@@ -123,6 +123,10 @@ brew cask install phpstorm
 brew cask install 1password
 brew cask install transmit
 brew cask install flash-player
+brew cask install java
+brew cask install eve
+brew cask install mamp
+
 
 # some cask quicklook extensions
 brew cask install qlcolorcode
