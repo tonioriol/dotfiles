@@ -122,6 +122,9 @@ brew cask install flash-player
 brew cask install java
 brew cask install eve
 brew cask install mamp
+brew cask install jitouch
+brew cask install moom
+
 
 
 # some cask quicklook extensions
