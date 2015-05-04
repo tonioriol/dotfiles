@@ -2,6 +2,9 @@
 
 # Install command-line tools using Homebrew.
 
+# Install Homebrew
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
 # Ask for the administrator password upfront.
 sudo -v
 
@@ -131,6 +134,12 @@ brew cask install quicklook-csv
 brew cask install betterzipql
 brew cask install webp-quicklook
 brew cask install suspicious-package
+
+# Some other tools like composer, node, bower, gulp...
+brew install composer
+brew install node
+npm install -g bower
+npm install -g gulp
 
 # Remove outdated versions from the cellar.
 brew cleanup
