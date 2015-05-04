@@ -97,5 +97,39 @@ brew install tree
 brew install vbindiff
 brew install zopfli
 
+# Install Cask utility
+brew install caskroom/cask/brew-cask
+
+# install the most common apps w/ cask
+brew cask install spotify
+brew cask install google-chrome
+brew cask install skype
+brew cask install transmission
+brew cask install the-unarchiver
+brew cask install dash
+brew cask install mysqlworkbench
+brew cask install teamviewer
+brew cask install appcleaner
+brew cask install dropbox
+brew cask install sequel-pro
+brew cask install sourcetree
+brew cask install firefox
+brew cask install opera
+brew cask install phpstorm
+brew cask install 1password
+brew cask install transmit
+brew cask install flash-player
+
+# some cask quicklook extensions
+brew cask install qlcolorcode
+brew cask install qlstephen
+brew cask install qlmarkdown
+brew cask install quicklook-json
+brew cask install qlprettypatch
+brew cask install quicklook-csv
+brew cask install betterzipql
+brew cask install webp-quicklook
+brew cask install suspicious-package
+
 # Remove outdated versions from the cellar.
 brew cleanup
