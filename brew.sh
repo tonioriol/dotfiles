@@ -106,26 +106,20 @@ brew cask install google-chrome
 brew cask install skype
 brew cask install transmission
 brew cask install the-unarchiver
-brew cask install dash
 brew cask install mysqlworkbench
+brew cask install sublime-text
 brew cask install teamviewer
 brew cask install appcleaner
 brew cask install dropbox
 brew cask install sequel-pro
-brew cask install sourcetree
 brew cask install firefox
 brew cask install opera
 brew cask install phpstorm
 brew cask install 1password
-brew cask install transmit
 brew cask install flash-player
 brew cask install java
-brew cask install eve
-brew cask install mamp
 brew cask install jitouch
 brew cask install moom
-
-
 
 # some cask quicklook extensions
 brew cask install qlcolorcode
