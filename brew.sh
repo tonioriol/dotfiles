@@ -105,6 +105,10 @@ brew install zopfli
 brew install caskroom/cask/brew-cask
 
 # install the most common apps w/ cask
+
+#first we need to tap this for some versions
+brew tap caskroom/versions
+
 brew cask install spotify
 brew cask install google-chrome
 brew cask install skype
@@ -112,17 +116,17 @@ brew cask install transmission
 brew cask install the-unarchiver
 brew cask install dash
 brew cask install mysqlworkbench
-brew cask install teamviewer
+brew cask install sublime-text3
 brew cask install appcleaner
 brew cask install dropbox
 brew cask install sequel-pro
 brew cask install sourcetree
 brew cask install firefox
 brew cask install opera
-brew cask install phpstorm
+brew cask install phpstorm-eap
 brew cask install 1password
-brew cask install transmit
 brew cask install flash-player
+brew cask install java6 #JavaForOSX2014-001.dmg
 
 # some cask quicklook extensions
 brew cask install qlcolorcode
