@@ -35,6 +35,10 @@ brew install bash
 brew tap homebrew/versions
 brew install bash-completion2
 
+#set the new bash as default. @See: https://vinkla.com/posts/update-bash-mac-osx/
+sudo bash -c 'echo /usr/local/bin/bash >> /etc/shells'
+chsh -s /usr/local/bin/bash
+
 # Install `wget` with IRI support.
 brew install wget --with-iri
 
