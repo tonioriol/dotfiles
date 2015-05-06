@@ -131,10 +131,11 @@ brew cask install eve
 brew cask install mamp
 brew cask install jitouch
 brew cask install moom
+brew cask install slack
 
 
 
-# some cask quicklook extensions
+# some quicklook extensions
 brew cask install qlcolorcode
 brew cask install qlstephen
 brew cask install qlmarkdown
