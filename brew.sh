@@ -120,6 +120,7 @@ brew cask install flash-player
 brew cask install java
 brew cask install jitouch
 brew cask install moom
+brew cask install slack
 
 # some cask quicklook extensions
 brew cask install qlcolorcode
