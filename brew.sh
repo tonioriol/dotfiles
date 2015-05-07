@@ -136,8 +136,7 @@ brew cask install mamp
 brew cask install jitouch
 brew cask install moom
 brew cask install slack
-
-
+brew cask install toggldesktop
 
 # some quicklook extensions
 brew cask install qlcolorcode
@@ -147,7 +146,7 @@ brew cask install quicklook-json
 brew cask install qlprettypatch
 brew cask install quicklook-csv
 brew cask install betterzipql
-brew cask install webp-quicklook
+brew cask install webpquicklook
 brew cask install suspicious-package
 
 # Some other tools like composer, node, bower, gulp...
