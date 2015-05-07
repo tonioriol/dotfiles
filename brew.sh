@@ -115,7 +115,6 @@ brew cask install sequel-pro
 brew cask install sourcetree
 brew cask install firefox
 brew cask install opera
-brew cask install phpstorm
 brew cask install 1password
 brew cask install flash-player
 brew cask install java
