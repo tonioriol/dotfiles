@@ -16,6 +16,7 @@ alias c="cd ~/Code"
 alias g="git"
 alias cask="brew cask"
 alias art="php artisan"
+alias hosts="sudo subl /etc/hosts"
 
 # Detect which `ls` flavor is in use
 if ls --color > /dev/null 2>&1; then # GNU `ls`
