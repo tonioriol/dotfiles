@@ -14,8 +14,6 @@ alias c="cd ~/Code"
 alias g="git"
 alias h="history"
 alias j="jobs"
-alias cask="brew cask"
-alias art="php artisan"
 
 # Detect which `ls` flavor is in use
 if ls --color > /dev/null 2>&1; then # GNU `ls`
@@ -141,3 +139,8 @@ alias afk="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resource
 
 # Reload the shell (i.e. invoke as a login shell)
 alias reload="exec $SHELL -l"
+
+
+alias cask="brew cask"
+alias art="php artisan"
+alias hosts="sudo vi /etc/hosts"
