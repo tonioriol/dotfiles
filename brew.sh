@@ -127,10 +127,10 @@ brew cask install sequel-pro
 brew cask install sourcetree
 brew cask install firefox
 brew cask install opera
-brew cask install phpstorm-eap
 brew cask install 1password
 brew cask install flash-player
-brew cask install java6 #JavaForOSX2014-001.dmg
+brew cask install java6 #JavaForOSX2014-001.dmg useful for a native font rendering on phpstorm-eap
+brew cask install phpstorm-eap
 brew cask install eve
 brew cask install mamp
 brew cask install jitouch
