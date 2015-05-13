@@ -130,7 +130,7 @@ brew cask install quicklook-json
 brew cask install qlprettypatch
 brew cask install quicklook-csv
 brew cask install betterzipql
-brew cask install webp-quicklook
+brew cask install webpquicklook
 brew cask install suspicious-package
 
 # Some other tools like composer, node, bower, gulp...
