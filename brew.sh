@@ -135,6 +135,7 @@ brew cask install suspicious-package
 
 # Some other tools like composer, node, bower, gulp...
 brew install composer
+composer global require "laravel/installer=~1.1"
 brew install node
 
 # Remove outdated versions from the cellar.
