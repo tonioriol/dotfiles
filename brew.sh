@@ -137,6 +137,7 @@ brew cask install jitouch
 brew cask install moom
 brew cask install slack
 brew cask install toggldesktop
+#brew cask install atext
 
 # some quicklook extensions
 brew cask install qlcolorcode
