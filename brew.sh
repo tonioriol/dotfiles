@@ -129,15 +129,16 @@ brew cask install firefox
 brew cask install opera
 brew cask install 1password
 brew cask install flash-player
-brew cask install java6 #JavaForOSX2014-001.dmg useful for a native font rendering on phpstorm-eap
+brew cask install java6 # JavaForOSX2014-001.dmg useful for a native font rendering on phpstorm-eap
 brew cask install phpstorm-eap
-brew cask install eve
+brew cask install eve # Hotkey EVE - Learn Your Mac Shortcuts -  http://www.hotkey-eve.com/
 brew cask install mamp
 brew cask install jitouch
 brew cask install moom
 brew cask install slack
 brew cask install toggldesktop
-#brew cask install atext
+brew cask install atext # aText - Typing accelerator - Text macro utility for Mac. - https://www.trankynam.com/atext/
+brew cask install fontprep # FontPrep - The missing font generator for Mac OSX. - https://github.com/briangonzalez/fontprep
 
 # some quicklook extensions
 brew cask install qlcolorcode
