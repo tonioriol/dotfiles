@@ -121,6 +121,8 @@ brew cask install java
 brew cask install jitouch
 brew cask install moom
 brew cask install slack
+brew cask install virtualbox
+brew cask install vagrant
 
 # some quicklook extensions
 brew cask install qlcolorcode
