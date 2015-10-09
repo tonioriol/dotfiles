@@ -139,6 +139,9 @@ brew cask install slack
 brew cask install toggldesktop
 brew cask install atext # aText - Typing accelerator - Text macro utility for Mac. - https://www.trankynam.com/atext/
 brew cask install fontprep # FontPrep - The missing font generator for Mac OSX. - https://github.com/briangonzalez/fontprep
+brew cask install virtualbox
+brew cask install vagrant
+vagrant plugin install vagrant-hostmanager
 
 # some quicklook extensions
 brew cask install qlcolorcode
