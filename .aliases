@@ -14,9 +14,6 @@ alias dl="cd ~/Downloads"
 alias dt="cd ~/Desktop"
 alias c="cd ~/Code"
 alias g="git"
-alias cask="brew cask"
-alias art="php artisan"
-alias hosts="sudo subl /etc/hosts"
 
 # Detect which `ls` flavor is in use
 if ls --color > /dev/null 2>&1; then # GNU `ls`
@@ -149,3 +146,16 @@ alias reload="exec ${SHELL} -l"
 
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
+
+alias cask="brew cask"
+alias art="php artisan"
+alias hosts="sudo subl /etc/hosts"
+alias key="/bin/cat ~/.ssh/id_rsa.pub | pbcopy"
+alias h="cd ~/" # Go home
+
+alias v='vagrant version && vagrant global-status'
+alias vst='vagrant status'
+alias vup='vagrant up'
+alias vdo='vagrant halt'
+alias vssh='vagrant ssh'
+alias vkill='vagrant destroy'
