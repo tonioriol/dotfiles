@@ -159,3 +159,5 @@ alias vup='vagrant up'
 alias vdo='vagrant halt'
 alias vssh='vagrant ssh'
 alias vkill='vagrant destroy'
+
+cd() { cd "$@" && ls -la; }
