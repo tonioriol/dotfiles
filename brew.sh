@@ -96,6 +96,7 @@ brew install ssh-copy-id
 brew install tree
 brew install vbindiff
 brew install zopfli
+brew install git-flow
 
 # Install Cask utility
 brew install caskroom/cask/brew-cask
