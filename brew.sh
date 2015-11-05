@@ -106,6 +106,7 @@ brew install ssh-copy-id
 brew install tree
 brew install webkit2png
 brew install zopfli
+brew install git-flow
 
 # Install Cask utility
 brew install caskroom/cask/brew-cask
