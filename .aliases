@@ -149,8 +149,8 @@ alias path='echo -e ${PATH//:/\\n}'
 
 alias cask="brew cask"
 alias art="php artisan"
-alias hosts="sudo subl /etc/hosts"
-alias key="/bin/cat ~/.ssh/id_rsa.pub | pbcopy"
+alias hosts="sudo vi /etc/hosts"
+alias key="/bin/cat ~/.ssh/id_rsa.pub | pbcopy && echo \"'~/.ssh/id_rsa.pub' copied to clipboard!\""
 alias h="cd ~/" # Go home
 
 alias v='vagrant version && vagrant global-status'
