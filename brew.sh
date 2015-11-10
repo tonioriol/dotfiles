@@ -145,6 +145,7 @@ brew cask install fontprep # FontPrep - The missing font generator for Mac OSX. 
 brew cask install virtualbox
 brew cask install vagrant
 vagrant plugin install vagrant-hostmanager
+brew cask install bettertouchtool
 
 # some quicklook extensions
 brew cask install qlcolorcode
