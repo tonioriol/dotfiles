@@ -124,6 +124,7 @@ brew cask install moom
 brew cask install slack
 brew cask install virtualbox
 brew cask install vagrant
+vagrant plugin install vagrant-hostmanager
 
 # some quicklook extensions
 brew cask install qlcolorcode
