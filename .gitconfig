@@ -76,7 +76,7 @@
 		fi \
 	}; f"
 
-	ds = stash && git stash clear
+	ds = !git stash && git stash clear
 
 [apply]
 
