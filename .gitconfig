@@ -76,6 +76,8 @@
 		fi \
 	}; f"
 
+	ds = git stash && git stash clear
+
 [apply]
 
 	# Detect whitespace errors when applying a patch
