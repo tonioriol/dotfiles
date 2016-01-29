@@ -76,7 +76,7 @@
 		fi \
 	}; f"
 
-	ds = "git stash && git stash clear"
+	ds = stash && git stash clear
 
 [apply]
 
