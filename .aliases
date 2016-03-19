@@ -163,3 +163,5 @@ alias vssh='vagrant ssh'
 alias vkill='vagrant destroy'
 
 function cd() { builtin cd "$@" && ls -la; }
+
+alias homestead='function __homestead() { (cd ~/Homestead && vagrant $*); unset -f __homestead; }; __homestead'
