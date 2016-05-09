@@ -113,9 +113,7 @@ brew cask install teamviewer
 brew cask install appcleaner
 brew cask install dropbox
 brew cask install sequel-pro
-brew cask install sourcetree
 brew cask install firefox
-brew cask install opera
 brew cask install 1password
 brew cask install flash-player
 brew cask install java
@@ -125,6 +123,7 @@ brew cask install slack
 brew cask install virtualbox
 brew cask install vagrant
 vagrant plugin install vagrant-hostmanager
+brew cask install postman
 
 # some quicklook extensions
 brew cask install qlcolorcode
