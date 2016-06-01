@@ -149,16 +149,17 @@ alias path='echo -e ${PATH//:/\\n}'
 
 alias cask="brew cask"
 alias art="php artisan"
-alias hosts="sudo vi /etc/hosts"
+alias hosts="sudo subl /etc/hosts"
 alias key="/bin/cat ~/.ssh/id_rsa.pub | pbcopy && echo \"'~/.ssh/id_rsa.pub' copied to clipboard!\""
 alias h="cd ~/" # Go home
 
-alias v='vagrant version && vagrant global-status'
-alias vst='vagrant status'
-alias vup='vagrant up'
-alias vdo='vagrant halt'
-alias vssh='vagrant ssh'
-alias vkill='vagrant destroy'
+alias v='vagrant'
+alias vv='vagrant version && vagrant global-status'
+alias vs='vagrant status'
+alias vu='vagrant up'
+alias vd='vagrant halt'
+alias vs='vagrant ssh'
+alias vk='vagrant destroy'
 
 function cd() { builtin cd "$@" && ls -la; }
 
