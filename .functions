@@ -171,5 +171,5 @@ function tre() {
 }
 
 function newtab() {
-	osascript -e 'tell application "System Events"' -e 'keystroke "t" using command down' -e 'end tell';
+	osascript -e 'tell application "System Events"' -e 'keystroke "t" using command down' -e 'keystroke "$1\n"' -e 'end tell';
 }
