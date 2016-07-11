@@ -244,3 +244,7 @@ function o() {
 function tre() {
 	tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
 }
+
+function newtab() {
+	osascript -e 'tell application "PHPStorm" to activate' -e 'tell application "System Events" to tell process "PHPStorm" to keystroke "t" using command down'
+}
