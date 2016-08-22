@@ -7,3 +7,4 @@ if [ "$(uname)" == "Darwin" ]; then
     # Do something under Windows NT platform
 fi
 export PATH="~/.composer/vendor/bin:$PATH"
+export PATH="/usr/local/sbin:$PATH"
