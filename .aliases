@@ -152,6 +152,7 @@ alias art="php artisan"
 alias hosts="sudo subl /etc/hosts"
 alias key="/bin/cat ~/.ssh/id_rsa.pub | pbcopy && echo \"'~/.ssh/id_rsa.pub' copied to clipboard!\""
 alias h="cd ~/" # Go home
+alias t='phpunit'
 
 alias v='vagrant'
 alias vv='vagrant version && vagrant global-status'
@@ -163,6 +164,10 @@ alias vk='vagrant destroy'
 
 function cd() { builtin cd "$@" && ls -la; }
 
-alias homestead='function __homestead() { (cd ~/Homestead && vagrant $*); unset -f __homestead; }; __homestead'
+function homestead() {
+    ( builtin cd ~/Homestead && vagrant $* )
+}
+
+alias h='homestead'
 
 export PROMPT_COMMAND='if [ "$(id -u)" -ne 0 ]; then echo "$(date "+%Y-%m-%d.%H:%M:%S") $(pwd) $(history 1)" >> ~/.logs/bash-history-$(date "+%Y-%m-%d").log; fi'
