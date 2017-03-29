@@ -171,3 +171,4 @@ function homestead() {
 }
 
 alias h='homestead'
+alias ubuntu='docker run -it --rm phusion/baseimage bash'
