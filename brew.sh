@@ -2,9 +2,6 @@
 
 # Install command-line tools using Homebrew.
 
-# Install Homebrew
-ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-
 # Ask for the administrator password upfront.
 sudo -v
 
@@ -15,12 +12,11 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 brew update
 
 # Upgrade any already-installed formulae.
-brew upgrade --all
+brew upgrade
 
-# Install GNU core utilities (those that come with OS X are outdated).
+# Install GNU core utilities (those that come with macOS are outdated).
 # Don’t forget to add `$(brew --prefix coreutils)/libexec/gnubin` to `$PATH`.
 brew install coreutils
-sudo ln -s /usr/local/bin/gsha256sum /usr/local/bin/sha256sum
 
 # Install some other useful utilities like `sponge`.
 brew install moreutils
@@ -32,27 +28,25 @@ brew install gnu-sed --with-default-names
 # Note: don’t forget to add `/usr/local/bin/bash` to `/etc/shells` before
 # running `chsh`.
 brew install bash
-brew tap homebrew/versions
 brew install bash-completion2
 
-#set the new bash as default. @See: https://vinkla.com/posts/update-bash-mac-osx/
-sudo bash -c 'echo /usr/local/bin/bash >> /etc/shells'
-chsh -s /usr/local/bin/bash
+# Switch to using brew-installed bash as default shell
+if ! fgrep -q '/usr/local/bin/bash' /etc/shells; then
+  echo '/usr/local/bin/bash' | sudo tee -a /etc/shells;
+  chsh -s /usr/local/bin/bash;
+fi;
 
 # Install `wget` with IRI support.
 brew install wget --with-iri
 
-# Install RingoJS and Narwhal.
-# Note that the order in which these are installed is important;
-# see http://git.io/brew-narwhal-ringo.
-brew install ringojs
-brew install narwhal
+# Install GnuPG to enable PGP-signing commits.
+brew install gnupg
 
-# Install more recent versions of some OS X tools.
-brew install vim --override-system-vi
-brew install homebrew/dupes/grep
-brew install homebrew/dupes/openssh
-brew install homebrew/dupes/screen
+# Install more recent versions of some macOS tools.
+brew install vim --with-override-system-vi
+brew install grep
+brew install openssh
+brew install screen
 brew install homebrew/php/php56 --with-gmp
 
 # Install font tools.
@@ -89,7 +83,6 @@ brew install xz
 
 # Install other useful binaries.
 brew install ack
-brew install dark-mode
 #brew install exiv2
 brew install git
 brew install git-lfs
@@ -100,11 +93,9 @@ brew install p7zip
 brew install pigz
 brew install pv
 brew install rename
-brew install rhino
-brew install speedtest_cli
 brew install ssh-copy-id
 brew install tree
-brew install webkit2png
+brew install vbindiff
 brew install zopfli
 brew install git-flow
 
@@ -131,20 +122,16 @@ brew cask install firefox
 brew cask install 1password
 brew cask install flash-player
 brew cask install phpstorm
-brew cask install eve # Hotkey EVE - Learn Your Mac Shortcuts -  http://www.hotkey-eve.com/
 brew cask install jitouch
 brew cask install moom
 brew cask install slack
 brew cask install atext # aText - Typing accelerator - Text macro utility for Mac. - https://www.trankynam.com/atext/
-#brew cask install fontprep # FontPrep - The missing font generator for Mac OSX. - https://github.com/briangonzalez/fontprep
 brew cask install virtualbox
 brew cask install vagrant
 vagrant plugin install vagrant-hostmanager
 brew cask install postman
 brew cask install tower
-brew cask install google-drive
 brew cask install screenhero
-brew cask install kodi
 
 # some quicklook extensions
 brew cask install qlcolorcode
@@ -162,16 +149,11 @@ brew install composer
 composer global require "laravel/installer=~1.1"
 composer global require phpunit/phpunit
 
-
 brew install node
 
 npm set init.author.name "Toni Oriol"
 npm set init.author.email "tonioriol@gmail.com"
 npm set init.author.url "http://tonioriol.com"
-
-
-npm install -g bower
-npm install -g gulp
 
 # Remove outdated versions from the cellar.
 brew cleanup
