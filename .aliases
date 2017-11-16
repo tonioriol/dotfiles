@@ -174,3 +174,7 @@ function homestead() {
 
 alias h='homestead'
 alias ubuntu='docker run -it --rm phusion/baseimage bash'
+
+function rename() {
+	for i in *; do mv $i `echo $i | sed "s/$1/$2/"`; done
+}
