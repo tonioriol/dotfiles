@@ -132,7 +132,7 @@ brew cask install vagrant
 vagrant plugin install vagrant-hostmanager
 brew cask install postman
 brew cask install tower
-brew cask install screenhero
+brew cask install flycut
 
 # some quicklook extensions
 brew cask install qlcolorcode
