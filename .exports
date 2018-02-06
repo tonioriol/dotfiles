@@ -3,9 +3,6 @@
 # Make sublime the default editor.
 export EDITOR='subl -w'
 
-# Make vim the default editor.
-export EDITOR='vim';
-
 # Enable persistent REPL history for `node`.
 export NODE_REPL_HISTORY=~/.node_history;
 # Allow 32³ entries; the default is 1000.
@@ -25,8 +22,8 @@ export HISTCONTROL='ignoreboth';
 # Prefer US English and use UTF-8.
 if [ "$(uname)" == "Darwin" ]; then # mac
     # Do something under Mac OS X platform
-    export LANG='ca_ES.UTF-8';
-	export LC_ALL='ca_ES.UTF-8';
+    export LANG='en_US.UTF-8';
+    export LC_ALL='en_US.UTF-8';
 #elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then # linux
     # Do something under GNU/Linux platform
 #elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then # windows
