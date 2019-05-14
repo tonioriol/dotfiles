@@ -20,16 +20,8 @@ export HISTFILESIZE="${HISTSIZE}";
 export HISTCONTROL='ignoreboth';
 
 # Prefer US English and use UTF-8.
-if [ "$(uname)" == "Darwin" ]; then # mac
-    # Do something under Mac OS X platform
-    export LANG='en_US.UTF-8';
-    export LC_ALL='en_US.UTF-8';
-#elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then # linux
-    # Do something under GNU/Linux platform
-#elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then # windows
-    # Do something under Windows NT platform
-fi
-
+export LANG='en_US.UTF-8';
+export LC_ALL='en_US.UTF-8';
 
 # Highlight section titles in manual pages.
 export LESS_TERMCAP_md="${yellow}";
