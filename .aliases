@@ -182,3 +182,6 @@ function docker-rmi-all-but() {
 	docker rmi $(docker images -q | grep -v $1)
 }
 alias dcompose=docker-compose
+
+alias itunesdown=launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist
+alias itunesup=launchctl load -w /System/Library/LaunchAgents/com.apple.rcd.plist
