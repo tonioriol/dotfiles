@@ -103,28 +103,28 @@ brew install caskroom/cask/brew-cask
 
 # install the most common apps w/ cask
 brew cask install spotify
-brew cask install google-chrome
-brew cask install skype
+#brew cask install google-chrome
+#brew cask install skype
 brew cask install transmission
 brew cask install the-unarchiver
-brew cask install mysqlworkbench
+#brew cask install mysqlworkbench
 brew cask install sublime-text
 brew cask install teamviewer
 brew cask install appcleaner
-brew cask install dropbox
-brew cask install sequel-pro
+#brew cask install dropbox
+#brew cask install sequel-pro
 brew cask install firefox
 brew cask install 1password
-brew cask install flash-player
-brew cask install java
+#brew cask install flash-player
+#brew cask install java
 brew cask install jitouch
-brew cask install moom
+#brew cask install moom
 brew cask install slack
-brew cask install virtualbox
-brew cask install vagrant
-vagrant plugin install vagrant-hostmanager
+#brew cask install virtualbox
+#brew cask install vagrant
+#vagrant plugin install vagrant-hostmanager
 brew cask install postman
-brew cask install tower
+#brew cask install tower
 brew cask install flycut
 
 # some quicklook extensions
@@ -139,9 +139,9 @@ brew cask install webpquicklook
 brew cask install suspicious-package
 
 # Some other tools like composer, node, bower, gulp...
-brew install composer
-composer global require "laravel/installer=~1.1"
-composer global require phpunit/phpunit
+#brew install composer
+#composer global require "laravel/installer=~1.1"
+#composer global require phpunit/phpunit
 
 
 brew install node
@@ -151,8 +151,8 @@ npm set init.author.email "tonioriol@gmail.com"
 npm set init.author.url "http://tonioriol.com"
 
 
-npm install -g bower
-npm install -g gulp
+#npm install -g bower
+#npm install -g gulp
 
 # Remove outdated versions from the cellar.
 brew cleanup
