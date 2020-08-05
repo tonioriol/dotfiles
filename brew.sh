@@ -21,7 +21,7 @@ brew install moreutils
 # Install GNU `find`, `locate`, `updatedb`, and `xargs`, `g`-prefixed.
 brew install findutils
 # Install GNU `sed`, overwriting the built-in `sed`.
-brew install gnu-sed --with-default-names
+brew install gnu-sed
 # Install a modern version of Bash.
 brew install bash
 brew install bash-completion2
@@ -33,7 +33,7 @@ if ! fgrep -q "${BREW_PREFIX}/bin/bash" /etc/shells; then
 fi;
 
 # Install `wget` with IRI support.
-brew install wget --with-iri
+brew install wget
 
 # Install GnuPG to enable PGP-signing commits.
 brew install gnupg
@@ -84,7 +84,7 @@ brew install ack
 brew install git
 brew install git-lfs
 brew install gs
-brew install imagemagick --with-webp
+brew install imagemagick
 brew install lua
 brew install lynx
 brew install p7zip
@@ -99,11 +99,11 @@ brew install zopfli
 brew install git-flow
 
 # Install Cask utility
-brew install caskroom/cask/brew-cask
+brew install cask
 
 # install the most common apps w/ cask
 brew cask install spotify
-#brew cask install google-chrome
+brew cask install google-chrome
 #brew cask install skype
 brew cask install transmission
 brew cask install the-unarchiver
@@ -126,6 +126,7 @@ brew cask install slack
 brew cask install postman
 #brew cask install tower
 brew cask install flycut
+brew cask install docker
 
 # some quicklook extensions
 brew cask install qlcolorcode
@@ -134,17 +135,24 @@ brew cask install qlmarkdown
 brew cask install quicklook-json
 brew cask install qlprettypatch
 brew cask install quicklook-csv
-brew cask install betterzipql
+brew cask install betterzip
 brew cask install webpquicklook
 brew cask install suspicious-package
+brew cask install qlimagesize
+brew cask install quicklookase
+brew cask install qlvideo
+
+# To get plugins working in Catalina, you will need to remove the quarantine attribute. https://github.com/sindresorhus/quick-look-plugins#catalina-notes
+xattr -d -r com.apple.quarantine ~/Library/QuickLook
 
 # Some other tools like composer, node, bower, gulp...
 #brew install composer
 #composer global require "laravel/installer=~1.1"
 #composer global require phpunit/phpunit
 
-
-brew install node
+brew install nvm
+source ~/.bash_profile
+nvm install --lts
 
 npm set init.author.name "Toni Oriol"
 npm set init.author.email "tonioriol@gmail.com"
