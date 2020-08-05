@@ -17,10 +17,10 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 ###############################################################################
 
 # Set computer name (as done via System Preferences → Sharing) - "0x4C756E696B" is "Lunik" encoded to hex
-sudo scutil --set ComputerName "0x4C756E696B"
-sudo scutil --set HostName "0x4C756E696B"
-sudo scutil --set LocalHostName "0x4C756E696B"
-sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "0x4C756E696B"
+sudo scutil --set ComputerName "Lunik"
+sudo scutil --set HostName "Lunik"
+sudo scutil --set LocalHostName "Lunik"
+sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "Lunik"
 
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "
