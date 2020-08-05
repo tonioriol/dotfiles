@@ -97,6 +97,7 @@ brew install tree
 brew install vbindiff
 brew install zopfli
 brew install git-flow
+brew install make
 
 # Install Cask utility
 brew install cask
