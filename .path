@@ -1,3 +1,5 @@
+# Use $(brew --prefix) for cross-architecture compatibility
+# Intel Macs: /usr/local | Apple Silicon: /opt/homebrew
 export PATH="$(brew --prefix coreutils)/libexec/gnubin:$PATH"
-export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
-export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
+export PATH="$(brew --prefix gnu-sed)/libexec/gnubin:$PATH"
+export PATH="$(brew --prefix make)/libexec/gnubin:$PATH"

@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
 
+# =============================================================================
+# DIRECTORY OPERATIONS
+# =============================================================================
+
 # Create a new directory and enter it
 function mkd() {
 	mkdir -p "$@" && cd "$_";
 }
 
-# Change working directory to the top-most Finder window location
+# Change working directory to the top-most Finder window location (macOS only)
 function cdf() { # short for `cdfinder`
 	cd "$(osascript -e 'tell app "Finder" to POSIX path of (insertion location as alias)')";
 }
+
+# =============================================================================
+# ARCHIVE OPERATIONS
+# =============================================================================
 
 # Create a .tar.gz archive, using `zopfli`, `pigz` or `gzip` for compression
 function targz() {
@@ -44,6 +52,10 @@ function targz() {
 	echo "${tmpFile}.gz ($((zippedSize / 1000)) kB) created successfully.";
 }
 
+# =============================================================================
+# FILE UTILITIES
+# =============================================================================
+
 # Determine size of a file or total size of a directory
 function fs() {
 	if du -b /dev/null > /dev/null 2>&1; then
@@ -58,15 +70,19 @@ function fs() {
 	fi;
 }
 
-# Use Git’s colored diff when available
-hash git &>/dev/null;
-if [ $? -eq 0 ]; then
+# Use delta for better diffs if available, otherwise fall back to git diff
+# delta provides syntax highlighting and side-by-side diffs
+if hash delta &>/dev/null; then
+	function diff() {
+		delta "$@";
+	}
+elif hash git &>/dev/null; then
 	function diff() {
 		git diff --no-index --color-words "$@";
 	}
 fi;
 
-# Create a data URL from a file
+# Create a data URL from a file (useful for embedding in HTML/CSS)
 function dataurl() {
 	local mimeType=$(file -b --mime-type "$1");
 	if [[ $mimeType == text/* ]]; then
@@ -75,13 +91,18 @@ function dataurl() {
 	echo "data:${mimeType};base64,$(openssl base64 -in "$1" | tr -d '\n')";
 }
 
+# =============================================================================
+# WEB SERVERS
+# =============================================================================
+
 # Start an HTTP server from a directory, optionally specifying the port
+# Usage: server [port] (default: 8000)
+# Note: Requires Python 3 (install via mise: mise use python@latest)
 function server() {
 	local port="${1:-8000}";
 	sleep 1 && open "http://localhost:${port}/" &
-	# Set the default Content-Type to `text/plain` instead of `application/octet-stream`
-	# And serve everything as UTF-8 (although not technically correct, this doesn’t break anything for binary files)
-	python -c $'import SimpleHTTPServer;\nmap = SimpleHTTPServer.SimpleHTTPRequestHandler.extensions_map;\nmap[""] = "text/plain";\nfor key, value in map.items():\n\tmap[key] = value + ";charset=UTF-8";\nSimpleHTTPServer.test();' "$port";
+	# Python 3's http.server module (replaces Python 2's SimpleHTTPServer)
+	python -m http.server "$port";
 }
 
 # Start a PHP server from a directory, optionally specifying the port
@@ -93,6 +114,10 @@ function phpserver() {
 	php -S "${ip}:${port}";
 }
 
+# =============================================================================
+# COMPRESSION UTILITIES
+# =============================================================================
+
 # Compare original and gzipped file size
 function gz() {
 	local origsize=$(wc -c < "$1");
@@ -102,13 +127,17 @@ function gz() {
 	printf "gzip: %d bytes (%2.2f%%)\n" "$gzipsize" "$ratio";
 }
 
+# =============================================================================
+# NETWORK UTILITIES
+# =============================================================================
+
 # Run `dig` and display the most useful info
 function digga() {
 	dig +nocmd "$1" any +multiline +noall +answer;
 }
 
-# Show all the names (CNs and SANs) listed in the SSL certificate
-# for a given domain
+# Show all the names (CNs and SANs) listed in the SSL certificate for a given domain
+# Usage: getcertnames example.com
 function getcertnames() {
 	if [ -z "${1}" ]; then
 		echo "ERROR: No domain specified.";
@@ -141,8 +170,12 @@ function getcertnames() {
 	fi;
 }
 
-# Normalize `open` across Linux, macOS, and Windows.
-# This is needed to make the `o` function (see below) cross-platform.
+# =============================================================================
+# CROSS-PLATFORM UTILITIES
+# =============================================================================
+
+# Normalize `open` across Linux, macOS, and Windows
+# This makes the `o` function (below) cross-platform
 if [ ! $(uname -s) = 'Darwin' ]; then
 	if grep -q Microsoft /proc/version; then
 		# Ubuntu on Windows using the Linux subsystem
@@ -152,8 +185,8 @@ if [ ! $(uname -s) = 'Darwin' ]; then
 	fi
 fi
 
-# `o` with no arguments opens the current directory, otherwise opens the given
-# location
+# Open files/directories with default application
+# Usage: o [file/directory] (no args opens current directory)
 function o() {
 	if [ $# -eq 0 ]; then
 		open .;
@@ -162,14 +195,23 @@ function o() {
 	fi;
 }
 
-# `tre` is a shorthand for `tree` with hidden files and color enabled, ignoring
-# the `.git` directory, listing directories first. The output gets piped into
-# `less` with options to preserve color and line numbers, unless the output is
-# small enough for one screen.
+# =============================================================================
+# TREE UTILITIES
+# =============================================================================
+
+# Enhanced tree command with sensible defaults
+# Shows hidden files, colors, ignores .git/node_modules, lists directories first
+# Usage: tre [directory]
 function tre() {
 	tree -aC -I '.git|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
 }
 
+# =============================================================================
+# MACOS TERMINAL UTILITIES
+# =============================================================================
+
+# Open a new terminal tab and optionally run a command
+# Usage: newtab [command]
 function newtab() {
 	osascript -e 'tell application "System Events"' -e 'keystroke "t" using command down' -e 'keystroke "'"$*"'\n"' -e 'end tell';
 }

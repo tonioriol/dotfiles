@@ -52,11 +52,25 @@ if type _git &>/dev/null; then
 	compdef g=git
 fi
 
-# ASDF version manager (replaces nvm, pyenv, rbenv, etc.)
-# Install plugins: asdf plugin add nodejs python ruby golang rust java
-# Then: asdf install nodejs latest && asdf global nodejs latest
-if type brew &>/dev/null && [ -f "$(brew --prefix asdf)/libexec/asdf.sh" ]; then
-	. "$(brew --prefix asdf)/libexec/asdf.sh"
+# mise - Modern version manager (replaces asdf, nvm, pyenv, rbenv, etc.)
+# Faster Rust-based alternative with better UX
+# Install languages: mise use --global node@lts python@latest ruby@latest
+# See: https://mise.jdx.dev/
+if type mise &>/dev/null; then
+	eval "$(mise activate zsh)"
+fi
+
+# direnv - Automatically load/unload environment variables based on directory
+# Loads .envrc files when entering directories, unloads when leaving
+# Run 'direnv allow' after creating/editing .envrc files
+if type direnv &>/dev/null; then
+	eval "$(direnv hook zsh)"
+fi
+
+# zoxide - Smarter cd command (learns your habits)
+# Usage: z <partial-path> to jump to frequently used directories
+if type zoxide &>/dev/null; then
+	eval "$(zoxide init zsh)"
 fi
 
 # McFly - smart history search (if installed via brew)

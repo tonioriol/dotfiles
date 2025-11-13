@@ -81,7 +81,46 @@ When setting up a new Mac, you may want to install some common [Homebrew](https:
 ./brew.sh
 ```
 
-Some of the functionality of these dotfiles depends on formulae installed by `brew.sh`. If you don’t plan to run `brew.sh`, you should look carefully through the script and manually install any particularly important ones. A good example is Bash/Git completion: the dotfiles use a special version from Homebrew.
+This will install all packages and automatically set up:
+- **mise** - Modern version manager (replaces asdf)
+- **Node.js LTS** - Installed via mise (configured in `.mise.toml`)
+- **Python 3.12** - Installed via mise (configured in `.mise.toml`)
+
+After installation, reload your shell:
+```bash
+exec $SHELL -l
+```
+
+### Customizing mise tools
+
+Edit `.mise.toml` to add or remove development tools. Uncomment any tools you need:
+
+```bash
+# Edit the configuration
+vim .mise.toml
+
+# Install tools from .mise.toml
+mise install
+
+# Or install individual tools
+mise use --global ruby@latest
+mise use --global terraform@latest
+mise use --global kubectl@latest
+```
+
+Available tools include: Node.js, Python, Ruby, Go, Rust, Java, Terraform, kubectl, Helm, AWS CLI, Maven, Deno, and many more. See [mise registry](https://mise.jdx.dev/registry.html) for the full list.
+
+Some of the functionality of these dotfiles depends on formulae installed by `brew.sh`. If you don't plan to run `brew.sh`, you should look carefully through the script and manually install any particularly important ones.
+
+## Apple Silicon Notes
+
+These dotfiles are optimized for Apple Silicon (M1/M2/M3/M4) Macs:
+- Homebrew paths use `$(brew --prefix)` for cross-architecture compatibility
+- Python 3 is used throughout (Python 2 removed)
+- Modern CLI tools included (bat, eza, delta, zoxide, lazygit, etc.)
+- **colima** - Lightweight Docker runtime optimized for Apple Silicon (alternative to Docker Desktop)
+- **devbox** - Reproducible development environments powered by Nix for project-specific tooling
+- See `APPLE_SILICON_REVIEW.md` for detailed changes and recommendations
 
 ## Notes & migration
 

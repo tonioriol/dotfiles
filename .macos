@@ -63,8 +63,10 @@ defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
 # Disable the “Are you sure you want to open this application?” dialog
 defaults write com.apple.LaunchServices LSQuarantine -bool false
 
-# Remove duplicates in the “Open With” menu (also see `lscleanup` alias)
-/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user
+# Remove duplicates in the "Open With" menu (also see `lscleanup` alias)
+# Note: On modern macOS, this requires Full Disk Access for Terminal/iTerm
+# Grant access in: System Settings > Privacy & Security > Full Disk Access
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user 2>/dev/null || true
 
 # Display ASCII control characters using caret notation in standard text views
 # Try e.g. `cd /tmp; unidecode "\x{0000}" > cc.txt; open -e cc.txt`
@@ -168,8 +170,12 @@ sudo defaults write /Library/Preferences/com.apple.loginwindow showInputMenu -bo
 sudo systemsetup -settimezone "Europe/Madrid" > /dev/null
 
 # Stop Music/iTunes from responding to the keyboard media keys
-# Note: This may not work on newer macOS versions due to system integrity protection
-launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null || true
+# Note: This path doesn't exist on macOS Catalina+ (Music.app replaced iTunes)
+# On modern macOS, use: launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist
+# However, this file no longer exists, so this command is kept for backwards compatibility only
+if [ -f /System/Library/LaunchAgents/com.apple.rcd.plist ]; then
+    launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2>/dev/null || true
+fi
 
 ###############################################################################
 # Energy saving                                                               #
@@ -343,10 +349,15 @@ defaults write com.apple.finder WarnOnEmptyTrash -bool false
 defaults write com.apple.NetworkBrowser BrowseAllInterfaces -bool true
 
 # Show the ~/Library folder
-chflags nohidden ~/Library && xattr -d com.apple.FinderInfo ~/Library 2>/dev/null || true
+# Note: xattr removal may fail on modern macOS due to SIP, but chflags still works
+chflags nohidden ~/Library
+xattr -d com.apple.FinderInfo ~/Library 2>/dev/null || true
 
 # Show the /Volumes folder
-sudo chflags nohidden /Volumes
+# Note: This is protected by SIP on modern macOS and will fail unless SIP is disabled
+# Skipping this command on macOS Catalina+ as it's not recommended to disable SIP
+# Uncomment only if you've disabled SIP and understand the security implications
+# sudo chflags nohidden /Volumes 2>/dev/null || true
 
 # Remove Dropbox’s green checkmark icons in Finder
 file=/Applications/Dropbox.app/Contents/Resources/emblem-dropbox-uptodate.icns

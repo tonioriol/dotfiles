@@ -40,33 +40,41 @@ gnupg              # GPG signing: sign commits/emails, encrypt files (upstream+y
 pinentry-mac       # macOS GPG UI: native macOS keychain integration, includes pinentry functionality (yours)
 openssl@3          # Modern SSL: latest security, most software uses this (yours)
 
-asdf               # Universal version manager: manage ALL language versions (Node, Python, Ruby, Go, Rust, Java, etc.)
-                   # After install: asdf plugin add nodejs python ruby golang rust java
-                   # Then: asdf install nodejs latest && asdf global nodejs latest
-                   # See: https://asdf-vm.com/
+mise               # Modern version manager: faster Rust-based alternative to asdf
+                   # Manages Node, Python, Ruby, Go, Rust, Java, etc. with better performance
+                   # Drop-in replacement for asdf with improved UX and speed
+                   # See: https://mise.jdx.dev/
+
+direnv             # Environment switcher: automatically load/unload environment variables per directory
+                   # Works with .envrc files, integrates with mise and other tools
+                   # See: https://direnv.net/
+
+devbox             # Reproducible dev environments powered by Nix (like package.json for your entire environment)
+                   # Creates isolated, reproducible development environments per project
+                   # See: https://www.jetpack.io/devbox
 
 # === Cloud and infrastructure tools ===
-awscli             # AWS: manage S3/EC2/Lambda from terminal (yours)
+# awscli managed by mise - see .mise.toml (uncomment if needed)
 azure-cli          # Azure: manage Azure resources from terminal (yours)
 doctl              # DigitalOcean: manage droplets/k8s from terminal (yours)
 heroku             # Heroku: deploy/manage Heroku apps (yours)
 
 # === Kubernetes and container orchestration ===
-kubernetes-cli     # kubectl: manage k8s clusters, deploy apps (yours)
-helm               # k8s packages: install/manage k8s apps via charts (yours)
+# kubectl managed by mise - see .mise.toml (uncomment if needed)
+# helm managed by mise - see .mise.toml (uncomment if needed)
 helmfile           # Helm automation: declarative multi-chart deployments (yours)
 k9s                # k8s TUI: visual cluster management in terminal (yours)
 minikube           # Local k8s: test k8s locally before cloud deploy (yours)
 
 # === Infrastructure as Code ===
-terraform          # IaC: provision cloud infrastructure as code (yours)
+# terraform managed by mise - see .mise.toml
 terragrunt         # Terraform DRY: reduce Terraform code duplication (yours)
 
 # === Development tools and build systems ===
 gcc                # GNU compiler: compile C/C++, newer than Xcode's (upstream+yours)
 make               # Build tool: run Makefiles, essential for many projects (upstream+yours)
 cmake              # Cross-platform build: modern C/C++ build system (implied)
-maven              # Java build: build/manage Java projects (yours)
+# maven managed by mise - see .mise.toml (uncomment if needed)
 pkgconf            # pkg-config: find library compile/link flags (yours)
 
 # === Database clients and servers ===
@@ -75,13 +83,16 @@ sqlite             # SQLite: embedded DB, great for local dev/testing (yours)
 # === Text processing and utilities ===
 jq                 # JSON: parse/transform JSON in shell scripts (upstream+yours)
 grep               # GNU grep: better regex than macOS BSD grep (upstream)
-ack                # Code search: search code ignoring .git/node_modules, kept for compatibility (upstream)
 ripgrep            # Fast search: faster than grep/ack, respects .gitignore (yours)
 fd                 # Fast find: faster than find, simpler syntax (yours)
 fzf                # Fuzzy finder: interactive file/history search (yours)
 tree               # Dir tree: visualize directory structure (upstream+yours)
+bat                # Better cat: syntax highlighting and git integration (recommended)
+eza                # Modern ls: better than lsd, successor to exa (recommended)
 lsd                # Modern ls: colorful ls with icons (yours)
 tldr               # Quick help: simplified man pages with examples (yours)
+delta              # Better git diff: syntax highlighting and side-by-side diffs (recommended)
+zoxide             # Smarter cd: learns your habits, jump to frequent directories (recommended)
 pcregrep           # PCRE grep: Perl-compatible regex grep (implied)
 
 # === Multiplexers and terminal tools ===
@@ -89,6 +100,8 @@ tmux               # Terminal multiplexer: multiple terminals in one window (you
 htop               # Process viewer: better than top, interactive (yours)
 mc                 # File manager: TUI file manager like Norton Commander (yours)
 mcfly              # Smart history: AI-powered shell history search (yours)
+lazygit            # Terminal UI for git: visual git operations (recommended)
+lazydocker         # Terminal UI for docker: visual docker management (recommended)
 
 # === Multimedia and imaging ===
 ffmpeg             # Video/audio: convert/edit video/audio files (yours)
@@ -111,7 +124,7 @@ cabextract         # CAB files: extract Windows .cab files (yours)
 wireshark          # Packet capture: analyze network traffic (yours)
 nmap               # Port scanner: scan networks/ports for security (upstream)
 speedtest-cli      # Speed test: test internet speed from CLI (yours)
-deno               # Modern JS: secure TypeScript/JS runtime, alternative to Node (yours)
+# deno managed by mise - see .mise.toml (uncomment if needed)
 yt-dlp             # Video download: maintained fork of youtube-dl, faster and more features (yours)
 
 mas                # App Store CLI: install Mac App Store apps from terminal (yours)
@@ -135,6 +148,9 @@ zen-browser        # Zen: minimalist browser (yours)
 visual-studio-code # VS Code: powerful code editor with extensions (upstream+yours)
 warp               # Modern terminal: AI-powered terminal with modern UI (yours)
 orbstack           # Fast Docker: faster Docker alternative for Mac, replaces Docker Desktop (yours)
+colima             # Lightweight Docker alternative for macOS (Apple Silicon optimized, replaces Docker Desktop)
+                   # Container runtime with minimal resource usage, compatible with Docker CLI
+                   # See: https://github.com/abiosoft/colima
 postman            # API test: test REST APIs with GUI (upstream+yours)
 chromedriver       # Chrome driver: automate Chrome browser (yours)
 lens               # k8s IDE: visual Kubernetes management (yours)
@@ -143,9 +159,9 @@ lens               # k8s IDE: visual Kubernetes management (yours)
 1password          # Passwords: secure password manager (upstream+yours)
 1password-cli      # 1Password CLI: access passwords from terminal (yours)
 raycast            # Launcher: Spotlight replacement with plugins (upstream+yours)
-rectangle          # Window mgmt: snap windows with keyboard shortcuts (upstream)
+# rectangle        # Window mgmt: snap windows with keyboard shortcuts (commented out by user)
 barrier            # Share input: share keyboard/mouse across computers (yours)
-flycut             # Clipboard: clipboard history manager (upstream legacy)
+maccy              # Clipboard manager: modern, lightweight clipboard history (replaces flycut)
 
 # === Media and entertainment ===
 spotify            # Music: stream music (upstream+yours)
@@ -215,5 +231,45 @@ fi
 echo "Running brew cleanup..."
 brew cleanup
 
-echo "Done. Review and edit PACKAGES array in ${BASH_SOURCE[0]} to customize."
+echo ""
+echo "=============================================================================="
+echo "Setting up mise (version manager)..."
+echo "=============================================================================="
+
+# Check if mise was installed
+if command -v mise &> /dev/null; then
+    echo "✓ mise is installed"
+    
+    # Install tools from .mise.toml
+    echo ""
+    echo "Installing tools from .mise.toml..."
+    mise install || echo "⚠ Failed to install some tools from .mise.toml"
+    
+    echo ""
+    echo "✓ Tools installed via mise (from .mise.toml):"
+    mise list 2>/dev/null || echo "  No tools installed yet"
+    echo ""
+    echo "Configuration file: .mise.toml"
+    echo "  - Edit .mise.toml to add/remove tools"
+    echo "  - Uncomment tools like terraform, kubectl, ruby, go, etc."
+    echo "  - Run 'mise install' to apply changes"
+    echo ""
+    echo "Useful commands:"
+    echo "  mise list              # Show installed tools"
+    echo "  mise registry          # Show all available tools"
+    echo "  mise use --global <tool>@<version>  # Install a tool globally"
+    echo "  mise doctor            # Check mise configuration"
+else
+    echo "⚠ mise not found. Install it with: brew install mise"
+fi
+
+echo ""
+echo "=============================================================================="
+echo "Done! Review and edit PACKAGES array in ${BASH_SOURCE[0]} to customize."
 echo "Remove any packages you don't need before running this script on a new machine."
+echo ""
+echo "Next steps:"
+echo "  1. Reload your shell: exec \$SHELL -l"
+echo "  2. Verify mise: mise doctor"
+echo "  3. Check installed tools: mise list"
+echo "=============================================================================="

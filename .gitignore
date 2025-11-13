@@ -16,3 +16,7 @@ Thumbs.db
 
 # Local secrets staging - do NOT commit contents
 .secrets_staging/
+
+# mise (version manager) - commit template, ignore local overrides
+.mise.local.toml
+.mise/
