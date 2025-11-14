@@ -6,6 +6,7 @@
 set -euo pipefail
 
 DEST="${PWD}/.secrets"
+FAILED_ITEMS=()
 
 [[ $# -eq 0 ]] && echo "Usage: $0 <backup|restore>" && exit 1
 
@@ -17,9 +18,13 @@ if [[ "$1" == "backup" ]]; then
   mkdir -p "$DEST" && chmod 700 "$DEST"
 
   copy() {
-    [[ ! -e "$1" ]] && return
-    mkdir -p "$2" && cp -a "$1" "$2/" && chmod -R go-rwx "$2"
-    echo "✓ $1"
+    [[ ! -e "$1" ]] && echo "⊘ $1 (not found)" && return
+    if mkdir -p "$2" && cp -a "$1" "$2/" && chmod -R go-rwx "$2"; then
+      echo "✓ $1"
+    else
+      echo "✗ $1 (failed)"
+      FAILED_ITEMS+=("$1")
+    fi
   }
 
   copy "${HOME}/.ssh" "$DEST/ssh"
@@ -27,10 +32,14 @@ if [[ "$1" == "backup" ]]; then
   
   if command -v gpg >/dev/null 2>&1; then
     mkdir -p "$DEST/gpg"
-    gpg --export-secret-keys --armor > "$DEST/gpg/private.asc" 2>/dev/null || true
-    gpg --export --armor > "$DEST/gpg/public.asc" 2>/dev/null || true
-    gpg --export-ownertrust > "$DEST/gpg/trust.txt" 2>/dev/null || true
-    echo "✓ GPG"
+    if gpg --export-secret-keys --armor > "$DEST/gpg/private.asc" 2>/dev/null && \
+       gpg --export --armor > "$DEST/gpg/public.asc" 2>/dev/null && \
+       gpg --export-ownertrust > "$DEST/gpg/trust.txt" 2>/dev/null; then
+      echo "✓ GPG"
+    else
+      echo "✗ GPG (failed)"
+      FAILED_ITEMS+=("GPG keys")
+    fi
   fi
   
   for f in .netrc .npmrc .gitconfig; do
@@ -45,6 +54,13 @@ if [[ "$1" == "backup" ]]; then
     [[ -d "$d" ]] && copy "$d" "$DEST/intellij" && break
   done
   
+  if [[ ${#FAILED_ITEMS[@]} -gt 0 ]]; then
+    echo ""
+    echo "⚠️  Failed to backup:"
+    printf '  - %s\n' "${FAILED_ITEMS[@]}"
+    echo ""
+  fi
+  
   echo "Done!"
 
 # ============================================================================
@@ -55,19 +71,36 @@ elif [[ "$1" == "restore" ]]; then
   echo "Restoring from $DEST"
 
   restore() {
-    [[ ! -e "$1" ]] && return
-    mkdir -p "$(dirname "$2")" && cp -a "$1" "$2"
-    echo "✓ $2"
+    [[ ! -e "$1" ]] && echo "⊘ $1 (not found)" && return
+    if mkdir -p "$(dirname "$2")" && cp -a "$1" "$2"; then
+      echo "✓ $2"
+    else
+      echo "✗ $2 (failed)"
+      FAILED_ITEMS+=("$2")
+    fi
   }
 
-  [[ -d "$DEST/ssh/.ssh" ]] && restore "$DEST/ssh/.ssh" "${HOME}/.ssh" && chmod 700 "${HOME}/.ssh" && chmod 600 "${HOME}/.ssh"/id_* 2>/dev/null || true
-  [[ -d "$DEST/aws/.aws" ]] && restore "$DEST/aws/.aws" "${HOME}/.aws" && chmod 700 "${HOME}/.aws" && chmod 600 "${HOME}/.aws"/* 2>/dev/null || true
+  if [[ -d "$DEST/ssh/.ssh" ]]; then
+    restore "$DEST/ssh/.ssh" "${HOME}/.ssh"
+    chmod 700 "${HOME}/.ssh" 2>/dev/null || true
+    chmod 600 "${HOME}/.ssh"/id_* 2>/dev/null || true
+  fi
+  
+  if [[ -d "$DEST/aws/.aws" ]]; then
+    restore "$DEST/aws/.aws" "${HOME}/.aws"
+    chmod 700 "${HOME}/.aws" 2>/dev/null || true
+    chmod 600 "${HOME}/.aws"/* 2>/dev/null || true
+  fi
   
   if [[ -f "$DEST/gpg/private.asc" ]]; then
-    gpg --import "$DEST/gpg/private.asc" 2>/dev/null || true
-    gpg --import "$DEST/gpg/public.asc" 2>/dev/null || true
-    gpg --import-ownertrust "$DEST/gpg/trust.txt" 2>/dev/null || true
-    echo "✓ GPG"
+    if gpg --import "$DEST/gpg/private.asc" 2>/dev/null && \
+       gpg --import "$DEST/gpg/public.asc" 2>/dev/null && \
+       gpg --import-ownertrust "$DEST/gpg/trust.txt" 2>/dev/null; then
+      echo "✓ GPG"
+    else
+      echo "✗ GPG (failed)"
+      FAILED_ITEMS+=("GPG keys")
+    fi
   fi
   
   for f in .netrc .npmrc .gitconfig; do
@@ -80,6 +113,13 @@ elif [[ "$1" == "restore" ]]; then
   for d in JetBrains IntelliJIdea; do
     [[ -d "$DEST/intellij/$d" ]] && restore "$DEST/intellij/$d" "${HOME}/Library/Application Support/$d" && break
   done
+  
+  if [[ ${#FAILED_ITEMS[@]} -gt 0 ]]; then
+    echo ""
+    echo "⚠️  Failed to restore:"
+    printf '  - %s\n' "${FAILED_ITEMS[@]}"
+    echo ""
+  fi
   
   echo "Done!"
 
