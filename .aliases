@@ -23,39 +23,102 @@ alias c="cd ~/Code"
 alias g="git"
 
 # =============================================================================
-# LS ALIASES - Enhanced directory listings
+# MODERN CLI TOOL REPLACEMENTS
+# =============================================================================
+# Modern alternatives to traditional Unix tools with better UX and performance.
+# These tools are installed via brew.sh and only aliased if available.
+#
+# BACKWARD COMPATIBILITY:
+# - Original commands remain accessible via: \command or command command
+# - Example: \ls or command ls will use the original ls
+# - Scripts should use full paths (/bin/ls) or command builtin for safety
 # =============================================================================
 
-# Detect which `ls` flavor is in use (GNU vs BSD)
-if ls --color > /dev/null 2>&1; then # GNU `ls`
-	colorflag="--color"
-	export LS_COLORS='no=00:fi=00:di=01;31:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.gz=01;31:*.bz2=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.avi=01;35:*.fli=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.ogg=01;35:*.mp3=01;35:*.wav=01;35:'
-else # macOS `ls`
-	colorflag="-G"
-	export LSCOLORS='BxBxhxDxfxhxhxhxhxcxcx'
+# eza: Modern replacement for ls
+# https://github.com/eza-community/eza
+# Features: colors, icons, git integration, tree view
+if command -v eza &> /dev/null; then
+    alias ls='eza --icons --group-directories-first'
+    alias ll='eza --icons --group-directories-first -l'
+    alias la='eza --icons --group-directories-first -la'
+    alias l='eza --icons --group-directories-first -lah --git'
+    alias lt='eza --icons --group-directories-first --tree --level=2'
+    alias lta='eza --icons --group-directories-first --tree --level=2 -a'
+    alias lsd='eza --icons -D'
+else
+    # Fallback to traditional ls with colors
+    if ls --color > /dev/null 2>&1; then # GNU `ls`
+        colorflag="--color"
+        export LS_COLORS='no=00:fi=00:di=01;31:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.gz=01;31:*.bz2=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.avi=01;35:*.fli=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.ogg=01;35:*.mp3=01;35:*.wav=01;35:'
+    else # macOS `ls`
+        colorflag="-G"
+        export LSCOLORS='BxBxhxDxfxhxhxhxhxcxcx'
+    fi
+    alias l="ls -lF ${colorflag}"
+    alias la="ls -lAF ${colorflag}"
+    alias lsd="ls -lF ${colorflag} | grep --color=never '^d'"
+    alias ls="command ls ${colorflag}"
 fi
 
-# List all files colorized in long format
-alias l="ls -lF ${colorflag}"
+# bat: Modern replacement for cat
+# https://github.com/sharkdp/bat
+# Features: syntax highlighting, git integration, line numbers
+if command -v bat &> /dev/null; then
+    alias cat='bat --style=auto'
+    alias catp='bat --style=plain'  # Plain output without decorations
+    alias bathelp='bat --plain --language=help'
+    export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+fi
 
-# List all files colorized in long format, excluding . and ..
-alias la="ls -lAF ${colorflag}"
+# fd: Modern replacement for find
+# https://github.com/sharkdp/fd
+# Features: faster, simpler syntax, respects .gitignore
+if command -v fd &> /dev/null; then
+    alias find='fd'
+fi
 
-# List only directories
-alias lsd="ls -lF ${colorflag} | grep --color=never '^d'"
+# ripgrep: Modern replacement for grep
+# https://github.com/BurntSushi/ripgrep
+# Features: faster, respects .gitignore, better output
+if command -v rg &> /dev/null; then
+    alias grep='rg'
+    alias fgrep='rg --fixed-strings'
+    alias egrep='rg'
+else
+    # Fallback to traditional grep with colors
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
 
-# Always use color output for `ls`
-alias ls="command ls ${colorflag}"
+# duf: Modern replacement for df
+# https://github.com/muesli/duf
+# Features: better visualization, colored output
+if command -v duf &> /dev/null; then
+    alias df='duf'
+fi
 
-# =============================================================================
-# GREP ALIASES - Colored output
-# =============================================================================
+# dust: Modern replacement for du
+# https://github.com/bootandy/dust
+# Features: better visualization, faster
+if command -v dust &> /dev/null; then
+    alias du='dust'
+fi
 
-# Always enable colored `grep` output
-# Note: `GREP_OPTIONS="--color=auto"` is deprecated, hence the alias usage.
-alias grep='grep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias egrep='egrep --color=auto'
+# procs: Modern replacement for ps
+# https://github.com/dalance/procs
+# Features: colored output, tree view, better formatting
+if command -v procs &> /dev/null; then
+    alias ps='procs'
+fi
+
+# bottom (btm): Modern replacement for top/htop
+# https://github.com/ClementTsang/bottom
+# Features: graphical charts, better UI, more info
+if command -v btm &> /dev/null; then
+    alias top='btm'
+    alias htop='btm'
+fi
 
 # =============================================================================
 # SYSTEM UTILITIES
@@ -221,7 +284,8 @@ alias key="/bin/cat ~/.ssh/id_rsa.pub | pbcopy && echo \"'~/.ssh/id_rsa.pub' cop
 # =============================================================================
 
 # Auto-list directory contents after cd
-function cd() { builtin cd "$@" && ls -la; }
+# Note: Uses 'la' alias which will use eza if available, otherwise traditional ls
+function cd() { builtin cd "$@" && la; }
 
 # Batch rename files (usage: rename 'old' 'new')
 function rename() {
@@ -231,11 +295,6 @@ function rename() {
 # =============================================================================
 # ITUNES/MUSIC CONTROL
 # =============================================================================
-
-
-function rename() {
-	for i in *; do mv $i `echo $i | sed "s/$1/$2/"`; done
-}
 
 # Disable iTunes/Music from responding to media keys (may not work on newer macOS)
 alias itunesdown='launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2>/dev/null'

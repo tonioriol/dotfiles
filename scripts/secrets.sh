@@ -28,6 +28,7 @@ declare -A BACKUP_ITEMS=(
   ["azure"]="${HOME}/.azure:configs/azure"
   ["doctl"]="${HOME}/Library/Application Support/doctl:configs/doctl"
   ["terraform"]="${HOME}/.terraform.d:configs/terraform"
+  ["operator-mono-fonts"]="${HOME}/Library/Fonts/OperatorMono-*.otf:fonts"
 )
 
 [[ $# -eq 0 ]] && echo "Usage: $0 <backup|restore>" && exit 1
