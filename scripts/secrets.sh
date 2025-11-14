@@ -33,10 +33,6 @@ if [[ "$1" == "backup" ]]; then
     echo "✓ GPG"
   fi
   
-  copy "${HOME}/Library/Application Support/Firefox/Profiles" "$DEST/firefox"
-  copy "${HOME}/Library/Application Support/zen/Profiles" "$DEST/zen"
-  copy "${HOME}/Library/Application Support/Google/Chrome" "$DEST/chrome"
-  
   for f in .netrc .npmrc .gitconfig; do
     copy "${HOME}/$f" "$DEST/configs"
   done
@@ -73,10 +69,6 @@ elif [[ "$1" == "restore" ]]; then
     gpg --import-ownertrust "$DEST/gpg/trust.txt" 2>/dev/null || true
     echo "✓ GPG"
   fi
-  
-  [[ -d "$DEST/firefox/Profiles" ]] && restore "$DEST/firefox/Profiles" "${HOME}/Library/Application Support/Firefox/Profiles"
-  [[ -d "$DEST/zen/Profiles" ]] && restore "$DEST/zen/Profiles" "${HOME}/Library/Application Support/zen/Profiles"
-  [[ -d "$DEST/chrome/Chrome" ]] && restore "$DEST/chrome/Chrome" "${HOME}/Library/Application Support/Google/Chrome"
   
   for f in .netrc .npmrc .gitconfig; do
     [[ -f "$DEST/configs/$f" ]] && restore "$DEST/configs/$f" "${HOME}/$f"
