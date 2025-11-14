@@ -49,10 +49,11 @@ if [[ "$1" == "backup" ]]; then
   copy "${HOME}/.kube/config" "$DEST/configs/kube"
   copy "${HOME}/.config/gh" "$DEST/configs/gh"
   
-  for d in "${HOME}/Library/Application Support/JetBrains" \
-           "${HOME}/Library/Application Support/IntelliJIdea"; do
-    [[ -d "$d" ]] && copy "$d" "$DEST/intellij" && break
-  done
+  # Cloud provider configs
+  copy "${HOME}/.config/gcloud" "$DEST/configs/gcloud"
+  copy "${HOME}/.azure" "$DEST/configs/azure"
+  copy "${HOME}/Library/Application Support/doctl" "$DEST/configs/doctl"
+  copy "${HOME}/.terraform.d" "$DEST/configs/terraform"
   
   if [[ ${#FAILED_ITEMS[@]} -gt 0 ]]; then
     echo ""
@@ -110,9 +111,11 @@ elif [[ "$1" == "restore" ]]; then
   [[ -f "$DEST/configs/kube/config" ]] && restore "$DEST/configs/kube/config" "${HOME}/.kube/config"
   [[ -d "$DEST/configs/gh" ]] && restore "$DEST/configs/gh" "${HOME}/.config/gh"
   
-  for d in JetBrains IntelliJIdea; do
-    [[ -d "$DEST/intellij/$d" ]] && restore "$DEST/intellij/$d" "${HOME}/Library/Application Support/$d" && break
-  done
+  # Cloud provider configs
+  [[ -d "$DEST/configs/gcloud" ]] && restore "$DEST/configs/gcloud" "${HOME}/.config/gcloud"
+  [[ -d "$DEST/configs/azure" ]] && restore "$DEST/configs/azure" "${HOME}/.azure"
+  [[ -d "$DEST/configs/doctl" ]] && restore "$DEST/configs/doctl" "${HOME}/Library/Application Support/doctl"
+  [[ -d "$DEST/configs/terraform" ]] && restore "$DEST/configs/terraform" "${HOME}/.terraform.d"
   
   if [[ ${#FAILED_ITEMS[@]} -gt 0 ]]; then
     echo ""
