@@ -8,6 +8,26 @@ set -euo pipefail
 DEST="${PWD}/.secrets"
 FAILED_ITEMS=()
 
+# Define what to backup/restore (format: "source_path:destination_subdir")
+declare -A BACKUP_ITEMS=(
+  ["ssh"]="${HOME}/.ssh:ssh"
+  ["aws"]="${HOME}/.aws:aws"
+  ["netrc"]="${HOME}/.netrc:configs"
+  ["npmrc"]="${HOME}/.npmrc:configs"
+  ["gitconfig"]="${HOME}/.gitconfig:configs"
+  ["docker"]="${HOME}/.docker/config.json:configs/docker"
+  ["kube"]="${HOME}/.kube/config:configs/kube"
+  ["gh"]="${HOME}/.config/gh:configs/gh"
+  ["glab"]="${HOME}/.config/glab-cli:configs/glab-cli"
+  ["linear"]="${HOME}/.config/linear-cli:configs/linear-cli"
+  ["gh-copilot"]="${HOME}/.config/gh-copilot:configs/gh-copilot"
+  ["firebase"]="${HOME}/.config/configstore/firebase-tools.json:configs/configstore"
+  ["gcloud"]="${HOME}/.config/gcloud:configs/gcloud"
+  ["azure"]="${HOME}/.azure:configs/azure"
+  ["doctl"]="${HOME}/Library/Application Support/doctl:configs/doctl"
+  ["terraform"]="${HOME}/.terraform.d:configs/terraform"
+)
+
 [[ $# -eq 0 ]] && echo "Usage: $0 <backup|restore>" && exit 1
 
 # ============================================================================
@@ -27,9 +47,13 @@ if [[ "$1" == "backup" ]]; then
     fi
   }
 
-  copy "${HOME}/.ssh" "$DEST/ssh"
-  copy "${HOME}/.aws" "$DEST/aws"
+  # Backup all defined items
+  for key in "${!BACKUP_ITEMS[@]}"; do
+    IFS=':' read -r src dest <<< "${BACKUP_ITEMS[$key]}"
+    copy "$src" "$DEST/$dest"
+  done
   
+  # GPG requires special handling (export instead of copy)
   if command -v gpg >/dev/null 2>&1; then
     mkdir -p "$DEST/gpg"
     if gpg --export-secret-keys --armor > "$DEST/gpg/private.asc" 2>/dev/null && \
@@ -41,23 +65,6 @@ if [[ "$1" == "backup" ]]; then
       FAILED_ITEMS+=("GPG keys")
     fi
   fi
-  
-  for f in .netrc .npmrc .gitconfig; do
-    copy "${HOME}/$f" "$DEST/configs"
-  done
-  copy "${HOME}/.docker/config.json" "$DEST/configs/docker"
-  copy "${HOME}/.kube/config" "$DEST/configs/kube"
-  copy "${HOME}/.config/gh" "$DEST/configs/gh"
-  copy "${HOME}/.config/glab-cli" "$DEST/configs/glab-cli"
-  copy "${HOME}/.config/linear-cli" "$DEST/configs/linear-cli"
-  copy "${HOME}/.config/gh-copilot" "$DEST/configs/gh-copilot"
-  copy "${HOME}/.config/configstore/firebase-tools.json" "$DEST/configs/configstore"
-  
-  # Cloud provider configs
-  copy "${HOME}/.config/gcloud" "$DEST/configs/gcloud"
-  copy "${HOME}/.azure" "$DEST/configs/azure"
-  copy "${HOME}/Library/Application Support/doctl" "$DEST/configs/doctl"
-  copy "${HOME}/.terraform.d" "$DEST/configs/terraform"
   
   if [[ ${#FAILED_ITEMS[@]} -gt 0 ]]; then
     echo ""
@@ -85,18 +92,33 @@ elif [[ "$1" == "restore" ]]; then
     fi
   }
 
-  if [[ -d "$DEST/ssh/.ssh" ]]; then
-    restore "$DEST/ssh/.ssh" "${HOME}/.ssh"
+  # Restore all defined items
+  for key in "${!BACKUP_ITEMS[@]}"; do
+    IFS=':' read -r src dest <<< "${BACKUP_ITEMS[$key]}"
+    backup_path="$DEST/$dest"
+    
+    # Determine the actual backed up path (handle directory vs file)
+    if [[ -d "$backup_path" ]]; then
+      # For directories, the backup contains the directory itself
+      actual_backup=$(find "$backup_path" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | head -1)
+      [[ -n "$actual_backup" ]] && restore "$actual_backup" "$src"
+    elif [[ -f "$backup_path/$(basename "$src")" ]]; then
+      # For files, restore from the backup directory
+      restore "$backup_path/$(basename "$src")" "$src"
+    fi
+  done
+  
+  # Apply special permissions for SSH and AWS
+  if [[ -d "${HOME}/.ssh" ]]; then
     chmod 700 "${HOME}/.ssh" 2>/dev/null || true
     chmod 600 "${HOME}/.ssh"/id_* 2>/dev/null || true
   fi
-  
-  if [[ -d "$DEST/aws/.aws" ]]; then
-    restore "$DEST/aws/.aws" "${HOME}/.aws"
+  if [[ -d "${HOME}/.aws" ]]; then
     chmod 700 "${HOME}/.aws" 2>/dev/null || true
     chmod 600 "${HOME}/.aws"/* 2>/dev/null || true
   fi
   
+  # GPG requires special handling (import instead of copy)
   if [[ -f "$DEST/gpg/private.asc" ]]; then
     if gpg --import "$DEST/gpg/private.asc" 2>/dev/null && \
        gpg --import "$DEST/gpg/public.asc" 2>/dev/null && \
@@ -107,23 +129,6 @@ elif [[ "$1" == "restore" ]]; then
       FAILED_ITEMS+=("GPG keys")
     fi
   fi
-  
-  for f in .netrc .npmrc .gitconfig; do
-    [[ -f "$DEST/configs/$f" ]] && restore "$DEST/configs/$f" "${HOME}/$f"
-  done
-  [[ -f "$DEST/configs/docker/config.json" ]] && restore "$DEST/configs/docker/config.json" "${HOME}/.docker/config.json"
-  [[ -f "$DEST/configs/kube/config" ]] && restore "$DEST/configs/kube/config" "${HOME}/.kube/config"
-  [[ -d "$DEST/configs/gh" ]] && restore "$DEST/configs/gh" "${HOME}/.config/gh"
-  [[ -d "$DEST/configs/glab-cli" ]] && restore "$DEST/configs/glab-cli" "${HOME}/.config/glab-cli"
-  [[ -d "$DEST/configs/linear-cli" ]] && restore "$DEST/configs/linear-cli" "${HOME}/.config/linear-cli"
-  [[ -d "$DEST/configs/gh-copilot" ]] && restore "$DEST/configs/gh-copilot" "${HOME}/.config/gh-copilot"
-  [[ -f "$DEST/configs/configstore/firebase-tools.json" ]] && restore "$DEST/configs/configstore/firebase-tools.json" "${HOME}/.config/configstore/firebase-tools.json"
-  
-  # Cloud provider configs
-  [[ -d "$DEST/configs/gcloud" ]] && restore "$DEST/configs/gcloud" "${HOME}/.config/gcloud"
-  [[ -d "$DEST/configs/azure" ]] && restore "$DEST/configs/azure" "${HOME}/.azure"
-  [[ -d "$DEST/configs/doctl" ]] && restore "$DEST/configs/doctl" "${HOME}/Library/Application Support/doctl"
-  [[ -d "$DEST/configs/terraform" ]] && restore "$DEST/configs/terraform" "${HOME}/.terraform.d"
   
   if [[ ${#FAILED_ITEMS[@]} -gt 0 ]]; then
     echo ""
