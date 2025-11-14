@@ -13,3 +13,10 @@ Thumbs.db
 .Spotlight-V100
 .Trashes
 .idea
+
+# Local secrets backup - do NOT commit contents
+.secrets/
+
+# mise (version manager) - commit template, ignore local overrides
+.mise.local.toml
+.mise/

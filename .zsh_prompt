@@ -1,0 +1,122 @@
+#!/usr/bin/env zsh
+
+# Shell prompt based on the Solarized Dark theme.
+# Heavily inspired by @necolas's prompt: https://github.com/necolas/dotfiles
+# Adapted for zsh
+
+# Enable colors
+autoload -U colors && colors
+
+# prompt_git() - Shows git branch and status in your prompt
+#
+# What it displays:
+#   "on main [+!?]"  where:
+#   - "main" = current branch name
+#   - [+]  = staged changes (ready to commit)
+#   - [!]  = unstaged changes (modified files)
+#   - [?]  = untracked files (new files not in git)
+#   - [$]  = stashed changes (saved work)
+#   - [*]  = special marker for huge repos (Chromium)
+#
+# Example prompts:
+#   user at hostname in ~/project on main [+!]     <- staged + unstaged changes
+#   user at hostname in ~/project on feature/new   <- clean branch
+#   user at hostname in ~/project on main [?$]     <- untracked files + stash
+#
+prompt_git() {
+	local s=''           # Status indicators string
+	local branchName=''  # Current branch/commit name
+
+	# Exit early if not in a git repository
+	git rev-parse --is-inside-work-tree &>/dev/null || return
+
+	# Get branch name (or commit SHA if detached HEAD)
+	# Tries in order: branch name → tag name → short commit SHA → "(unknown)"
+	branchName="$(git symbolic-ref --quiet --short HEAD 2> /dev/null || \
+		git describe --all --exact-match HEAD 2> /dev/null || \
+		git rev-parse --short HEAD 2> /dev/null || \
+		echo '(unknown)')"
+
+	# Special case: Skip slow status checks for massive repos like Chromium
+	# (checking status in Chromium can take 10+ seconds)
+	repoUrl="$(git config --get remote.origin.url)"
+	if grep -q 'chromium/src.git' <<< "${repoUrl}"; then
+		s+='*'  # Just show * for "probably dirty"
+	else
+		# Check for staged changes (git add'ed files)
+		# These are ready to commit
+		if ! git diff --quiet --ignore-submodules --cached 2>/dev/null; then
+			s+='+'
+		fi
+		
+		# Check for unstaged changes (modified but not git add'ed)
+		# These need to be staged before committing
+		if ! git diff-files --quiet --ignore-submodules -- 2>/dev/null; then
+			s+='!'
+		fi
+		
+		# Check for untracked files (new files not in .gitignore)
+		# These aren't tracked by git yet
+		if [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
+			s+='?'
+		fi
+		
+		# Check for stashed changes (saved work via git stash)
+		# Useful reminder you have saved work
+		if git rev-parse --verify refs/stash &>/dev/null; then
+			s+='$'
+		fi
+	fi
+
+	# Format status indicators in brackets if any exist
+	[ -n "${s}" ] && s=" [${s}]"
+
+	# Output: "on <branch> [status]"
+	# $1 = prefix color/text (e.g., "on ")
+	# $2 = suffix color for status
+	echo -e "${1}${branchName}${2}${s}"
+}
+
+# Solarized colors for zsh
+if [[ $COLORTERM = gnome-* && $TERM = xterm ]] && infocmp gnome-256color >/dev/null 2>&1; then
+	export TERM='gnome-256color'
+elif infocmp xterm-256color >/dev/null 2>&1; then
+	export TERM='xterm-256color'
+fi
+
+# Define colors using zsh color codes
+local reset="%{$reset_color%}"
+local bold="%{$fg_bold[white]%}"
+local black="%{$fg[black]%}"
+local blue="%{$fg[blue]%}"
+local cyan="%{$fg[cyan]%}"
+local green="%{$fg[green]%}"
+local orange="%{$fg[yellow]%}"
+local purple="%{$fg[magenta]%}"
+local red="%{$fg[red]%}"
+local violet="%{$fg[magenta]%}"
+local white="%{$fg[white]%}"
+local yellow="%{$fg[yellow]%}"
+
+# Highlight the user name when logged in as root.
+if [[ "${USER}" == "root" ]]; then
+	local userStyle="${red}"
+else
+	local userStyle="${orange}"
+fi
+
+# Highlight the hostname when connected via SSH.
+if [[ -n "${SSH_TTY}" ]]; then
+	local hostStyle="${bold}${red}"
+else
+	local hostStyle="${yellow}"
+fi
+
+# Set the terminal title and prompt.
+# %n = username, %m = hostname, %~ = current directory with ~
+PROMPT='${bold}
+${userStyle}%n${white} at ${hostStyle}%m${white} in ${green}%~$(prompt_git "${white} on ${violet}" "${blue}")
+${white}$ ${reset}'
+
+# Secondary prompt
+PROMPT2="${yellow}→ ${reset}"

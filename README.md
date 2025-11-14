@@ -10,19 +10,19 @@
 
 You can clone the repository wherever you want. (I like to keep it in `~/Projects/dotfiles`, with `~/dotfiles` as a symlink.) The bootstrapper script will pull in the latest version and copy the files to your home folder.
 
-```bash
+```shell
 git clone https://github.com/tonioriol/dotfiles.git && cd dotfiles && source bootstrap.sh
 ```
 
 To update, `cd` into your local `dotfiles` repository and then:
 
-```bash
+```shell
 source bootstrap.sh
 ```
 
 Alternatively, to update while avoiding the confirmation prompt:
 
-```bash
+```shell
 set -- -f; source bootstrap.sh
 ```
 
@@ -30,64 +30,121 @@ set -- -f; source bootstrap.sh
 
 To install these dotfiles without Git:
 
-```bash
-cd; curl -#L https://github.com/tonioriol/dotfiles/tarball/master | tar -xzv --strip-components 1 --exclude={README.md,bootstrap.sh,.osx,LICENSE-MIT.txt}
+```shell
+cd; curl -#L https://github.com/tonioriol/dotfiles/tarball/master | tar -xzv --strip-components 1 --exclude={README.md,bootstrap.sh,.macos,LICENSE-MIT.txt}
 ```
 
 To update later on, just run that command again.
 
 ### Specify the `$PATH`
 
-If `~/.path` exists, it will be sourced along with the other files, before any feature testing (such as [detecting which version of `ls` is being used](https://github.com/mathiasbynens/dotfiles/blob/aff769fd75225d8f2e481185a71d5e05b76002dc/.aliases#L21-L26)) takes place.
+If `~/.path` exists, it will be sourced along with the other files, before any feature testing (such as detecting which version of `ls` is being used) takes place.
 
 Here’s an example `~/.path` file that adds `/usr/local/bin` to the `$PATH`:
 
-```bash
+```shell
 export PATH="/usr/local/bin:$PATH"
 ```
 
-### Add custom commands without creating a new fork
+### Personalization with `.extra`
 
-If `~/.extra` exists, it will be sourced along with the other files. You can use this to add a few custom commands without the need to fork this entire repository, or to add commands you don’t want to commit to a public repository.
+The `.extra` file (gitignored) contains your personal configuration:
 
-My `~/.extra` looks something like this:
-
-```bash
-# Git credentials
-# Not in the repository, to prevent people from accidentally committing under my name
-GIT_AUTHOR_NAME="Mathias Bynens"
-GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
-git config --global user.name "$GIT_AUTHOR_NAME"
-GIT_AUTHOR_EMAIL="mathias@mailinator.com"
-GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
-git config --global user.email "$GIT_AUTHOR_EMAIL"
+```shell
+cp .extra.template ~/.extra
+vim ~/.extra  # Edit with your personal information
 ```
 
-You could also use `~/.extra` to override settings, functions and aliases from my dotfiles repository. It’s probably better to [fork this repository](https://github.com/mathiasbynens/dotfiles/fork) instead, though.
+See `.extra.template` for full documentation on all available options (git credentials, macOS settings, editor preferences, etc.).
 
-### Sensible macOS defaults
+### Additional Setup
 
-When setting up a new Mac, you may want to set some sensible macOS defaults:
+**macOS defaults:** `./.macos` - Configure sensible macOS system settings
 
-```bash
-./.macos
+**Homebrew packages:** `./brew.sh` - Install packages including mise, which manages Node.js and Python versions (see `.mise.toml`)
+
+**Customize tools:** Edit `.mise.toml` to add/remove development tools. See [mise registry](https://mise.jdx.dev/registry.html) for available tools.
+
+## Apple Silicon Notes
+
+These dotfiles are optimized for Apple Silicon (M1/M2/M3/M4) Macs:
+- Homebrew paths use `$(brew --prefix)` for cross-architecture compatibility
+- Python 3 is used throughout (Python 2 removed)
+- Modern CLI tools included (bat, eza, delta, zoxide, lazygit, etc.)
+- **colima** - Lightweight Docker runtime optimized for Apple Silicon (alternative to Docker Desktop)
+- **devbox** - Reproducible development environments powered by Nix for project-specific tooling
+- See `APPLE_SILICON_REVIEW.md` for detailed changes and recommendations
+
+## Modern CLI Tools
+
+Modern replacements for Unix commands (installed via `brew.sh`):
+- **eza** → `ls`, **bat** → `cat`, **delta** → `git diff`, **fd** → `find`, **ripgrep** → `grep`
+- **duf** → `df`, **dust** → `du`, **procs** → `ps`, **bottom** → `top`
+
+Use `\command` or `command command` to access originals if needed.
+
+## Notes & migration
+
+This fork has been customized to help migrating to a new Mac while keeping sensitive credentials out of git. Recommended workflow:
+
+### On your source machine:
+1. Run the secrets backup script to save sensitive files:
+   ```shell
+   ./scripts/secrets.sh backup
+   ```
+   This copies sensitive files (SSH keys, AWS credentials, GPG keys, etc.) into `./.secrets/` (which is gitignored) and sets strict permissions. Do NOT commit `.secrets/`.
+
+### On your new machine:
+1. Clone this repository (git is pre-installed on macOS):
+   ```shell
+   git clone https://github.com/tonioriol/dotfiles.git && cd dotfiles
+   ```
+
+2. Copy your `.secrets/` directory from backup to the dotfiles directory
+
+3. Create your `.extra` file from the template:
+   ```shell
+   cp .extra.template ~/.extra
+   vim ~/.extra  # Edit with your personal information
+   ```
+
+4. Run the bootstrap script:
+   ```shell
+   ./bootstrap.sh
+   ```
+   This will sync dotfiles, install packages, and configure macOS settings.
+
+5. Restore your secrets:
+   ```shell
+   ./scripts/secrets.sh restore
+   ```
+
+6. If you use GPG signing, add your key ID to `~/.extra`:
+   ```shell
+   # Get your GPG key ID
+   gpg --list-secret-keys --keyid-format=long
+   
+   # Edit ~/.extra and uncomment the GPG lines with your key ID
+   vim ~/.extra
+   
+   # Reload configuration
+   source ~/.extra
+   ```
+
+7. Restart your computer for all macOS settings to take effect
+
+### Regenerating brew.sh
+The `brew.sh` script can be regenerated from your source machine to produce an exact list of formulae & casks:
+```shell
+# On source machine, generate list of installed packages
+brew bundle dump --describe --force
 ```
-
-### Install Homebrew formulae
-
-When setting up a new Mac, you may want to install some common [Homebrew](https://brew.sh/) formulae (after installing Homebrew, of course):
-
-```bash
-./brew.sh
-```
-
-Some of the functionality of these dotfiles depends on formulae installed by `brew.sh`. If you don’t plan to run `brew.sh`, you should look carefully through the script and manually install any particularly important ones. A good example is Bash/Git completion: the dotfiles use a special version from Homebrew.
 
 ## Feedback
 
 Suggestions/improvements
-[welcome](https://github.com/mathiasbynens/dotfiles/issues)!
+[welcome](https://github.com/tonioriol/dotfiles/issues)!
 
 ## Author
 
-Forked form the amazing https://github.com/mathiasbynens/dotfiles
+Forked from the amazing https://github.com/mathiasbynens/dotfiles
