@@ -85,31 +85,31 @@ elif infocmp xterm-256color >/dev/null 2>&1; then
 fi
 
 # Define colors using zsh color codes
-local reset="%{$reset_color%}"
-local bold="%{$fg_bold[white]%}"
-local black="%{$fg[black]%}"
-local blue="%{$fg[blue]%}"
-local cyan="%{$fg[cyan]%}"
-local green="%{$fg[green]%}"
-local orange="%{$fg[yellow]%}"
-local purple="%{$fg[magenta]%}"
-local red="%{$fg[red]%}"
-local violet="%{$fg[magenta]%}"
-local white="%{$fg[white]%}"
-local yellow="%{$fg[yellow]%}"
+reset="%{$reset_color%}"
+bold="%{$fg_bold[white]%}"
+black="%{$fg[black]%}"
+blue="%{$fg[blue]%}"
+cyan="%{$fg[cyan]%}"
+green="%{$fg[green]%}"
+orange="%{$fg[yellow]%}"
+purple="%{$fg[magenta]%}"
+red="%{$fg[red]%}"
+violet="%{$fg[magenta]%}"
+white="%{$fg[white]%}"
+yellow="%{$fg[yellow]%}"
 
 # Highlight the user name when logged in as root.
 if [[ "${USER}" == "root" ]]; then
-	local userStyle="${red}"
+	userStyle="${red}"
 else
-	local userStyle="${orange}"
+	userStyle="${orange}"
 fi
 
 # Highlight the hostname when connected via SSH.
 if [[ -n "${SSH_TTY}" ]]; then
-	local hostStyle="${bold}${red}"
+	hostStyle="${bold}${red}"
 else
-	local hostStyle="${yellow}"
+	hostStyle="${yellow}"
 fi
 
 # Set the terminal title and prompt.

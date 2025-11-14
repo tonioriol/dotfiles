@@ -19,15 +19,13 @@ declare -A BACKUP_ITEMS=(
   ["gitconfig"]="${HOME}/.gitconfig:configs"
   ["docker"]="${HOME}/.docker/config.json:configs/docker"
   ["kube"]="${HOME}/.kube/config:configs/kube"
-  ["gh"]="${HOME}/.config/gh:configs/gh"
-  ["glab"]="${HOME}/.config/glab-cli:configs/glab-cli"
-  ["linear"]="${HOME}/.config/linear-cli:configs/linear-cli"
-  ["gh-copilot"]="${HOME}/.config/gh-copilot:configs/gh-copilot"
+  ["gh"]="${HOME}/.config/gh:configs"
+  ["glab"]="${HOME}/.config/glab-cli:configs"
+  ["linear"]="${HOME}/.config/linear-cli:configs"
+  ["gh-copilot"]="${HOME}/.config/gh-copilot:configs"
   ["firebase"]="${HOME}/.config/configstore/firebase-tools.json:configs/configstore"
-  ["gcloud"]="${HOME}/.config/gcloud:configs/gcloud"
-  ["azure"]="${HOME}/.azure:configs/azure"
-  ["doctl"]="${HOME}/Library/Application Support/doctl:configs/doctl"
-  ["terraform"]="${HOME}/.terraform.d:configs/terraform"
+  ["doctl"]="${HOME}/Library/Application Support/doctl:configs"
+  ["terraform"]="${HOME}/.terraform.d:configs"
   ["operator-mono-fonts"]="${HOME}/Library/Fonts/OperatorMono-*.otf:fonts"
 )
 
@@ -53,7 +51,25 @@ if [[ "$1" == "backup" ]]; then
   # Backup all defined items
   for key in "${!BACKUP_ITEMS[@]}"; do
     IFS=':' read -r src dest <<< "${BACKUP_ITEMS[$key]}"
-    copy "$src" "$DEST/$dest"
+    
+    # Special handling for wildcard patterns (like fonts)
+    if [[ "$src" == *"*"* ]]; then
+      mkdir -p "$DEST/$dest"
+      if compgen -G "$src" > /dev/null; then
+        for file in $src; do
+          if cp -a "$file" "$DEST/$dest/" && chmod -R go-rwx "$DEST/$dest"; then
+            echo "✓ $(basename "$file")"
+          else
+            echo "✗ $(basename "$file") (failed)"
+            FAILED_ITEMS+=("$(basename "$file")")
+          fi
+        done
+      else
+        echo "⊘ $src (not found)"
+      fi
+    else
+      copy "$src" "$DEST/$dest"
+    fi
   done
   
   # GPG keys: export as ASCII-armored files (unencrypted)
@@ -100,8 +116,17 @@ elif [[ "$1" == "restore" ]]; then
     IFS=':' read -r src dest <<< "${BACKUP_ITEMS[$key]}"
     backup_path="$DEST/$dest"
     
+    # Special handling for wildcard patterns (like fonts)
+    if [[ "$src" == *"*"* ]]; then
+      if [[ -d "$backup_path" ]]; then
+        target_dir="$(dirname "$src")"
+        mkdir -p "$target_dir"
+        for file in "$backup_path"/*; do
+          [[ -f "$file" ]] && restore "$file" "$target_dir/$(basename "$file")"
+        done
+      fi
     # Handle both directory and file backups
-    if [[ -d "$backup_path" ]]; then
+    elif [[ -d "$backup_path" ]]; then
       # For directories, the backup contains the directory itself
       actual_backup=$(find "$backup_path" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | head -1)
       [[ -n "$actual_backup" ]] && restore "$actual_backup" "$src"

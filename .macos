@@ -40,7 +40,10 @@ sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.serve
 sudo nvram SystemAudioVolume=" "
 
 # Disable transparency in the menu bar and elsewhere on Yosemite
-defaults write com.apple.universalaccess reduceTransparency -bool true
+# Note: This requires Full Disk Access for Terminal on macOS Sequoia+
+# Grant access in: System Settings > Privacy & Security > Full Disk Access
+# Commenting out to avoid bootstrap failure - enable manually if needed
+# defaults write com.apple.universalaccess reduceTransparency -bool true
 
 # Set sidebar icon size to medium
 defaults write NSGlobalDomain NSTableViewDefaultSizeMode -int 2

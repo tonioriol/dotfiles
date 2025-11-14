@@ -11,7 +11,7 @@ set -euo pipefail
 
 echo "Updating Homebrew and upgrading existing packages..."
 brew update
-brew upgrade --cleanup
+brew upgrade
 
 BREW_PREFIX="$(brew --prefix)"
 
