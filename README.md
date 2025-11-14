@@ -10,19 +10,19 @@
 
 You can clone the repository wherever you want. (I like to keep it in `~/Projects/dotfiles`, with `~/dotfiles` as a symlink.) The bootstrapper script will pull in the latest version and copy the files to your home folder.
 
-```bash
+```shell
 git clone https://github.com/tonioriol/dotfiles.git && cd dotfiles && source bootstrap.sh
 ```
 
 To update, `cd` into your local `dotfiles` repository and then:
 
-```bash
+```shell
 source bootstrap.sh
 ```
 
 Alternatively, to update while avoiding the confirmation prompt:
 
-```bash
+```shell
 set -- -f; source bootstrap.sh
 ```
 
@@ -30,8 +30,8 @@ set -- -f; source bootstrap.sh
 
 To install these dotfiles without Git:
 
-```bash
-cd; curl -#L https://github.com/tonioriol/dotfiles/tarball/master | tar -xzv --strip-components 1 --exclude={README.md,bootstrap.sh,.osx,LICENSE-MIT.txt}
+```shell
+cd; curl -#L https://github.com/tonioriol/dotfiles/tarball/master | tar -xzv --strip-components 1 --exclude={README.md,bootstrap.sh,.macos,LICENSE-MIT.txt}
 ```
 
 To update later on, just run that command again.
@@ -42,7 +42,7 @@ If `~/.path` exists, it will be sourced along with the other files, before any f
 
 Here’s an example `~/.path` file that adds `/usr/local/bin` to the `$PATH`:
 
-```bash
+```shell
 export PATH="/usr/local/bin:$PATH"
 ```
 
@@ -52,7 +52,7 @@ If `~/.extra` exists, it will be sourced along with the other files. You can use
 
 My `~/.extra` looks something like this:
 
-```bash
+```shell
 # Git credentials
 # Not in the repository, to prevent people from accidentally committing under my name
 GIT_AUTHOR_NAME="Mathias Bynens"
@@ -69,7 +69,7 @@ You could also use `~/.extra` to override settings, functions and aliases from m
 
 When setting up a new Mac, you may want to set some sensible macOS defaults:
 
-```bash
+```shell
 ./.macos
 ```
 
@@ -77,7 +77,7 @@ When setting up a new Mac, you may want to set some sensible macOS defaults:
 
 When setting up a new Mac, you may want to install some common [Homebrew](https://brew.sh/) formulae (after installing Homebrew, of course):
 
-```bash
+```shell
 ./brew.sh
 ```
 
@@ -87,7 +87,7 @@ This will install all packages and automatically set up:
 - **Python 3.12** - Installed via mise (configured in `.mise.toml`)
 
 After installation, reload your shell:
-```bash
+```shell
 exec $SHELL -l
 ```
 
@@ -95,7 +95,7 @@ exec $SHELL -l
 
 Edit `.mise.toml` to add or remove development tools. Uncomment any tools you need:
 
-```bash
+```shell
 # Edit the configuration
 vim .mise.toml
 
@@ -122,11 +122,84 @@ These dotfiles are optimized for Apple Silicon (M1/M2/M3/M4) Macs:
 - **devbox** - Reproducible development environments powered by Nix for project-specific tooling
 - See `APPLE_SILICON_REVIEW.md` for detailed changes and recommendations
 
+## Modern CLI Tools
+
+This dotfiles configuration uses modern CLI tools as defaults for better performance and user experience. All tools are automatically installed via `brew.sh`.
+
+### Replacements
+
+The following modern tools replace traditional Unix commands:
+
+- **[eza](https://github.com/eza-community/eza)** → `ls` - Modern ls replacement with icons, colors, and git integration
+- **[bat](https://github.com/sharkdp/bat)** → `cat` - Cat clone with syntax highlighting and git integration
+- **[delta](https://github.com/dandavison/delta)** → `git diff` - Better git diffs with syntax highlighting and side-by-side view
+- **[fd](https://github.com/sharkdp/fd)** → `find` - Faster, simpler, and more user-friendly find alternative
+- **[ripgrep](https://github.com/BurntSushi/ripgrep)** → `grep` - Extremely fast grep alternative that respects .gitignore
+- **[duf](https://github.com/muesli/duf)** → `df` - Better disk usage display with colors and graphs
+- **[dust](https://github.com/bootandy/dust)** → `du` - More intuitive directory size display
+- **[procs](https://github.com/dalance/procs)** → `ps` - Modern process viewer with colors and tree view
+- **[bottom](https://github.com/ClementTsang/bottom)** → `top` - Modern system monitor with graphs and customizable interface
+
+### Usage Examples
+
+```shell
+# Modern ls with icons and git status
+ls -la
+
+# Syntax-highlighted file viewing
+cat script.js
+
+# Beautiful git diffs
+git diff
+
+# Fast file search
+find . -name "*.js"
+
+# Fast content search
+grep "TODO" -r .
+
+# Better disk usage
+df -h
+
+# Directory size analysis
+du -h
+
+# Process monitoring
+ps aux
+top
+```
+
+### Backward Compatibility
+
+Original commands remain accessible if needed:
+
+```shell
+# Use backslash to bypass alias
+\ls -la
+\cat file.txt
+\grep pattern file
+
+# Use command builtin
+command ls
+command cat
+
+# Use full paths
+/bin/ls
+/bin/cat
+```
+
+### Configuration
+
+- **eza**: Configured in `.aliases` with sensible defaults (icons, git, colors)
+- **bat**: Theme and style configured via environment variables in `.exports`
+- **delta**: Git integration configured in `.gitconfig` with side-by-side diffs
+- **ripgrep**: Respects `.gitignore` by default, configured via `.ripgreprc` if present
+
 ## Notes & migration
 
 This fork has been customized to help migrating to a new Mac while keeping sensitive credentials out of git. Recommended workflow:
 
-- Run the staged secrets helper script included in `scripts/stage_secrets.sh` on your source machine. That script copies sensitive files into `./.secrets_staging/` (which is gitignored) and sets strict permissions. Do NOT commit `.secrets_staging/`.
+- Run the secrets helper script included in `scripts/secrets.sh` on your source machine. That script copies sensitive files into `./.secrets_staging/` (which is gitignored) and sets strict permissions. Do NOT commit `.secrets_staging/`.
 - Use this repo's `bootstrap.sh` after reviewing and cleaning the files you want to install. The bootstrap script will rsync files into your home directory.
 - The `brew.sh` script in this repo can be regenerated from the source machine to produce an exact list of formulae & casks.
 
@@ -137,8 +210,4 @@ Suggestions/improvements
 
 ## Author
 
-Forked form the amazing https://github.com/mathiasbynens/dotfiles
-
-## TODO
-copy dev fonts
-review all improved cli tools we added, and checek if we can make them default, like ls, cat, git diff, etc.
+Forked from the amazing https://github.com/mathiasbynens/dotfiles
