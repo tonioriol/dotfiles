@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
-# Backup and restore secrets
-# Notes:
-# - Backups go to .secrets/ (gitignored)
+# Backup and restore sensitive credentials and configurations
+# Usage: ./secrets.sh <backup|restore>
+# Destination: .secrets/ directory (gitignored, chmod 700)
+# Platform: macOS only (uses macOS-specific paths)
 
 set -euo pipefail
 
 DEST="${PWD}/.secrets"
 FAILED_ITEMS=()
 
-# Define what to backup/restore (format: "source_path:destination_subdir")
+# Define what to backup/restore
+# Format: ["key"]="source_path:destination_subdir"
 declare -A BACKUP_ITEMS=(
   ["ssh"]="${HOME}/.ssh:ssh"
   ["aws"]="${HOME}/.aws:aws"
@@ -53,7 +55,7 @@ if [[ "$1" == "backup" ]]; then
     copy "$src" "$DEST/$dest"
   done
   
-  # GPG requires special handling (export instead of copy)
+  # GPG keys: export as ASCII-armored files (unencrypted)
   if command -v gpg >/dev/null 2>&1; then
     mkdir -p "$DEST/gpg"
     if gpg --export-secret-keys --armor > "$DEST/gpg/private.asc" 2>/dev/null && \
@@ -97,7 +99,7 @@ elif [[ "$1" == "restore" ]]; then
     IFS=':' read -r src dest <<< "${BACKUP_ITEMS[$key]}"
     backup_path="$DEST/$dest"
     
-    # Determine the actual backed up path (handle directory vs file)
+    # Handle both directory and file backups
     if [[ -d "$backup_path" ]]; then
       # For directories, the backup contains the directory itself
       actual_backup=$(find "$backup_path" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | head -1)
@@ -108,7 +110,7 @@ elif [[ "$1" == "restore" ]]; then
     fi
   done
   
-  # Apply special permissions for SSH and AWS
+  # Set secure permissions for SSH and AWS credentials
   if [[ -d "${HOME}/.ssh" ]]; then
     chmod 700 "${HOME}/.ssh" 2>/dev/null || true
     chmod 600 "${HOME}/.ssh"/id_* 2>/dev/null || true
@@ -118,7 +120,7 @@ elif [[ "$1" == "restore" ]]; then
     chmod 600 "${HOME}/.aws"/* 2>/dev/null || true
   fi
   
-  # GPG requires special handling (import instead of copy)
+  # GPG keys: import from ASCII-armored files
   if [[ -f "$DEST/gpg/private.asc" ]]; then
     if gpg --import "$DEST/gpg/private.asc" 2>/dev/null && \
        gpg --import "$DEST/gpg/public.asc" 2>/dev/null && \
