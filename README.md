@@ -138,3 +138,7 @@ Suggestions/improvements
 ## Author
 
 Forked form the amazing https://github.com/mathiasbynens/dotfiles
+
+## TODO
+copy dev fonts
+review all improved cli tools we added, and checek if we can make them default, like ls, cat, git diff, etc.
