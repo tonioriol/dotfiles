@@ -2,6 +2,11 @@
 # Comprehensive brew.sh — includes all formulae/casks from upstream dotfiles + your machine.
 # Each entry is documented with its purpose and source (upstream/your-machine).
 # Edit this file to remove packages you don't want before running.
+#
+# Note: --no-quarantine flag is deprecated in Homebrew 5.0.0+ (Nov 2025)
+# To bypass macOS Gatekeeper quarantine on installed apps, use:
+#   xattr -d com.apple.quarantine /Applications/AppName.app
+# Or for all apps: xattr -dr com.apple.quarantine /Applications/*.app
 set -euo pipefail
 
 echo "Updating Homebrew and upgrading existing packages..."
@@ -120,7 +125,6 @@ unzip              # Unzip: extract .zip files (yours)
 cabextract         # CAB files: extract Windows .cab files (yours)
 
 # === Networking and protocols ===
-wireshark          # Packet capture: analyze network traffic (yours)
 nmap               # Port scanner: scan networks/ports for security (upstream)
 speedtest-cli      # Speed test: test internet speed from CLI (yours)
 # deno managed by mise - see .mise.toml (uncomment if needed)
@@ -157,7 +161,6 @@ lens               # k8s IDE: visual Kubernetes management (yours)
 1password          # Passwords: secure password manager (upstream+yours)
 1password-cli      # 1Password CLI: access passwords from terminal (yours)
 raycast            # Launcher: Spotlight replacement with plugins (upstream+yours)
-# rectangle        # Window mgmt: snap windows with keyboard shortcuts (commented out by user)
 barrier            # Share input: share keyboard/mouse across computers (yours)
 maccy              # Clipboard manager: modern, lightweight clipboard history (replaces flycut)
 
