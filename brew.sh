@@ -95,8 +95,7 @@ delta              # Better git diff: syntax highlighting and side-by-side diffs
 zoxide             # Smarter cd: learns your habits, jump to frequent directories (recommended)
 pcregrep           # PCRE grep: Perl-compatible regex grep (implied)
 
-# === Multiplexers and terminal tools ===
-tmux               # Terminal multiplexer: multiple terminals in one window (yours)
+# === Terminal tools ===
 htop               # Process viewer: better than top, interactive (yours)
 mc                 # File manager: TUI file manager like Norton Commander (yours)
 mcfly              # Smart history: AI-powered shell history search (yours)
@@ -131,7 +130,6 @@ mas                # App Store CLI: install Mac App Store apps from terminal (yo
 rename             # Batch rename: Perl-based file renamer for bulk operations (upstream)
 watch              # Monitor: run command periodically, watch output changes (upstream)
 
-gdb                # Debugger: GNU debugger for C/C++ (implied)
 llvm               # Compiler: LLVM compiler infrastructure (yours)
 act                # GitHub Actions: test GitHub Actions locally (yours)
 geckodriver        # Firefox driver: WebDriver for Firefox automation (yours)
