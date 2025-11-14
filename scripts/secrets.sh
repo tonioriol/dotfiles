@@ -48,6 +48,10 @@ if [[ "$1" == "backup" ]]; then
   copy "${HOME}/.docker/config.json" "$DEST/configs/docker"
   copy "${HOME}/.kube/config" "$DEST/configs/kube"
   copy "${HOME}/.config/gh" "$DEST/configs/gh"
+  copy "${HOME}/.config/glab-cli" "$DEST/configs/glab-cli"
+  copy "${HOME}/.config/linear-cli" "$DEST/configs/linear-cli"
+  copy "${HOME}/.config/gh-copilot" "$DEST/configs/gh-copilot"
+  copy "${HOME}/.config/configstore/firebase-tools.json" "$DEST/configs/configstore"
   
   # Cloud provider configs
   copy "${HOME}/.config/gcloud" "$DEST/configs/gcloud"
@@ -110,6 +114,10 @@ elif [[ "$1" == "restore" ]]; then
   [[ -f "$DEST/configs/docker/config.json" ]] && restore "$DEST/configs/docker/config.json" "${HOME}/.docker/config.json"
   [[ -f "$DEST/configs/kube/config" ]] && restore "$DEST/configs/kube/config" "${HOME}/.kube/config"
   [[ -d "$DEST/configs/gh" ]] && restore "$DEST/configs/gh" "${HOME}/.config/gh"
+  [[ -d "$DEST/configs/glab-cli" ]] && restore "$DEST/configs/glab-cli" "${HOME}/.config/glab-cli"
+  [[ -d "$DEST/configs/linear-cli" ]] && restore "$DEST/configs/linear-cli" "${HOME}/.config/linear-cli"
+  [[ -d "$DEST/configs/gh-copilot" ]] && restore "$DEST/configs/gh-copilot" "${HOME}/.config/gh-copilot"
+  [[ -f "$DEST/configs/configstore/firebase-tools.json" ]] && restore "$DEST/configs/configstore/firebase-tools.json" "${HOME}/.config/configstore/firebase-tools.json"
   
   # Cloud provider configs
   [[ -d "$DEST/configs/gcloud" ]] && restore "$DEST/configs/gcloud" "${HOME}/.config/gcloud"
