@@ -1,7 +1,12 @@
 #!/usr/bin/env sh
 
-# Make sublime the default editor.
-export EDITOR='subl -w'
+# Load personal configuration from .extra
+if [ -f ~/.extra ]; then
+    source ~/.extra
+fi
+
+# Make sublime the default editor (can be overridden in .extra)
+export EDITOR="${EDITOR:-subl -w}"
 
 # Enable persistent REPL history for `node`.
 export NODE_REPL_HISTORY=~/.node_history;

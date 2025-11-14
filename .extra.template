@@ -1,21 +1,23 @@
 #!/usr/bin/env sh
-# .extra - Personal configuration (gitignored)
-# This file contains your personal settings and is not tracked by git
+# .extra.template - Template for personal configuration
+# Copy this file to .extra and customize with your personal information
+# .extra is gitignored to keep your personal data private
 
 # =============================================================================
 # GIT CONFIGURATION
 # =============================================================================
 # Git credentials
-GIT_AUTHOR_NAME="Toni Oriol"
+GIT_AUTHOR_NAME="Your Name"
 GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
 git config --global user.name "$GIT_AUTHOR_NAME"
 
-GIT_AUTHOR_EMAIL="tonioriol@gmail.com"
+GIT_AUTHOR_EMAIL="your.email@example.com"
 GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
 git config --global user.email "$GIT_AUTHOR_EMAIL"
 
-# GPG signing key (optional - uncomment if you use GPG signing)
+# GPG signing key (optional - uncomment and set if you use GPG signing)
 # Get your key ID with: gpg --list-secret-keys --keyid-format=long
+# Note: GPG keys are backed up/restored by scripts/secrets.sh
 # After restoring secrets, uncomment the lines below and set your key ID:
 # GIT_GPG_KEY="YOUR_GPG_KEY_ID"
 # git config --global user.signingkey "$GIT_GPG_KEY"
@@ -24,20 +26,25 @@ git config --global user.email "$GIT_AUTHOR_EMAIL"
 # MACOS SYSTEM CONFIGURATION
 # =============================================================================
 # These variables are used by .macos script (sourced, not exported)
-# Computer/hostname
-COMPUTER_NAME="Lunik"
+# Computer/hostname - will be set as ComputerName, HostName, LocalHostName, and NetBIOSName
+COMPUTER_NAME="MacBook"
 
+# =============================================================================
+# LOCALE AND REGIONAL SETTINGS
+# =============================================================================
 # Language preferences (space-separated list, in order of preference)
-MACOS_LANGUAGES=("ca" "en" "es")
+# Examples: "en" "es" "ca", "en" "de" "fr", "en" "ja"
+MACOS_LANGUAGES=("en" "es")
 
 # Locale setting - determines number/date formats and currency
 # Common options:
 #   en_US@currency=USD  - US English, US Dollar
 #   en_GB@currency=GBP  - British English, British Pound
 #   en_ES@currency=EUR  - English (Spain), Euro
-#   ca_ES@currency=EUR  - Catalan (Spain), Euro (well-supported on macOS)
+#   ca_ES@currency=EUR  - Catalan (Spain), Euro
 #   es_ES@currency=EUR  - Spanish (Spain), Euro
-MACOS_LOCALE="ca_ES@currency=EUR"
+# Note: ca_ES is well-supported on macOS but may have limited support in some apps
+MACOS_LOCALE="en_ES@currency=EUR"
 
 # Measurement units: "Centimeters" or "Inches"
 MACOS_MEASUREMENT_UNITS="Centimeters"
@@ -46,6 +53,7 @@ MACOS_MEASUREMENT_UNITS="Centimeters"
 MACOS_METRIC_UNITS=true
 
 # Timezone - see available zones with: sudo systemsetup -listtimezones
+# Examples: "Europe/Madrid", "America/New_York", "Asia/Tokyo"
 MACOS_TIMEZONE="Europe/Madrid"
 
 # =============================================================================

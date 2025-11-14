@@ -13,15 +13,28 @@ sudo -v
 # Keep-alive: update existing `sudo` time stamp until `.macos` has finished
 while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
+# Load personal configuration from .extra
+if [ -f ~/.extra ]; then
+    source ~/.extra
+fi
+
+# Set defaults if not defined in .extra
+COMPUTER_NAME="${COMPUTER_NAME:-MacBook}"
+MACOS_LANGUAGES="${MACOS_LANGUAGES[@]:-en es}"
+MACOS_LOCALE="${MACOS_LOCALE:-en_ES@currency=EUR}"
+MACOS_MEASUREMENT_UNITS="${MACOS_MEASUREMENT_UNITS:-Centimeters}"
+MACOS_METRIC_UNITS="${MACOS_METRIC_UNITS:-true}"
+MACOS_TIMEZONE="${MACOS_TIMEZONE:-Europe/Madrid}"
+
 ###############################################################################
 # General UI/UX                                                               #
 ###############################################################################
 
-# Set computer name (as done via System Preferences → Sharing) - "0x4C756E696B" is "Lunik" encoded to hex
-sudo scutil --set ComputerName "Lunik"
-sudo scutil --set HostName "Lunik"
-sudo scutil --set LocalHostName "Lunik"
-sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "Lunik"
+# Set computer name (as done via System Preferences → Sharing)
+sudo scutil --set ComputerName "$COMPUTER_NAME"
+sudo scutil --set HostName "$COMPUTER_NAME"
+sudo scutil --set LocalHostName "$COMPUTER_NAME"
+sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "$COMPUTER_NAME"
 
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "
@@ -156,18 +169,17 @@ defaults write NSGlobalDomain KeyRepeat -int 1
 defaults write NSGlobalDomain InitialKeyRepeat -int 10
 
 # Set language and text formats
-# Note: if you’re in the US, replace `EUR` with `USD`, `Centimeters` with
-# `Inches`, `en_GB` with `en_US`, and `true` with `false`.
-defaults write NSGlobalDomain AppleLanguages -array "en" "es" "ca"
-defaults write NSGlobalDomain AppleLocale -string "en_ES@currency=EUR"
-defaults write NSGlobalDomain AppleMeasurementUnits -string "Centimeters"
-defaults write NSGlobalDomain AppleMetricUnits -bool true
+# Configured via .extra file (MACOS_LANGUAGES, MACOS_LOCALE, etc.)
+defaults write NSGlobalDomain AppleLanguages -array ${MACOS_LANGUAGES[@]}
+defaults write NSGlobalDomain AppleLocale -string "$MACOS_LOCALE"
+defaults write NSGlobalDomain AppleMeasurementUnits -string "$MACOS_MEASUREMENT_UNITS"
+defaults write NSGlobalDomain AppleMetricUnits -bool $MACOS_METRIC_UNITS
 
 # Show language menu in the top right corner of the boot screen
 sudo defaults write /Library/Preferences/com.apple.loginwindow showInputMenu -bool true
 
 # Set the timezone; see `sudo systemsetup -listtimezones` for other values
-sudo systemsetup -settimezone "Europe/Madrid" > /dev/null
+sudo systemsetup -settimezone "$MACOS_TIMEZONE" > /dev/null
 
 # Stop Music/iTunes from responding to the keyboard media keys
 # Note: This path doesn't exist on macOS Catalina+ (Music.app replaced iTunes)

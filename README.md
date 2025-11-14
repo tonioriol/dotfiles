@@ -46,71 +46,24 @@ Here’s an example `~/.path` file that adds `/usr/local/bin` to the `$PATH`:
 export PATH="/usr/local/bin:$PATH"
 ```
 
-### Add custom commands without creating a new fork
+### Personalization with `.extra`
 
-If `~/.extra` exists, it will be sourced along with the other files. You can use this to add a few custom commands without the need to fork this entire repository, or to add commands you don’t want to commit to a public repository.
-
-My `~/.extra` looks something like this:
+The `.extra` file (gitignored) contains your personal configuration:
 
 ```shell
-# Git credentials
-# Not in the repository, to prevent people from accidentally committing under my name
-GIT_AUTHOR_NAME="Mathias Bynens"
-GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
-git config --global user.name "$GIT_AUTHOR_NAME"
-GIT_AUTHOR_EMAIL="mathias@mailinator.com"
-GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
-git config --global user.email "$GIT_AUTHOR_EMAIL"
+cp .extra.template ~/.extra
+vim ~/.extra  # Edit with your personal information
 ```
 
-You could also use `~/.extra` to override settings, functions and aliases from my dotfiles repository. It’s probably better to fork this repo instead, though.
+See `.extra.template` for full documentation on all available options (git credentials, macOS settings, editor preferences, etc.).
 
-### Sensible macOS defaults
+### Additional Setup
 
-When setting up a new Mac, you may want to set some sensible macOS defaults:
+**macOS defaults:** `./.macos` - Configure sensible macOS system settings
 
-```shell
-./.macos
-```
+**Homebrew packages:** `./brew.sh` - Install packages including mise, which manages Node.js and Python versions (see `.mise.toml`)
 
-### Install Homebrew formulae
-
-When setting up a new Mac, you may want to install some common [Homebrew](https://brew.sh/) formulae (after installing Homebrew, of course):
-
-```shell
-./brew.sh
-```
-
-This will install all packages and automatically set up:
-- **mise** - Modern version manager (replaces asdf)
-- **Node.js LTS** - Installed via mise (configured in `.mise.toml`)
-- **Python 3.12** - Installed via mise (configured in `.mise.toml`)
-
-After installation, reload your shell:
-```shell
-exec $SHELL -l
-```
-
-### Customizing mise tools
-
-Edit `.mise.toml` to add or remove development tools. Uncomment any tools you need:
-
-```shell
-# Edit the configuration
-vim .mise.toml
-
-# Install tools from .mise.toml
-mise install
-
-# Or install individual tools
-mise use --global ruby@latest
-mise use --global terraform@latest
-mise use --global kubectl@latest
-```
-
-Available tools include: Node.js, Python, Ruby, Go, Rust, Java, Terraform, kubectl, Helm, AWS CLI, Maven, Deno, and many more. See [mise registry](https://mise.jdx.dev/registry.html) for the full list.
-
-Some of the functionality of these dotfiles depends on formulae installed by `brew.sh`. If you don't plan to run `brew.sh`, you should look carefully through the script and manually install any particularly important ones.
+**Customize tools:** Edit `.mise.toml` to add/remove development tools. See [mise registry](https://mise.jdx.dev/registry.html) for available tools.
 
 ## Apple Silicon Notes
 
@@ -124,84 +77,68 @@ These dotfiles are optimized for Apple Silicon (M1/M2/M3/M4) Macs:
 
 ## Modern CLI Tools
 
-This dotfiles configuration uses modern CLI tools as defaults for better performance and user experience. All tools are automatically installed via `brew.sh`.
+Modern replacements for Unix commands (installed via `brew.sh`):
+- **eza** → `ls`, **bat** → `cat`, **delta** → `git diff`, **fd** → `find`, **ripgrep** → `grep`
+- **duf** → `df`, **dust** → `du`, **procs** → `ps`, **bottom** → `top`
 
-### Replacements
-
-The following modern tools replace traditional Unix commands:
-
-- **[eza](https://github.com/eza-community/eza)** → `ls` - Modern ls replacement with icons, colors, and git integration
-- **[bat](https://github.com/sharkdp/bat)** → `cat` - Cat clone with syntax highlighting and git integration
-- **[delta](https://github.com/dandavison/delta)** → `git diff` - Better git diffs with syntax highlighting and side-by-side view
-- **[fd](https://github.com/sharkdp/fd)** → `find` - Faster, simpler, and more user-friendly find alternative
-- **[ripgrep](https://github.com/BurntSushi/ripgrep)** → `grep` - Extremely fast grep alternative that respects .gitignore
-- **[duf](https://github.com/muesli/duf)** → `df` - Better disk usage display with colors and graphs
-- **[dust](https://github.com/bootandy/dust)** → `du` - More intuitive directory size display
-- **[procs](https://github.com/dalance/procs)** → `ps` - Modern process viewer with colors and tree view
-- **[bottom](https://github.com/ClementTsang/bottom)** → `top` - Modern system monitor with graphs and customizable interface
-
-### Usage Examples
-
-```shell
-# Modern ls with icons and git status
-ls -la
-
-# Syntax-highlighted file viewing
-cat script.js
-
-# Beautiful git diffs
-git diff
-
-# Fast file search
-find . -name "*.js"
-
-# Fast content search
-grep "TODO" -r .
-
-# Better disk usage
-df -h
-
-# Directory size analysis
-du -h
-
-# Process monitoring
-ps aux
-top
-```
-
-### Backward Compatibility
-
-Original commands remain accessible if needed:
-
-```shell
-# Use backslash to bypass alias
-\ls -la
-\cat file.txt
-\grep pattern file
-
-# Use command builtin
-command ls
-command cat
-
-# Use full paths
-/bin/ls
-/bin/cat
-```
-
-### Configuration
-
-- **eza**: Configured in `.aliases` with sensible defaults (icons, git, colors)
-- **bat**: Theme and style configured via environment variables in `.exports`
-- **delta**: Git integration configured in `.gitconfig` with side-by-side diffs
-- **ripgrep**: Respects `.gitignore` by default, configured via `.ripgreprc` if present
+Use `\command` or `command command` to access originals if needed.
 
 ## Notes & migration
 
 This fork has been customized to help migrating to a new Mac while keeping sensitive credentials out of git. Recommended workflow:
 
-- Run the secrets helper script included in `scripts/secrets.sh` on your source machine. That script copies sensitive files into `./.secrets_staging/` (which is gitignored) and sets strict permissions. Do NOT commit `.secrets_staging/`.
-- Use this repo's `bootstrap.sh` after reviewing and cleaning the files you want to install. The bootstrap script will rsync files into your home directory.
-- The `brew.sh` script in this repo can be regenerated from the source machine to produce an exact list of formulae & casks.
+### On your source machine:
+1. Run the secrets backup script to save sensitive files:
+   ```shell
+   ./scripts/secrets.sh backup
+   ```
+   This copies sensitive files (SSH keys, AWS credentials, GPG keys, etc.) into `./.secrets/` (which is gitignored) and sets strict permissions. Do NOT commit `.secrets/`.
+
+### On your new machine:
+1. Clone this repository (git is pre-installed on macOS):
+   ```shell
+   git clone https://github.com/tonioriol/dotfiles.git && cd dotfiles
+   ```
+
+2. Copy your `.secrets/` directory from backup to the dotfiles directory
+
+3. Create your `.extra` file from the template:
+   ```shell
+   cp .extra.template ~/.extra
+   vim ~/.extra  # Edit with your personal information
+   ```
+
+4. Run the bootstrap script:
+   ```shell
+   ./bootstrap.sh
+   ```
+   This will sync dotfiles, install packages, and configure macOS settings.
+
+5. Restore your secrets:
+   ```shell
+   ./scripts/secrets.sh restore
+   ```
+
+6. If you use GPG signing, add your key ID to `~/.extra`:
+   ```shell
+   # Get your GPG key ID
+   gpg --list-secret-keys --keyid-format=long
+   
+   # Edit ~/.extra and uncomment the GPG lines with your key ID
+   vim ~/.extra
+   
+   # Reload configuration
+   source ~/.extra
+   ```
+
+7. Restart your computer for all macOS settings to take effect
+
+### Regenerating brew.sh
+The `brew.sh` script can be regenerated from your source machine to produce an exact list of formulae & casks:
+```shell
+# On source machine, generate list of installed packages
+brew bundle dump --describe --force
+```
 
 ## Feedback
 
