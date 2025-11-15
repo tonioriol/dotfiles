@@ -28,6 +28,14 @@ function doIt() {
 		-avh --no-perms . ~;
 	source ~/.zshrc;
 	
+	# Allow direnv for the dotfiles directory if direnv is available
+	if command -v direnv &> /dev/null; then
+		echo ""
+		echo "Approving direnv configuration..."
+		direnv allow .
+		echo "✓ direnv configuration approved"
+	fi
+	
 	# Copy devbox global configuration to proper location
 	if [ -f devbox.json ]; then
 		echo ""

@@ -32,6 +32,15 @@ else
     echo "✓ Homebrew is already installed"
 fi
 
+# Check Homebrew permissions and fix if needed
+BREW_PREFIX="$(brew --prefix)"
+if [ ! -w "$BREW_PREFIX" ]; then
+    echo "⚠ Homebrew directory is not writable. Fixing permissions..."
+    echo "This requires sudo access."
+    sudo chown -R "$(whoami)" "$BREW_PREFIX"
+    echo "✓ Permissions fixed"
+fi
+
 echo "Updating Homebrew and upgrading existing packages..."
 brew update
 brew upgrade
