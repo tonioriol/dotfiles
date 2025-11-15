@@ -47,14 +47,15 @@ brew upgrade
 
 BREW_PREFIX="$(brew --prefix)"
 
-# All packages (formulae and casks merged - Homebrew 4.0+ handles both)
-PACKAGES=(
-# === macOS-specific CLI tools ===
+# CLI tools (formulae)
+FORMULAE=(
 mas                # App Store CLI: install Mac App Store apps from terminal (yours)
                    # Note: mas is macOS-specific and requires deep system integration with the Mac App Store
                    # All other CLI tools are now managed by devbox (see .devbox-global.json)
+)
 
-# === GUI Applications ===
+# GUI Applications (casks)
+CASKS=(
 
 # === Browsers ===
 google-chrome      # Chrome: fast browser, good dev tools (upstream+yours)
@@ -117,24 +118,40 @@ transmission       # Torrent: lightweight BitTorrent client (upstream)
 
 echo "Installing packages..."
 
-# Build list of package names (filter out comments and empty lines)
-TO_INSTALL=()
-for pkg in "${PACKAGES[@]}"; do
+# Build list of formulae (filter out comments and empty lines)
+FORMULAE_TO_INSTALL=()
+for pkg in "${FORMULAE[@]}"; do
   # Skip comments and empty lines
   [[ "$pkg" =~ ^#.*$ ]] && continue
   [[ -z "$pkg" ]] && continue
   
   # Extract package name (everything before first space/comment)
   pkg_name=$(echo "$pkg" | awk '{print $1}')
-  TO_INSTALL+=("$pkg_name")
+  FORMULAE_TO_INSTALL+=("$pkg_name")
 done
 
-# Install all packages with --cask flag - brew handles parallelization and skips already installed
-if [ ${#TO_INSTALL[@]} -gt 0 ]; then
-  echo "Installing ${#TO_INSTALL[@]} packages (brew will parallelize and skip already installed)..."
-  brew install --cask "${TO_INSTALL[@]}" || echo "Some packages failed to install"
-else
-  echo "No packages to install!"
+# Build list of casks (filter out comments and empty lines)
+CASKS_TO_INSTALL=()
+for pkg in "${CASKS[@]}"; do
+  # Skip comments and empty lines
+  [[ "$pkg" =~ ^#.*$ ]] && continue
+  [[ -z "$pkg" ]] && continue
+  
+  # Extract package name (everything before first space/comment)
+  pkg_name=$(echo "$pkg" | awk '{print $1}')
+  CASKS_TO_INSTALL+=("$pkg_name")
+done
+
+# Install formulae
+if [ ${#FORMULAE_TO_INSTALL[@]} -gt 0 ]; then
+  echo "Installing ${#FORMULAE_TO_INSTALL[@]} formulae (CLI tools)..."
+  brew install "${FORMULAE_TO_INSTALL[@]}" 2>&1 || echo "⚠ Some formulae failed to install"
+fi
+
+# Install casks (brew will skip already installed ones)
+if [ ${#CASKS_TO_INSTALL[@]} -gt 0 ]; then
+  echo "Installing ${#CASKS_TO_INSTALL[@]} casks (GUI applications)..."
+  brew install --cask "${CASKS_TO_INSTALL[@]}" 2>&1 || echo "⚠ Some casks failed to install (this is normal if apps are already installed)"
 fi
 
 # Add brew-installed bash to /etc/shells if present (do not change user shell automatically)
@@ -227,7 +244,7 @@ fi
 
 echo ""
 echo "=============================================================================="
-echo "Done! Review and edit PACKAGES array in ${BASH_SOURCE[0]} to customize."
+echo "Done! Review and edit FORMULAE and CASKS arrays in ${BASH_SOURCE[0]} to customize."
 echo "Remove any packages you don't need before running this script on a new machine."
 echo ""
 echo "Next steps:"
