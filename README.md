@@ -154,3 +154,6 @@ Suggestions/improvements
 ## Author
 
 Forked from the amazing https://github.com/mathiasbynens/dotfiles
+
+## TODO
+* remove canva and openemu
