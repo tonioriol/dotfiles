@@ -121,12 +121,6 @@ Use `\command` to access originals if needed.
 - `.zshrc` - Zsh configuration
 - `.extra.template` - Template for personal settings
 
-## Apple Silicon Optimized
-
-- Uses `$(brew --prefix)` for cross-architecture compatibility
-- Includes OrbStack (lightweight Docker alternative)
-- Modern tooling throughout
-
 ## Feedback
 
 Suggestions/improvements [welcome](https://github.com/tonioriol/dotfiles/issues)!
@@ -140,3 +134,5 @@ Forked from [mathiasbynens/dotfiles](https://github.com/mathiasbynens/dotfiles)
 * move remaining to brewfile
 * rm .extra
 * add jitouch install
+* fix gpg copy and reference it properly in .extra
+* cleanup all crappy md files

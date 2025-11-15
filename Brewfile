@@ -72,6 +72,8 @@ cask "onyx"
 cask "appcleaner"
 # Archives: extract AND create archives with GUI, handles formats macOS can't (RAR, 7z, etc.)
 cask "keka"
+# Gestures: advanced trackpad/mouse gesture control
+cask "jitouch"
 
 # === Remote access ===
 # Remote desktop: remote computer access
