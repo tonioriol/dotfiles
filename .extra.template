@@ -17,7 +17,8 @@ git config --global user.email "$GIT_AUTHOR_EMAIL"
 
 # GPG signing key (optional - uncomment and set if you use GPG signing)
 # Get your key ID with: gpg --list-secret-keys --keyid-format=long
-# Note: GPG keys are backed up/restored by scripts/secrets.sh
+# Note: GPG keys and configuration are backed up/restored by scripts/secrets.sh
+# This includes ~/.gnupg/gpg-agent.conf with pinentry-mac configuration
 # After restoring secrets, uncomment the lines below and set your key ID:
 # GIT_GPG_KEY="YOUR_GPG_KEY_ID"
 # git config --global user.signingkey "$GIT_GPG_KEY"

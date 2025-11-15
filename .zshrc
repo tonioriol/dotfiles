@@ -90,6 +90,3 @@ if type brew &>/dev/null; then
 		source "$(brew --prefix)/opt/fzf/shell/key-bindings.zsh"
 	fi
 fi
-
-# GPG TTY (for commit signing)
-export GPG_TTY=$(tty)

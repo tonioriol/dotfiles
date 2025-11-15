@@ -130,9 +130,4 @@ Suggestions/improvements [welcome](https://github.com/tonioriol/dotfiles/issues)
 Forked from [mathiasbynens/dotfiles](https://github.com/mathiasbynens/dotfiles)
 
 ## TODO
-* remove canva and openemu
-* move remaining to brewfile
-* rm .extra
-* add jitouch install
-* fix gpg copy and reference it properly in .extra
-* cleanup all crappy md files
+* how do we add the gpg key to .extra?
