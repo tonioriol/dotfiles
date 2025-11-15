@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+ #!/usr/bin/env bash
 
 cd "$(dirname "${BASH_SOURCE[0]:-$0}")";
 
@@ -20,7 +20,7 @@ function doIt() {
 		--exclude ".DS_Store" \
 		--exclude ".osx" \
 		--exclude "bootstrap.sh" \
-		--exclude "brew.sh" \
+		--exclude "tools.sh" \
 		--exclude "README.md" \
 		--exclude "LICENSE-MIT.txt" \
 		--exclude "AGENTS.md" \
@@ -45,12 +45,12 @@ function doIt() {
 		echo "✓ Devbox configuration copied to ~/.local/share/devbox/global/default/devbox.json"
 	fi
 	
-	# Run brew.sh to install packages
+	# Install development tools
 	echo ""
 	echo "=============================================================================="
-	echo "Running brew.sh to install packages..."
+	echo "Installing development tools..."
 	echo "=============================================================================="
-	./brew.sh
+	./tools.sh
 	
 	# Run .macos to configure macOS settings
 	# echo ""
