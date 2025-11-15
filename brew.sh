@@ -129,10 +129,10 @@ for pkg in "${PACKAGES[@]}"; do
   TO_INSTALL+=("$pkg_name")
 done
 
-# Install all packages in one command - brew handles parallelization and skips already installed
+# Install all packages with --cask flag - brew handles parallelization and skips already installed
 if [ ${#TO_INSTALL[@]} -gt 0 ]; then
   echo "Installing ${#TO_INSTALL[@]} packages (brew will parallelize and skip already installed)..."
-  brew install "${TO_INSTALL[@]}" || echo "Some packages failed to install"
+  brew install --cask "${TO_INSTALL[@]}" || echo "Some packages failed to install"
 else
   echo "No packages to install!"
 fi
