@@ -20,12 +20,10 @@ brew "mas"
 # ============================================================================
 
 # === Browsers ===
-# Chrome: fast browser, good dev tools
+# Chrome: good for testing
 cask "google-chrome"
 # Firefox: privacy-focused browser, great dev tools
 cask "firefox"
-# Edge: Chromium-based, good for testing
-cask "microsoft-edge"
 # Zen: minimalist browser
 cask "zen@twilight"
 
@@ -48,18 +46,14 @@ cask "1password"
 cask "raycast"
 # Share input: share keyboard/mouse across computers
 cask "barrier"
-# Clipboard manager: modern, lightweight clipboard history (replaces flycut)
+# Clipboard manager: modern, lightweight clipboard history
 cask "maccy"
 
 # === Media and entertainment ===
-# Music: stream music
-cask "spotify"
 # Audio player: advanced audio player
 cask "foobar2000"
 # Gaming: PC game platform
 cask "steam"
-# Emulator: play retro console games
-cask "openemu"
 # Audio edit: record/edit audio
 cask "audacity"
 # Music tag: auto-tag music files
@@ -79,27 +73,9 @@ cask "appcleaner"
 # Archives: extract AND create archives with GUI, handles formats macOS can't (RAR, 7z, etc.)
 cask "keka"
 
-# === Networking and analysis ===
-# Wireshark GUI: visual packet analysis
-cask "wireshark"
-# Network scan: discover devices on network
-cask "fing"
-# IP scanner: fast network scanner
-cask "angry-ip-scanner"
-# WiFi analyze: WiFi site survey and analysis
-cask "netspot"
-
-# === Fonts ===
-# Monaspace: modern monospace font family for coding
-cask "font-monaspace"
-
 # === Remote access ===
 # Remote desktop: remote computer access
 cask "teamviewer"
-
-# === Design and content ===
-# Design: graphic design tool
-cask "canva"
 
 # === Backup and sync ===
 # rsync GUI: visual rsync file sync
