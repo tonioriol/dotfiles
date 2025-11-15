@@ -67,9 +67,6 @@ zen@twilight        # Zen: minimalist browser (yours)
 visual-studio-code # VS Code: powerful code editor with extensions (upstream+yours)
 warp               # Modern terminal: AI-powered terminal with modern UI (yours)
 orbstack           # Fast Docker: faster Docker alternative for Mac, replaces Docker Desktop (yours)
-colima             # Lightweight Docker alternative for macOS (Apple Silicon optimized, replaces Docker Desktop)
-                   # Container runtime with minimal resource usage, compatible with Docker CLI
-                   # See: https://github.com/abiosoft/colima
 postman            # API test: test REST APIs with GUI (upstream+yours)
 lens               # k8s IDE: visual Kubernetes management (yours)
 

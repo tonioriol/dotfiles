@@ -54,6 +54,7 @@
     "mcfly@latest",
     "lazygit@latest",
     "lazydocker@latest",
+    "colima@latest",
     "ffmpeg@latest",
     "imagemagick@latest",
     "ghostscript@latest",
