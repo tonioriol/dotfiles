@@ -9,6 +9,29 @@
 # Or for all apps: xattr -dr com.apple.quarantine /Applications/*.app
 set -euo pipefail
 
+# Check if Homebrew is installed, install if not
+if ! command -v brew &> /dev/null; then
+    echo "Homebrew not found. Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    
+    # Add Homebrew to PATH for current session (Apple Silicon)
+    if [[ $(uname -m) == 'arm64' ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    else
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+    
+    if command -v brew &> /dev/null; then
+        echo "✓ Homebrew installed successfully"
+    else
+        echo "❌ Homebrew installation failed. Please install manually:"
+        echo "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+        exit 1
+    fi
+else
+    echo "✓ Homebrew is already installed"
+fi
+
 echo "Updating Homebrew and upgrading existing packages..."
 brew update
 brew upgrade
