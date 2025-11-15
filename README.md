@@ -61,9 +61,13 @@ See `.extra.template` for full documentation on all available options (git crede
 
 **macOS defaults:** `./.macos` - Configure sensible macOS system settings
 
-**Homebrew packages:** `./brew.sh` - Install packages including mise, which manages Node.js and Python versions (see `.mise.toml`)
-  - The bootstrap script automatically trusts the `.mise.toml` configuration file
-  - Tools defined in `.mise.toml` are installed automatically during setup
+**Homebrew packages:** `./brew.sh` - Install packages including mise and direnv
+  - **mise**: Version manager for Node.js, Python, etc. (see `.mise.toml`)
+    - The bootstrap script automatically trusts the `.mise.toml` configuration file
+    - Tools defined in `.mise.toml` are installed automatically during setup
+  - **direnv**: Environment switcher that loads `.envrc` files per directory
+    - The bootstrap script automatically approves the `~/.envrc` configuration file
+    - Edit `.envrc` to set environment variables that load automatically when you cd into directories
 
 **Customize tools:** Edit `.mise.toml` to add/remove development tools. See [mise registry](https://mise.jdx.dev/registry.html) for available tools.
 

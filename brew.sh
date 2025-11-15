@@ -275,6 +275,34 @@ fi
 
 echo ""
 echo "=============================================================================="
+echo "Setting up direnv (environment switcher)..."
+echo "=============================================================================="
+
+# Check if direnv was installed
+if command -v direnv &> /dev/null; then
+    echo "✓ direnv is installed"
+    
+    # Allow the .envrc file
+    echo ""
+    echo "Allowing ~/.envrc configuration..."
+    direnv allow ~/.envrc
+    echo "✓ ~/.envrc has been approved"
+    
+    echo ""
+    echo "Configuration file: .envrc"
+    echo "  - Edit ~/.envrc to set environment variables per directory"
+    echo "  - Run 'direnv allow' after editing .envrc files"
+    echo ""
+    echo "Useful commands:"
+    echo "  direnv allow           # Approve current directory's .envrc"
+    echo "  direnv deny            # Block current directory's .envrc"
+    echo "  direnv reload          # Reload current directory's .envrc"
+else
+    echo "⚠ direnv not found. Install it with: brew install direnv"
+fi
+
+echo ""
+echo "=============================================================================="
 echo "Done! Review and edit PACKAGES array in ${BASH_SOURCE[0]} to customize."
 echo "Remove any packages you don't need before running this script on a new machine."
 echo ""
