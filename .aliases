@@ -38,13 +38,13 @@ alias g="git"
 # https://github.com/eza-community/eza
 # Features: colors, icons, git integration, tree view
 if command -v eza &> /dev/null; then
-    alias ls='eza --icons --group-directories-first'
-    alias ll='eza --icons --group-directories-first -l'
-    alias la='eza --icons --group-directories-first -la'
-    alias l='eza --icons --group-directories-first -lah --git'
-    alias lt='eza --icons --group-directories-first --tree --level=2'
-    alias lta='eza --icons --group-directories-first --tree --level=2 -a'
-    alias lsd='eza --icons -D'
+    alias ls='eza --group-directories-first'
+    alias ll='eza --group-directories-first -l'
+    alias la='eza --group-directories-first -la'
+    alias l='eza --group-directories-first -lah --git'
+    alias lt='eza --group-directories-first --tree --level=2'
+    alias lta='eza --group-directories-first --tree --level=2 -a'
+    alias lsd='eza -D'
 else
     # Fallback to traditional ls with colors
     if ls --color > /dev/null 2>&1; then # GNU `ls`

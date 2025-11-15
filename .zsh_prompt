@@ -118,6 +118,7 @@ setopt PROMPT_SUBST
 
 # Set the terminal title and prompt.
 # %n = username, %m = hostname, %~ = current directory with ~
+# Note: Using single quotes with PROMPT_SUBST allows both variable expansion and command substitution
 PROMPT='${bold}${userStyle}%n${white} at ${hostStyle}%m${white} in ${green}%~$(prompt_git "${white} on ${violet}" "${blue}")
 ${white}$ ${reset}'
 
