@@ -33,8 +33,11 @@ if type brew &>/dev/null; then
 	FPATH="$(brew --prefix)/share/zsh-completions:$FPATH"
 	FPATH="$(brew --prefix)/share/zsh/site-functions:$FPATH"
 	
+	# Initialize completion system
+	# Use -u flag to skip insecure directory checks (Homebrew directories are safe)
+	# This prevents the "insecure directories" warning on fresh installations
 	autoload -Uz compinit
-	compinit
+	compinit -u
 	
 	# Load zsh-autosuggestions (Fish-like suggestions)
 	if [ -f "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
