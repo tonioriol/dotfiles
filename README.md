@@ -62,6 +62,8 @@ See `.extra.template` for full documentation on all available options (git crede
 **macOS defaults:** `./.macos` - Configure sensible macOS system settings
 
 **Homebrew packages:** `./brew.sh` - Install packages including mise, which manages Node.js and Python versions (see `.mise.toml`)
+  - The bootstrap script automatically trusts the `.mise.toml` configuration file
+  - Tools defined in `.mise.toml` are installed automatically during setup
 
 **Customize tools:** Edit `.mise.toml` to add/remove development tools. See [mise registry](https://mise.jdx.dev/registry.html) for available tools.
 

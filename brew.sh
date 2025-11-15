@@ -144,7 +144,7 @@ geckodriver        # Firefox driver: WebDriver for Firefox automation (yours)
 google-chrome      # Chrome: fast browser, good dev tools (upstream+yours)
 firefox            # Firefox: privacy-focused browser, great dev tools (upstream+yours)
 microsoft-edge     # Edge: Chromium-based, good for testing (yours)
-zen-browser        # Zen: minimalist browser (yours)
+zen@twilight        # Zen: minimalist browser (yours)
 
 # === Development tools ===
 visual-studio-code # VS Code: powerful code editor with extensions (upstream+yours)
@@ -206,6 +206,9 @@ powershell         # PowerShell: Microsoft's cross-platform shell (yours)
 )
 
 echo "Installing packages..."
+
+# Build list of package names (filter out comments and empty lines)
+TO_INSTALL=()
 for pkg in "${PACKAGES[@]}"; do
   # Skip comments and empty lines
   [[ "$pkg" =~ ^#.*$ ]] && continue
@@ -213,15 +216,16 @@ for pkg in "${PACKAGES[@]}"; do
   
   # Extract package name (everything before first space/comment)
   pkg_name=$(echo "$pkg" | awk '{print $1}')
-  
-  # Check if already installed (works for both formulae and casks)
-  if brew list "$pkg_name" &>/dev/null; then
-    echo " - ${pkg_name} already installed"
-  else
-    echo " - installing ${pkg_name}"
-    brew install "${pkg_name}" || echo "Failed to install ${pkg_name}"
-  fi
+  TO_INSTALL+=("$pkg_name")
 done
+
+# Install all packages in one command - brew handles parallelization and skips already installed
+if [ ${#TO_INSTALL[@]} -gt 0 ]; then
+  echo "Installing ${#TO_INSTALL[@]} packages (brew will parallelize and skip already installed)..."
+  brew install "${TO_INSTALL[@]}" || echo "Some packages failed to install"
+else
+  echo "No packages to install!"
+fi
 
 # Add brew-installed bash to /etc/shells if present (do not change user shell automatically)
 if [ -x "${BREW_PREFIX}/bin/bash" ] && ! grep -q "${BREW_PREFIX}/bin/bash" /etc/shells; then
@@ -240,6 +244,11 @@ echo "==========================================================================
 # Check if mise was installed
 if command -v mise &> /dev/null; then
     echo "✓ mise is installed"
+    
+    # Trust the .mise.toml configuration file
+    echo ""
+    echo "Trusting ~/.mise.toml configuration..."
+    mise trust ~/.mise.toml
     
     # Install tools from .mise.toml
     echo ""
