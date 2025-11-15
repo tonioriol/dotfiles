@@ -131,6 +131,41 @@ elif [[ "$1" == "restore" ]]; then
   shopt -u dotglob globstar
   
   echo "Done!"
+  
+  # ============================================================================
+  # POST-RESTORE: GPG KEY DETECTION
+  # ============================================================================
+  # Check if GPG keys were restored and help user configure .extra
+  if [[ -d "$HOME/.gnupg/private-keys-v1.d" ]] && [[ -n "$(ls -A "$HOME/.gnupg/private-keys-v1.d" 2>/dev/null)" ]]; then
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "GPG Keys Detected"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "GPG private keys have been restored. To use them for Git commit signing,"
+    echo "you need to add your GPG key ID to ~/.extra file."
+    echo ""
+    echo "Available GPG keys:"
+    echo ""
+    
+    # List GPG keys with formatting
+    gpg --list-secret-keys --keyid-format=long 2>/dev/null | grep -A 2 "^sec" || {
+      echo "Note: Run 'gpg --list-secret-keys --keyid-format=long' to see your keys"
+      echo "      after GPG has initialized (may require first use)"
+    }
+    
+    echo ""
+    echo "To configure Git signing:"
+    echo "  1. Copy your GPG key ID from above (the part after 'rsa4096/' or similar)"
+    echo "  2. Edit ~/.extra and uncomment the GPG configuration lines"
+    echo "  3. Replace YOUR_GPG_KEY_ID with your actual key ID"
+    echo "  4. Source the file: source ~/.extra"
+    echo ""
+    echo "Example:"
+    echo "  GIT_GPG_KEY=\"ABCD1234EFGH5678\""
+    echo "  git config --global user.signingkey \"\$GIT_GPG_KEY\""
+    echo ""
+  fi
 
 else
   echo "Usage: $0 <backup|restore>" && exit 1

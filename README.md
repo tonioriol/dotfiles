@@ -79,6 +79,8 @@ vim ~/.extra
 
 # 5. Restore secrets
 ./scripts/secrets.sh restore
+# The restore script will display your GPG keys if found.
+# Edit ~/.extra to add your GPG key ID, then: source ~/.extra
 
 # 6. Restart computer
 ```
@@ -129,5 +131,3 @@ Suggestions/improvements [welcome](https://github.com/tonioriol/dotfiles/issues)
 
 Forked from [mathiasbynens/dotfiles](https://github.com/mathiasbynens/dotfiles)
 
-## TODO
-* how do we add the gpg key to .extra?
