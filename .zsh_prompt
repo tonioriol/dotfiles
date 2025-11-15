@@ -85,8 +85,9 @@ elif infocmp xterm-256color >/dev/null 2>&1; then
 fi
 
 # Define colors using zsh color codes
+# Using colors that work well on both light and dark themes
 reset="%{$reset_color%}"
-bold="%{$fg_bold[white]%}"
+bold="%{$fg_bold[default]%}"
 black="%{$fg[black]%}"
 blue="%{$fg[blue]%}"
 cyan="%{$fg[cyan]%}"
@@ -95,7 +96,7 @@ orange="%{$fg[yellow]%}"
 purple="%{$fg[magenta]%}"
 red="%{$fg[red]%}"
 violet="%{$fg[magenta]%}"
-white="%{$fg[white]%}"
+white="%{$fg[default]%}"
 yellow="%{$fg[yellow]%}"
 
 # Highlight the user name when logged in as root.
@@ -112,11 +113,13 @@ else
 	hostStyle="${yellow}"
 fi
 
+# Enable prompt substitution for command substitution in prompts
+setopt PROMPT_SUBST
+
 # Set the terminal title and prompt.
 # %n = username, %m = hostname, %~ = current directory with ~
-PROMPT="${bold}
-${userStyle}%n${white} at ${hostStyle}%m${white} in ${green}%~\$(prompt_git \"${white} on ${violet}\" \"${blue}\")
-${white}\$ ${reset}"
+PROMPT='${bold}${userStyle}%n${white} at ${hostStyle}%m${white} in ${green}%~$(prompt_git "${white} on ${violet}" "${blue}")
+${white}$ ${reset}'
 
 # Secondary prompt
 PROMPT2="${yellow}→ ${reset}"
