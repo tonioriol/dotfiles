@@ -28,12 +28,13 @@ function doIt() {
 		-avh --no-perms . ~;
 	source ~/.zshrc;
 	
-	# Copy devbox global configuration
-	if [ -f .devbox-global.json ]; then
+	# Copy devbox global configuration to proper location
+	if [ -f devbox.json ]; then
 		echo ""
-		echo "Copying devbox global configuration..."
-		cp .devbox-global.json ~/.devbox-global.json
-		echo "✓ Devbox configuration copied to ~/.devbox-global.json"
+		echo "Setting up devbox global configuration..."
+		mkdir -p ~/.local/share/devbox/global/default
+		cp devbox.json ~/.local/share/devbox/global/default/devbox.json
+		echo "✓ Devbox configuration copied to ~/.local/share/devbox/global/default/devbox.json"
 	fi
 	
 	# Run brew.sh to install packages

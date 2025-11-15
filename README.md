@@ -62,15 +62,22 @@ See `.extra.template` for full documentation on all available options (git crede
 **macOS defaults:** `./.macos` - Configure sensible macOS system settings
 
 **Homebrew packages:** `./brew.sh` - Install GUI apps and macOS-specific tools
-  - **devbox**: Development environment manager powered by Nix (see `.devbox-global.json`)
-    - The bootstrap script automatically copies `.devbox-global.json` to your home directory
-    - Global packages are installed automatically during setup
+  - **devbox**: Development environment manager powered by Nix (see `devbox.json`)
+    - The bootstrap script automatically copies `devbox.json` to `~/.local/share/devbox/global/default/`
+    - Global packages are loaded automatically via shell integration
     - Use `devbox global add <package>` to add more tools
   - **direnv**: Environment switcher that loads `.envrc` files per directory
     - The bootstrap script automatically approves the `~/.envrc` configuration file
     - Edit `.envrc` to set environment variables that load automatically when you cd into directories
 
-**Customize tools:** Edit `.devbox-global.json` to add/remove development tools. Search for packages at [search.nixos.org](https://search.nixos.org/packages).
+**Customize tools:** Edit `devbox.json` in the repo to add/remove development tools, then run `bootstrap.sh` to sync. Search for packages at [search.nixos.org](https://search.nixos.org/packages).
+
+**Devbox Workflow:**
+  - Configuration is stored in the repo as `devbox.json` (easy to edit and version control)
+  - `bootstrap.sh` copies it to the correct location: `~/.local/share/devbox/global/default/devbox.json`
+  - Shell integration in `.zshrc` automatically loads packages via `eval "$(devbox global shellenv)"`
+  - To sync across machines: commit changes to `devbox.json` and run `bootstrap.sh` on other machines
+  - **Do NOT use** `devbox global push/pull` - those are for remote repositories, not local configs
 
 ## Hybrid Architecture: devbox + Homebrew
 
@@ -145,24 +152,30 @@ This fork has been customized to help migrating to a new Mac while keeping sensi
    ```
    This will:
    - Sync dotfiles to your home directory
-   - Copy devbox global configuration
+   - Copy devbox.json to `~/.local/share/devbox/global/default/`
    - Install Homebrew packages (GUI apps + devbox)
-   - Install devbox global packages (CLI tools)
+   - Initialize devbox global environment (CLI tools)
    - Configure macOS settings
 
-5. Verify devbox setup:
+5. Restart your shell to load devbox packages:
    ```shell
+   exec $SHELL -l
+   ```
+
+6. Verify devbox setup:
+   ```shell
+   devbox global path  # Should show: ~/.local/share/devbox/global/default
    devbox global list  # Should show ~97 packages
    node --version      # Should work from devbox
    python --version    # Should work from devbox
    ```
 
-6. Restore your secrets:
+7. Restore your secrets:
    ```shell
    ./scripts/secrets.sh restore
    ```
 
-7. If you use GPG signing, add your key ID to `~/.extra`:
+8. If you use GPG signing, add your key ID to `~/.extra`:
    ```shell
    # Get your GPG key ID
    gpg --list-secret-keys --keyid-format=long
@@ -174,7 +187,39 @@ This fork has been customized to help migrating to a new Mac while keeping sensi
    source ~/.extra
    ```
 
-8. Restart your computer for all macOS settings to take effect
+9. Restart your computer for all macOS settings to take effect
+
+### Managing Devbox Packages
+
+**Adding packages:**
+```shell
+# Edit devbox.json in the repo
+vim devbox.json
+
+# Sync to home directory
+./bootstrap.sh -f
+
+# Reload shell
+exec $SHELL -l
+```
+
+**Checking configuration:**
+```shell
+# View current config location
+devbox global path
+
+# List installed packages
+devbox global list
+
+# Search for packages
+devbox search <package-name>
+```
+
+**Syncing across machines:**
+1. Edit `devbox.json` in the repo
+2. Commit and push changes
+3. On other machines: `git pull && ./bootstrap.sh -f`
+4. Reload shell: `exec $SHELL -l`
 
 ### Regenerating brew.sh
 The `brew.sh` script can be regenerated from your source machine to produce an exact list of formulae & casks:
@@ -194,3 +239,5 @@ Forked from the amazing https://github.com/mathiasbynens/dotfiles
 
 ## TODO
 * remove canva and openemu
+* move remaining to brewfile
+* rm .extra

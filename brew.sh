@@ -143,19 +143,21 @@ echo "==========================================================================
 echo "Setting up devbox global packages..."
 echo "=============================================================================="
 
-# Copy global configuration if it exists in dotfiles
-if [ -f ~/.devbox-global.json ]; then
-    echo "Installing devbox global packages from ~/.devbox-global.json..."
-    devbox global pull ~/.devbox-global.json
-    echo "✓ Devbox global packages installed"
+# Initialize devbox global environment if configuration exists
+if [ -f ~/.local/share/devbox/global/default/devbox.json ]; then
+    echo "Initializing devbox global environment..."
+    # The shellenv will automatically load packages from the config
+    eval "$(devbox global shellenv)"
+    echo "✓ Devbox global environment initialized"
 else
-    echo "⚠ ~/.devbox-global.json not found. Skipping global package installation."
+    echo "⚠ Devbox configuration not found at ~/.local/share/devbox/global/default/devbox.json"
+    echo "  Run bootstrap.sh first to copy the configuration"
 fi
 
 echo ""
-echo "Configuration file: ~/.devbox-global.json"
-echo "  - Edit to add/remove global packages"
-echo "  - Run 'devbox global pull ~/.devbox-global.json' to apply changes"
+echo "Configuration file: ~/.local/share/devbox/global/default/devbox.json"
+echo "  - Edit devbox.json in the dotfiles repo, then run bootstrap.sh to sync"
+echo "  - Or edit directly and run 'devbox global shellenv' to reload"
 echo ""
 echo "Useful commands:"
 echo "  devbox global list         # Show installed global packages"

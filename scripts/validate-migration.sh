@@ -69,28 +69,42 @@ else
     print_check "fail" "Devbox is not installed" "Run: curl -fsSL https://get.jetify.com/devbox | bash"
 fi
 
-# Check 2: Verify .devbox-global.json exists in home directory
+# Check 2: Verify devbox.json exists in correct location
 print_header "2. Global Configuration Check"
-if [ -f "$HOME/.devbox-global.json" ]; then
-    print_check "pass" ".devbox-global.json exists in home directory" "Location: $HOME/.devbox-global.json"
+DEVBOX_CONFIG="$HOME/.local/share/devbox/global/default/devbox.json"
+if [ -f "$DEVBOX_CONFIG" ]; then
+    print_check "pass" "devbox.json exists in correct location" "Location: $DEVBOX_CONFIG"
+    
+    # Verify using devbox global path command
+    if command -v devbox &> /dev/null; then
+        DEVBOX_PATH=$(devbox global path 2>/dev/null || echo "")
+        if [ -n "$DEVBOX_PATH" ]; then
+            print_check "pass" "devbox global path verified" "Path: $DEVBOX_PATH"
+        fi
+    fi
     
     # Validate JSON syntax
     if command -v jq &> /dev/null; then
-        if jq empty "$HOME/.devbox-global.json" 2>/dev/null; then
-            print_check "pass" ".devbox-global.json has valid JSON syntax"
+        if jq empty "$DEVBOX_CONFIG" 2>/dev/null; then
+            print_check "pass" "devbox.json has valid JSON syntax"
         else
-            print_check "fail" ".devbox-global.json has invalid JSON syntax"
+            print_check "fail" "devbox.json has invalid JSON syntax"
         fi
     else
         print_check "warn" "jq not available, skipping JSON validation" "Install jq to validate JSON syntax"
     fi
 else
-    print_check "fail" ".devbox-global.json not found in home directory" "Run bootstrap.sh to copy the configuration"
+    print_check "fail" "devbox.json not found in correct location" "Expected: $DEVBOX_CONFIG - Run bootstrap.sh to copy the configuration"
+    
+    # Check for old location
+    if [ -f "$HOME/.devbox-global.json" ]; then
+        print_check "warn" "Old .devbox-global.json found" "Remove $HOME/.devbox-global.json after migration"
+    fi
 fi
 
 # Check 3: List devbox global packages
 print_header "3. Global Packages Check"
-if command -v devbox &> /dev/null && [ -f "$HOME/.devbox-global.json" ]; then
+if command -v devbox &> /dev/null && [ -f "$DEVBOX_CONFIG" ]; then
     PACKAGE_COUNT=$(devbox global list 2>/dev/null | grep -c "^" || echo "0")
     if [ "$PACKAGE_COUNT" -gt 0 ]; then
         print_check "pass" "Devbox global packages configured" "$PACKAGE_COUNT packages found"
@@ -164,8 +178,15 @@ print_header "7. Installation Scripts Check"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 if [ -f "$SCRIPT_DIR/bootstrap.sh" ]; then
-    if grep -q "devbox-global.json" "$SCRIPT_DIR/bootstrap.sh"; then
+    if grep -q "devbox.json" "$SCRIPT_DIR/bootstrap.sh"; then
         print_check "pass" "bootstrap.sh includes devbox configuration"
+        
+        # Check if it uses the correct path
+        if grep -q ".local/share/devbox/global/default" "$SCRIPT_DIR/bootstrap.sh"; then
+            print_check "pass" "bootstrap.sh uses correct devbox path"
+        else
+            print_check "warn" "bootstrap.sh may not use correct devbox path"
+        fi
     else
         print_check "warn" "bootstrap.sh may not include devbox configuration"
     fi
