@@ -31,7 +31,7 @@
     "k9s@latest",
     "minikube@latest",
     "terragrunt@latest",
-    "gcc@latest",
+    "gcc@14.3.0",
     "gnumake@latest",
     "cmake@latest",
     "pkg-config@latest",
