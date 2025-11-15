@@ -55,12 +55,12 @@ if type _git &>/dev/null; then
 	compdef g=git
 fi
 
-# mise - Modern version manager (replaces asdf, nvm, pyenv, rbenv, etc.)
-# Faster Rust-based alternative with better UX
-# Install languages: mise use --global node@lts python@latest ruby@latest
-# See: https://mise.jdx.dev/
-if type mise &>/dev/null; then
-	eval "$(mise activate zsh)"
+# devbox - Reproducible development environments powered by Nix
+# Manages CLI tools globally and per-project
+# Install packages: devbox global add <package>
+# See: https://www.jetify.com/devbox
+if type devbox &>/dev/null; then
+	eval "$(devbox global shellenv --init-hook)"
 fi
 
 # direnv - Automatically load/unload environment variables based on directory

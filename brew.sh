@@ -17,126 +17,10 @@ BREW_PREFIX="$(brew --prefix)"
 
 # All packages (formulae and casks merged - Homebrew 4.0+ handles both)
 PACKAGES=(
-# === Core utilities and system tools ===
-coreutils          # GNU ls/cat/etc: cross-platform scripts need consistent behavior vs BSD variants (upstream+yours)
-moreutils          # sponge/ifdata: useful for piping output back to same file safely (upstream)
-findutils          # GNU find/xargs: more features than macOS BSD find, better for complex searches (upstream)
-gnu-sed            # GNU sed: scripts using -i, -r flags need GNU syntax vs macOS BSD sed (upstream)
-
-# === Shell and completion ===
-zsh                # Latest zsh: newer features than system zsh (macOS default shell since Catalina)
-zsh-completions    # Extra completions: better tab-complete for docker/git/kubectl
-zsh-autosuggestions # Fish-like autosuggestions for zsh
-zsh-syntax-highlighting # Fish-like syntax highlighting for zsh
-
-# === Version control ===
-git                # Latest git: newer features/security vs system git (upstream)
-git-lfs            # Large files: track binaries/media in git without bloating repo (upstream+yours)
-gh                 # GitHub CLI: create PRs, manage issues without browser (yours)
-glab               # GitLab CLI: same as gh but for GitLab projects (yours)
-
-# === Network tools ===
-curl               # Latest curl: newer protocols/security vs system curl (yours)
-wget               # Robust downloads: better for scripts, resume support vs curl (upstream+yours)
-openssh            # Latest SSH: newer ciphers/security vs system openssh (upstream)
-
-# === Security and encryption ===
-gnupg              # GPG signing: sign commits/emails, encrypt files (upstream+yours)
-pinentry-mac       # macOS GPG UI: native macOS keychain integration, includes pinentry functionality (yours)
-openssl@3          # Modern SSL: latest security, most software uses this (yours)
-
-mise               # Modern version manager: faster Rust-based alternative to asdf
-                   # Manages Node, Python, Ruby, Go, Rust, Java, etc. with better performance
-                   # Drop-in replacement for asdf with improved UX and speed
-                   # See: https://mise.jdx.dev/
-
-direnv             # Environment switcher: automatically load/unload environment variables per directory
-                   # Works with .envrc files, integrates with mise and other tools
-                   # See: https://direnv.net/
-
-devbox             # Reproducible dev environments powered by Nix (like package.json for your entire environment)
-                   # Creates isolated, reproducible development environments per project
-                   # See: https://www.jetpack.io/devbox
-
-# === Cloud and infrastructure tools ===
-# awscli managed by mise - see .mise.toml (uncomment if needed)
-azure-cli          # Azure: manage Azure resources from terminal (yours)
-doctl              # DigitalOcean: manage droplets/k8s from terminal (yours)
-heroku             # Heroku: deploy/manage Heroku apps (yours)
-
-# === Kubernetes and container orchestration ===
-# kubectl managed by mise - see .mise.toml (uncomment if needed)
-# helm managed by mise - see .mise.toml (uncomment if needed)
-helmfile           # Helm automation: declarative multi-chart deployments (yours)
-k9s                # k8s TUI: visual cluster management in terminal (yours)
-minikube           # Local k8s: test k8s locally before cloud deploy (yours)
-
-# === Infrastructure as Code ===
-# terraform managed by mise - see .mise.toml
-terragrunt         # Terraform DRY: reduce Terraform code duplication (yours)
-
-# === Development tools and build systems ===
-gcc                # GNU compiler: compile C/C++, newer than Xcode's (upstream+yours)
-make               # Build tool: run Makefiles, essential for many projects (upstream+yours)
-cmake              # Cross-platform build: modern C/C++ build system (implied)
-# maven managed by mise - see .mise.toml (uncomment if needed)
-pkgconf            # pkg-config: find library compile/link flags (yours)
-
-# === Database clients and servers ===
-sqlite             # SQLite: embedded DB, great for local dev/testing (yours)
-
-# === Text processing and utilities ===
-jq                 # JSON: parse/transform JSON in shell scripts (upstream+yours)
-grep               # GNU grep: better regex than macOS BSD grep (upstream)
-ripgrep            # Fast search: faster than grep/ack, respects .gitignore (yours)
-fd                 # Fast find: faster than find, simpler syntax (yours)
-fzf                # Fuzzy finder: interactive file/history search (yours)
-tree               # Dir tree: visualize directory structure (upstream+yours)
-bat                # Better cat: syntax highlighting and git integration (recommended)
-eza                # Modern ls: better than lsd, successor to exa (recommended)
-lsd                # Modern ls: colorful ls with icons (yours)
-tldr               # Quick help: simplified man pages with examples (yours)
-delta              # Better git diff: syntax highlighting and side-by-side diffs (recommended)
-zoxide             # Smarter cd: learns your habits, jump to frequent directories (recommended)
-pcregrep           # PCRE grep: Perl-compatible regex grep (implied)
-
-# === Terminal tools ===
-htop               # Process viewer: better than top, interactive (yours)
-mc                 # File manager: TUI file manager like Norton Commander (yours)
-mcfly              # Smart history: AI-powered shell history search (yours)
-lazygit            # Terminal UI for git: visual git operations (recommended)
-lazydocker         # Terminal UI for docker: visual docker management (recommended)
-
-# === Multimedia and imaging ===
-ffmpeg             # Video/audio: convert/edit video/audio files (yours)
-imagemagick        # Image edit: convert/resize/edit images from CLI (upstream+yours)
-ghostscript        # PDF/PS: render PostScript/PDF files (yours)
-
-# === Compression and archiving ===
-p7zip              # 7z archives: extract .7z files (upstream+yours)
-xz                 # XZ compress: better compression than gzip (upstream+yours)
-zstd               # Fast compress: faster than gzip, better ratio (yours)
-lz4                # Ultra-fast: fastest compression, lower ratio (yours)
-brotli             # Web compress: used by web servers for compression (yours)
-zopfli             # Best gzip: slowest but best gzip compression (upstream)
-pigz               # Parallel gzip: multi-core gzip compression (upstream)
-libarchive         # Archive lib: read/write many archive formats (yours)
-unzip              # Unzip: extract .zip files (yours)
-cabextract         # CAB files: extract Windows .cab files (yours)
-
-# === Networking and protocols ===
-nmap               # Port scanner: scan networks/ports for security (upstream)
-speedtest-cli      # Speed test: test internet speed from CLI (yours)
-# deno managed by mise - see .mise.toml (uncomment if needed)
-yt-dlp             # Video download: maintained fork of youtube-dl, faster and more features (yours)
-
+# === macOS-specific CLI tools ===
 mas                # App Store CLI: install Mac App Store apps from terminal (yours)
-rename             # Batch rename: Perl-based file renamer for bulk operations (upstream)
-watch              # Monitor: run command periodically, watch output changes (upstream)
-
-llvm               # Compiler: LLVM compiler infrastructure (yours)
-act                # GitHub Actions: test GitHub Actions locally (yours)
-geckodriver        # Firefox driver: WebDriver for Firefox automation (yours)
+                   # Note: mas is macOS-specific and requires deep system integration with the Mac App Store
+                   # All other CLI tools are now managed by devbox (see .devbox-global.json)
 
 # === GUI Applications ===
 
@@ -154,12 +38,10 @@ colima             # Lightweight Docker alternative for macOS (Apple Silicon opt
                    # Container runtime with minimal resource usage, compatible with Docker CLI
                    # See: https://github.com/abiosoft/colima
 postman            # API test: test REST APIs with GUI (upstream+yours)
-chromedriver       # Chrome driver: automate Chrome browser (yours)
 lens               # k8s IDE: visual Kubernetes management (yours)
 
 # === Productivity and utilities ===
 1password          # Passwords: secure password manager (upstream+yours)
-1password-cli      # 1Password CLI: access passwords from terminal (yours)
 raycast            # Launcher: Spotlight replacement with plugins (upstream+yours)
 barrier            # Share input: share keyboard/mouse across computers (yours)
 maccy              # Clipboard manager: modern, lightweight clipboard history (replaces flycut)
@@ -186,7 +68,6 @@ wireshark          # Wireshark GUI: visual packet analysis (yours)
 fing               # Network scan: discover devices on network (yours)
 angry-ip-scanner   # IP scanner: fast network scanner (yours)
 netspot            # WiFi analyze: WiFi site survey and analysis (yours)
-ngrok              # Tunnels: expose localhost to internet securely (yours)
 
 # === Fonts ===
 font-monaspace     # Monaspace: modern monospace font family for coding (yours)
@@ -200,9 +81,6 @@ canva              # Design: graphic design tool (yours)
 # === Backup and sync ===
 rsyncui            # rsync GUI: visual rsync file sync (yours)
 transmission       # Torrent: lightweight BitTorrent client (upstream)
-
-# === Shell and command line ===
-powershell         # PowerShell: Microsoft's cross-platform shell (yours)
 )
 
 echo "Installing packages..."
@@ -238,47 +116,59 @@ brew cleanup
 
 echo ""
 echo "=============================================================================="
-echo "Setting up mise (version manager)..."
+echo "Installing devbox (development environment manager)..."
 echo "=============================================================================="
 
-# Check if mise was installed
-if command -v mise &> /dev/null; then
-    echo "✓ mise is installed"
-    
-    # Trust the .mise.toml configuration file
-    echo ""
-    echo "Trusting ~/.mise.toml configuration..."
-    mise trust ~/.mise.toml
-    
-    # Install tools from .mise.toml
-    echo ""
-    echo "Installing tools from .mise.toml..."
-    mise install || echo "⚠ Failed to install some tools from .mise.toml"
-    
-    echo ""
-    echo "✓ Tools installed via mise (from .mise.toml):"
-    mise list 2>/dev/null || echo "  No tools installed yet"
-    echo ""
-    echo "Configuration file: .mise.toml"
-    echo "  - Edit .mise.toml to add/remove tools"
-    echo "  - Uncomment tools like terraform, kubectl, ruby, go, etc."
-    echo "  - Run 'mise install' to apply changes"
-    echo ""
-    echo "Useful commands:"
-    echo "  mise list              # Show installed tools"
-    echo "  mise registry          # Show all available tools"
-    echo "  mise use --global <tool>@<version>  # Install a tool globally"
-    echo "  mise doctor            # Check mise configuration"
+# Check if devbox is already installed
+if command -v devbox &> /dev/null; then
+    echo "✓ devbox is already installed"
 else
-    echo "⚠ mise not found. Install it with: brew install mise"
+    echo "Installing devbox via official installer..."
+    curl -fsSL https://get.jetify.com/devbox | bash
+    
+    # Add devbox to PATH for current session
+    export PATH="$HOME/.local/bin:$PATH"
+    
+    if command -v devbox &> /dev/null; then
+        echo "✓ devbox installed successfully"
+    else
+        echo "⚠ devbox installation failed. Please install manually:"
+        echo "  curl -fsSL https://get.jetify.com/devbox | bash"
+        exit 1
+    fi
 fi
+
+echo ""
+echo "=============================================================================="
+echo "Setting up devbox global packages..."
+echo "=============================================================================="
+
+# Copy global configuration if it exists in dotfiles
+if [ -f ~/.devbox-global.json ]; then
+    echo "Installing devbox global packages from ~/.devbox-global.json..."
+    devbox global pull ~/.devbox-global.json
+    echo "✓ Devbox global packages installed"
+else
+    echo "⚠ ~/.devbox-global.json not found. Skipping global package installation."
+fi
+
+echo ""
+echo "Configuration file: ~/.devbox-global.json"
+echo "  - Edit to add/remove global packages"
+echo "  - Run 'devbox global pull ~/.devbox-global.json' to apply changes"
+echo ""
+echo "Useful commands:"
+echo "  devbox global list         # Show installed global packages"
+echo "  devbox global add <pkg>    # Add a package globally"
+echo "  devbox global rm <pkg>     # Remove a package globally"
+echo "  devbox search <pkg>        # Search for packages"
 
 echo ""
 echo "=============================================================================="
 echo "Setting up direnv (environment switcher)..."
 echo "=============================================================================="
 
-# Check if direnv was installed
+# Check if direnv is available (now managed by devbox)
 if command -v direnv &> /dev/null; then
     echo "✓ direnv is installed"
     
@@ -298,7 +188,7 @@ if command -v direnv &> /dev/null; then
     echo "  direnv deny            # Block current directory's .envrc"
     echo "  direnv reload          # Reload current directory's .envrc"
 else
-    echo "⚠ direnv not found. Install it with: brew install direnv"
+    echo "⚠ direnv not found. It should be installed via devbox global packages."
 fi
 
 echo ""
@@ -308,6 +198,6 @@ echo "Remove any packages you don't need before running this script on a new mac
 echo ""
 echo "Next steps:"
 echo "  1. Reload your shell: exec \$SHELL -l"
-echo "  2. Verify mise: mise doctor"
-echo "  3. Check installed tools: mise list"
+echo "  2. Verify devbox: devbox global list"
+echo "  3. Check installed tools: node --version, python --version, etc."
 echo "=============================================================================="

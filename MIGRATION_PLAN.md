@@ -1,8 +1,8 @@
 # Migration Plan: mise + Homebrew → devbox + Homebrew
 
-**Document Version:** 1.0  
-**Date:** 2025-11-15  
-**Status:** Ready for Review
+**Document Version:** 2.0
+**Date:** 2025-11-15
+**Status:** Ready for Review - GUI Strategy Finalized
 
 ---
 
@@ -11,13 +11,14 @@
 1. [Executive Summary](#1-executive-summary)
 2. [Current State Analysis](#2-current-state-analysis)
 3. [Target Architecture](#3-target-architecture)
-4. [Devbox Global Configuration](#4-devbox-global-configuration)
-5. [Homebrew Streamlining](#5-homebrew-streamlining)
-6. [File Modifications](#6-file-modifications)
-7. [Migration Steps](#7-migration-steps)
-8. [Testing Strategy](#8-testing-strategy)
-9. [Rollback Plan](#9-rollback-plan)
-10. [Post-Migration](#10-post-migration)
+4. [GUI Application Strategy](#4-gui-application-strategy)
+5. [Devbox Global Configuration](#5-devbox-global-configuration)
+6. [Homebrew Streamlining](#6-homebrew-streamlining)
+7. [File Modifications](#7-file-modifications)
+8. [Migration Steps](#8-migration-steps)
+9. [Testing Strategy](#9-testing-strategy)
+10. [Rollback Plan](#10-rollback-plan)
+11. [Post-Migration](#11-post-migration)
 
 ---
 
@@ -117,7 +118,129 @@ Current flow:
 
 ---
 
-## 4. Devbox Global Configuration
+## 4. GUI Application Strategy
+
+### 4.1 Research Findings: Nix GUI Apps on macOS
+
+After thorough research, here are the key findings about GUI application support in Nix/devbox on macOS:
+
+#### Known Issues with Nix GUI Apps on macOS
+
+1. **Spotlight Integration Problem**
+   - Nix apps are symlinked to `~/Applications/Nix Apps/`
+   - macOS Spotlight doesn't index symlinks by default
+   - Apps won't appear in Spotlight search or Launchpad
+
+2. **Dock Persistence Issue**
+   - Apps pinned to Dock become "missing question marks" after Nix rebuild
+   - Requires re-pinning apps after every system update
+   - Frustrating user experience for frequently used apps
+
+3. **File Association Challenges**
+   - Setting Nix apps as default for file types can be problematic
+   - macOS may not recognize symlinked apps for "Open With" menus
+
+#### Available Solution: mac-app-util
+
+**Tool:** [`mac-app-util`](https://github.com/hraban/mac-app-util)
+
+**What it does:**
+- Creates "trampoline apps" that macOS recognizes as real applications
+- Enables Spotlight indexing of Nix-installed GUI apps
+- Maintains Dock persistence across rebuilds
+- Requires nix-darwin or home-manager integration
+
+**Limitations:**
+- Requires additional setup and configuration
+- Adds complexity to the dotfiles setup
+- Not officially supported by devbox (requires nix-darwin/home-manager)
+- May still have edge cases with certain apps
+
+### 4.2 Recommendation: Keep GUI Apps in Homebrew
+
+**Decision:** Continue using Homebrew for GUI applications
+
+**Rationale:**
+
+| Factor | Homebrew | Nix + mac-app-util | Winner |
+|--------|----------|-------------------|--------|
+| Spotlight integration | ✅ Native | ⚠️ Requires setup | Homebrew |
+| Dock persistence | ✅ Works perfectly | ⚠️ Needs trampolines | Homebrew |
+| File associations | ✅ Native | ⚠️ May have issues | Homebrew |
+| Setup complexity | ✅ Simple | ❌ Complex | Homebrew |
+| Maintenance | ✅ Low | ⚠️ Medium | Homebrew |
+| macOS integration | ✅ Excellent | ⚠️ Good with workarounds | Homebrew |
+| Reproducibility | ⚠️ Good | ✅ Excellent | Nix |
+
+**Key Points:**
+
+1. **Pragmatism over Purity:** While Nix offers better reproducibility, GUI apps benefit more from native macOS integration than from Nix's reproducibility guarantees
+
+2. **User Experience:** Spotlight search and Dock persistence are critical for daily workflow. The workarounds add friction that outweighs the benefits
+
+3. **Maintenance Burden:** Adding nix-darwin or home-manager just for GUI app integration significantly increases complexity
+
+4. **Hybrid Approach Works:** CLI tools benefit greatly from Nix's reproducibility and isolation, while GUI apps work better with Homebrew's native integration
+
+5. **Community Consensus:** Many experienced Nix users on macOS keep GUI apps in Homebrew for these exact reasons
+
+### 4.3 Final Architecture Decision
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Development Environment                   │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────────────────┐      ┌──────────────────────┐   │
+│  │   devbox (Nix)       │      │   Homebrew (macOS)   │   │
+│  ├──────────────────────┤      ├──────────────────────┤   │
+│  │ • CLI Tools (~97)    │      │ • GUI Apps (~40)     │   │
+│  │ • Programming langs  │      │ • macOS-specific     │   │
+│  │ • Cloud tools        │      │ • Browsers           │   │
+│  │ • Build systems      │      │ • Development IDEs   │   │
+│  │ • Text processing    │      │ • Productivity apps  │   │
+│  │ • Compression utils  │      │ • Media players      │   │
+│  │ • Version control    │      │ • System utilities   │   │
+│  └──────────────────────┘      └──────────────────────┘   │
+│                                                              │
+│  Benefits:                      Benefits:                   │
+│  • Reproducible                 • Native Spotlight          │
+│  • Isolated                     • Dock persistence          │
+│  • Version pinning              • File associations         │
+│  • 80k+ packages                • Zero setup friction       │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**This hybrid approach provides:**
+- ✅ Best-in-class CLI tool management via devbox/Nix
+- ✅ Seamless macOS GUI app experience via Homebrew
+- ✅ Clear separation of concerns
+- ✅ Minimal complexity and maintenance
+- ✅ Excellent user experience for both CLI and GUI workflows
+
+### 4.4 Future Considerations
+
+If you want to explore Nix GUI apps in the future:
+
+1. **Prerequisites:**
+   - Install nix-darwin or home-manager
+   - Configure mac-app-util
+   - Test thoroughly with your most-used apps
+
+2. **Migration Path:**
+   - Start with 1-2 non-critical GUI apps
+   - Validate Spotlight, Dock, and file associations
+   - Gradually migrate more apps if satisfied
+
+3. **Resources:**
+   - [mac-app-util GitHub](https://github.com/hraban/mac-app-util)
+   - [nix-darwin](https://github.com/LnL7/nix-darwin)
+   - [home-manager](https://github.com/nix-community/home-manager)
+
+---
+
+## 5. Devbox Global Configuration
 
 ### 4.1 Complete `devbox.json` Structure
 

@@ -61,15 +61,40 @@ See `.extra.template` for full documentation on all available options (git crede
 
 **macOS defaults:** `./.macos` - Configure sensible macOS system settings
 
-**Homebrew packages:** `./brew.sh` - Install packages including mise and direnv
-  - **mise**: Version manager for Node.js, Python, etc. (see `.mise.toml`)
-    - The bootstrap script automatically trusts the `.mise.toml` configuration file
-    - Tools defined in `.mise.toml` are installed automatically during setup
+**Homebrew packages:** `./brew.sh` - Install GUI apps and macOS-specific tools
+  - **devbox**: Development environment manager powered by Nix (see `.devbox-global.json`)
+    - The bootstrap script automatically copies `.devbox-global.json` to your home directory
+    - Global packages are installed automatically during setup
+    - Use `devbox global add <package>` to add more tools
   - **direnv**: Environment switcher that loads `.envrc` files per directory
     - The bootstrap script automatically approves the `~/.envrc` configuration file
     - Edit `.envrc` to set environment variables that load automatically when you cd into directories
 
-**Customize tools:** Edit `.mise.toml` to add/remove development tools. See [mise registry](https://mise.jdx.dev/registry.html) for available tools.
+**Customize tools:** Edit `.devbox-global.json` to add/remove development tools. Search for packages at [search.nixos.org](https://search.nixos.org/packages).
+
+## Hybrid Architecture: devbox + Homebrew
+
+This setup uses a hybrid approach for package management:
+
+- **devbox (Nix)**: Manages all CLI development tools (~97 packages)
+  - Programming languages (Node.js, Python, Deno)
+  - Cloud tools (AWS CLI, Azure CLI, kubectl, Terraform)
+  - Build systems (gcc, make, cmake, maven)
+  - Text processing (jq, ripgrep, fd, bat, eza)
+  - Compression utilities (p7zip, xz, zstd)
+  - Version control (git, gh, glab)
+  
+- **Homebrew**: Manages GUI applications and macOS-specific tools (~40 packages)
+  - Browsers (Chrome, Firefox, Edge)
+  - Development IDEs (VS Code, Warp)
+  - Productivity apps (1Password, Raycast)
+  - Media players (Spotify, Steam)
+  - System utilities (OrbStack, Colima)
+
+This separation provides:
+- **Better reproducibility** for CLI tools via Nix
+- **Native macOS integration** for GUI apps via Homebrew
+- **Clear boundaries** between development and system tools
 
 ## Apple Silicon Notes
 
@@ -118,14 +143,26 @@ This fork has been customized to help migrating to a new Mac while keeping sensi
    ```shell
    ./bootstrap.sh
    ```
-   This will sync dotfiles, install packages, and configure macOS settings.
+   This will:
+   - Sync dotfiles to your home directory
+   - Copy devbox global configuration
+   - Install Homebrew packages (GUI apps + devbox)
+   - Install devbox global packages (CLI tools)
+   - Configure macOS settings
 
-5. Restore your secrets:
+5. Verify devbox setup:
+   ```shell
+   devbox global list  # Should show ~97 packages
+   node --version      # Should work from devbox
+   python --version    # Should work from devbox
+   ```
+
+6. Restore your secrets:
    ```shell
    ./scripts/secrets.sh restore
    ```
 
-6. If you use GPG signing, add your key ID to `~/.extra`:
+7. If you use GPG signing, add your key ID to `~/.extra`:
    ```shell
    # Get your GPG key ID
    gpg --list-secret-keys --keyid-format=long
@@ -137,7 +174,7 @@ This fork has been customized to help migrating to a new Mac while keeping sensi
    source ~/.extra
    ```
 
-7. Restart your computer for all macOS settings to take effect
+8. Restart your computer for all macOS settings to take effect
 
 ### Regenerating brew.sh
 The `brew.sh` script can be regenerated from your source machine to produce an exact list of formulae & casks:
