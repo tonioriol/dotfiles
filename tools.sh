@@ -14,11 +14,6 @@ if ! command -v brew &> /dev/null; then
     fi
 fi
 
-BREW_PREFIX="$(brew --prefix)"
-if [ ! -w "$BREW_PREFIX" ]; then
-    sudo chown -R "$(whoami)" "$BREW_PREFIX"
-fi
-
 brew update && brew upgrade
 brew bundle install
 brew cleanup

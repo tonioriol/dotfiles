@@ -51,7 +51,7 @@ function doIt() {
 	# Refresh devbox global environment if devbox is available
 	if command -v devbox &> /dev/null; then
 		echo "Refreshing devbox global environment..."
-		devbox global refresh || true
+		refresh-global
 		echo "✓ Devbox environment refreshed"
 	fi
 	
