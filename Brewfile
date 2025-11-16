@@ -20,14 +20,16 @@ brew "mas"
 # ============================================================================
 
 # === Browsers ===
-# Chrome: good for testing
-cask "google-chrome"
 # Firefox: privacy-focused browser, great dev tools
 cask "firefox"
 # Zen: minimalist browser
 cask "zen@twilight"
+# Chrome: good for testing
+cask "google-chrome"
 
 # === Development tools ===
+# JetBrains Toolbox: manage JetBrains IDEs
+cask "jetbrains-toolbox"
 # VS Code: powerful code editor with extensions
 cask "visual-studio-code"
 # Modern terminal: AI-powered terminal with modern UI
@@ -52,12 +54,12 @@ cask "maccy"
 # === Media and entertainment ===
 # Audio player: advanced audio player
 cask "foobar2000"
-# Gaming: PC game platform
-cask "steam"
 # Audio edit: record/edit audio
 cask "audacity"
 # Music tag: auto-tag music files
 cask "musicbrainz-picard"
+# Gaming: PC game platform
+cask "steam"
 # Epic Games: play Epic/GOG games
 cask "heroic"
 

@@ -2,23 +2,37 @@
 
 # ~/.macos — https://mths.be/macos
 
-# Close any open System Settings/Preferences panes, to prevent them from overriding
-# settings we're about to change
+# WHAT: Closes System Settings/Preferences application before applying changes
+# WHY: Prevents GUI from overriding or conflicting with command-line changes being applied
+# STATUS: Active
+# COMPAT: Handles both "System Settings" (macOS Ventura 13.0+) and "System Preferences" (older versions)
 osascript -e 'tell application "System Settings" to quit' 2>/dev/null || \
 osascript -e 'tell application "System Preferences" to quit' 2>/dev/null
 
-# Ask for the administrator password upfront
+# WHAT: Requests administrator password at script start
+# WHY: Many system settings require elevated privileges; getting password upfront prevents interruptions
+# STATUS: Active
+# COMPAT: All macOS versions
 sudo -v
 
-# Keep-alive: update existing `sudo` time stamp until `.macos` has finished
+# WHAT: Keeps sudo session alive by refreshing timestamp every 60 seconds
+# WHY: Prevents password re-prompts during long-running script execution
+# STATUS: Active
+# COMPAT: All macOS versions; runs in background until script completes
 while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
-# Load personal configuration from .extra
+# WHAT: Sources personal configuration file if it exists
+# WHY: Allows user-specific overrides without modifying main script (e.g., custom computer name, locale)
+# STATUS: Active
+# COMPAT: All macOS versions; create ~/.extra file with custom variables
 if [ -f ~/.extra ]; then
     source ~/.extra
 fi
 
-# Set defaults if not defined in .extra
+# WHAT: Sets default configuration variables if not defined in ~/.extra
+# WHY: Provides sensible defaults for system naming and localization settings
+# STATUS: Active
+# COMPAT: All macOS versions; override any variable in ~/.extra file
 COMPUTER_NAME="${COMPUTER_NAME:-MacBook}"
 MACOS_LANGUAGES="${MACOS_LANGUAGES[@]:-en es}"
 MACOS_LOCALE="${MACOS_LOCALE:-en_ES@currency=EUR}"
@@ -30,105 +44,177 @@ MACOS_TIMEZONE="${MACOS_TIMEZONE:-Europe/Madrid}"
 # General UI/UX                                                               #
 ###############################################################################
 
-# Set computer name (as done via System Preferences → Sharing)
+# WHAT: Sets computer name across all network protocols (Bonjour, SMB, hostname)
+# WHY: Ensures consistent device identification on networks; useful for distinguishing multiple Macs
+# STATUS: Active
+# COMPAT: All macOS versions; configurable via COMPUTER_NAME variable
 sudo scutil --set ComputerName "$COMPUTER_NAME"
 sudo scutil --set HostName "$COMPUTER_NAME"
 sudo scutil --set LocalHostName "$COMPUTER_NAME"
 sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "$COMPUTER_NAME"
 
-# Disable the sound effects on boot
-sudo nvram SystemAudioVolume=" "
+# WHAT: Disables startup chime sound
+# WHY: Prevents loud boot sound in quiet environments (libraries, meetings, early morning)
+# STATUS: Active
+# COMPAT: All macOS versions; persists in NVRAM across reboots
+# sudo nvram SystemAudioVolume=" "
 
-# Disable transparency in the menu bar and elsewhere on Yosemite
-# Note: This requires Full Disk Access for Terminal on macOS Sequoia+
-# Grant access in: System Settings > Privacy & Security > Full Disk Access
-# Commenting out to avoid bootstrap failure - enable manually if needed
+# WHAT: Disables transparency effects in menu bar, windows, and UI elements
+# WHY: Improves performance on older Macs; reduces visual distractions; better for accessibility
+# STATUS: Commented out - Requires Full Disk Access on macOS Sequoia 15.0+
+# COMPAT: macOS Yosemite 10.10+; enable manually after granting Full Disk Access in System Settings > Privacy & Security
 # defaults write com.apple.universalaccess reduceTransparency -bool true
 
-# Set sidebar icon size to medium
-defaults write NSGlobalDomain NSTableViewDefaultSizeMode -int 2
+# WHAT: Sets Finder sidebar icon size to medium (value: 1=small, 2=medium, 3=large)
+# WHY: Medium size balances visibility with space efficiency in sidebar
+# STATUS: Active
+# COMPAT: All macOS versions
+# defaults write NSGlobalDomain NSTableViewDefaultSizeMode -int 2
 
-# Always show scrollbars
+# WHAT: Controls when scrollbars are visible (Always/WhenScrolling/Automatic)
+# WHY: "Always" shows scrollbars permanently for better scroll position awareness
+# STATUS: Commented out - Uses system default (Automatic)
+# COMPAT: All macOS versions; uncomment and set to "Always", "WhenScrolling", or "Automatic"
 #defaults write NSGlobalDomain AppleShowScrollBars -string "Always"
-# Possible values: `WhenScrolling`, `Automatic` and `Always`
 
-# Disable the over-the-top focus ring animation
+# WHAT: Disables animated blue focus ring around UI controls
+# WHY: Reduces visual distractions; improves performance on older Macs
+# STATUS: Commented out - Uses system default (animated)
+# COMPAT: All macOS versions
 #defaults write NSGlobalDomain NSUseAnimatedFocusRing -bool false
 
-# Disable smooth scrolling
-# (Uncomment if you’re on an older Mac that messes up the animation)
+# WHAT: Disables smooth scrolling animation
+# WHY: Useful on older Macs where smooth scrolling causes stuttering or lag
+# STATUS: Commented out - Uses system default (smooth scrolling enabled)
+# COMPAT: All macOS versions; uncomment only if experiencing scroll performance issues
 #defaults write NSGlobalDomain NSScrollAnimationEnabled -bool false
 
-# Increase window resize speed for Cocoa applications
+# WHAT: Sets window resize animation duration to 0.001 seconds (nearly instant)
+# WHY: Makes window resizing feel more responsive; reduces animation delay
+# STATUS: Active
+# COMPAT: All macOS versions; affects all Cocoa applications
 defaults write NSGlobalDomain NSWindowResizeTime -float 0.001
 
-# Expand save panel by default
+# WHAT: Expands save dialog to show full file browser by default
+# WHY: Provides immediate access to all folders without clicking disclosure triangle
+# STATUS: Active
+# COMPAT: All macOS versions; NSNavPanelExpandedStateForSaveMode2 for newer apps
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
 
-# Expand print panel by default
+# WHAT: Expands print dialog to show all options by default
+# WHY: Provides immediate access to advanced print settings without clicking "Show Details"
+# STATUS: Active
+# COMPAT: All macOS versions; PMPrintingExpandedStateForPrint2 for newer apps
 defaults write NSGlobalDomain PMPrintingExpandedStateForPrint -bool true
 defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true
 
-# Save to disk (not to iCloud) by default
+# WHAT: Sets default save location to local disk instead of iCloud Drive
+# WHY: Faster saves; avoids iCloud sync delays; keeps files local by default
+# STATUS: Active
+# COMPAT: macOS Lion 10.7+ (when iCloud Drive was introduced)
 defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
 
-# Automatically quit printer app once the print jobs complete
+# WHAT: Automatically closes printer utility app after print jobs finish
+# WHY: Reduces clutter; printer app serves no purpose after job completes
+# STATUS: Active
+# COMPAT: All macOS versions
 defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
 
-# Disable the “Are you sure you want to open this application?” dialog
+# WHAT: Disables Gatekeeper warning "Are you sure you want to open this application?"
+# WHY: Removes repetitive security prompt for downloaded applications
+# STATUS: Active - SECURITY RISK: Disables quarantine protection against malicious downloads
+# COMPAT: All macOS versions; reduces security - only enable if you trust all your downloads
 defaults write com.apple.LaunchServices LSQuarantine -bool false
 
-# Remove duplicates in the "Open With" menu (also see `lscleanup` alias)
-# Note: On modern macOS, this requires Full Disk Access for Terminal/iTerm
-# Grant access in: System Settings > Privacy & Security > Full Disk Access
+# WHAT: Rebuilds Launch Services database to remove duplicate "Open With" menu entries
+# WHY: Fixes cluttered "Open With" menus showing multiple copies of same app
+# STATUS: Active - Requires Full Disk Access on modern macOS
+# COMPAT: All macOS versions; grant Full Disk Access in System Settings > Privacy & Security on Sequoia+
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user 2>/dev/null || true
 
-# Display ASCII control characters using caret notation in standard text views
-# Try e.g. `cd /tmp; unidecode "\x{0000}" > cc.txt; open -e cc.txt`
+# WHAT: Shows ASCII control characters (0x00-0x1F) using caret notation (^@, ^A, etc.) in text views
+# WHY: Makes invisible control characters visible for debugging text files
+# STATUS: Active
+# COMPAT: All macOS versions; useful for developers working with binary/text files
 defaults write NSGlobalDomain NSTextShowsControlCharacters -bool true
 
-# Disable Resume system-wide
-defaults write com.apple.systempreferences NSQuitAlwaysKeepsWindows -bool false
+# WHAT: Disables Resume feature that reopens windows from previous session
+# WHY: Starts with clean slate; prevents reopening windows after crashes; improves privacy
+# STATUS: Active
+# COMPAT: macOS Lion 10.7+ (when Resume was introduced)
+# defaults write com.apple.systempreferences NSQuitAlwaysKeepsWindows -bool false
 
-# Disable automatic termination of inactive apps
+# WHAT: Prevents macOS from automatically terminating inactive applications
+# WHY: Keeps apps running in background; prevents data loss from unexpected termination
+# STATUS: Active
+# COMPAT: macOS Lion 10.7+ (when App Nap/automatic termination was introduced)
 defaults write NSGlobalDomain NSDisableAutomaticTermination -bool true
 
-# Disable the crash reporter
-defaults write com.apple.CrashReporter DialogType -string "none"
+# WHAT: Disables crash reporter dialog that appears after application crashes
+# WHY: Reduces interruptions; crash reports still saved to ~/Library/Logs/DiagnosticReports
+# STATUS: Active
+# COMPAT: All macOS versions; set to "none" (no dialog), "crashreport" (dialog), or "server" (send to Apple)
+# defaults write com.apple.CrashReporter DialogType -string "none"
 
-# Set Help Viewer windows to non-floating mode
-defaults write com.apple.helpviewer DevMode -bool true
+# WHAT: Makes Help Viewer windows behave like normal windows (not always-on-top)
+# WHY: Prevents Help windows from floating above all other windows; easier window management
+# STATUS: Active
+# COMPAT: All macOS versions
+# defaults write com.apple.helpviewer DevMode -bool true
 
-# Fix for the ancient UTF-8 bug in QuickLook (https://mths.be/bbo)
-# Commented out, as this is known to cause problems in various Adobe apps :(
-# See https://github.com/mathiasbynens/dotfiles/issues/237
+# WHAT: Sets text encoding to fix UTF-8 display issues in QuickLook
+# WHY: Fixes ancient bug where QuickLook couldn't display UTF-8 characters correctly
+# STATUS: Commented out - Known to cause problems in Adobe applications
+# COMPAT: All macOS versions; see https://github.com/mathiasbynens/dotfiles/issues/237
 #echo "0x08000100:0" > ~/.CFUserTextEncoding
 
-# Reveal IP address, hostname, OS version, etc. when clicking the clock
-# in the login window
+# WHAT: Shows system information (IP, hostname, OS version) when clicking clock on login screen
+# WHY: Useful for IT support, troubleshooting network issues, identifying machines
+# STATUS: Active
+# COMPAT: All macOS versions
 sudo defaults write /Library/Preferences/com.apple.loginwindow AdminHostInfo HostName
 
-# Disable Notification Center and remove the menu bar icon
+# WHAT: Disables Notification Center and removes its menu bar icon
+# WHY: Eliminates distractions; reclaims menu bar space
+# STATUS: Commented out - No longer works on modern macOS (Catalina 10.15+)
+# COMPAT: macOS Yosemite 10.10 - Mojave 10.14; deprecated on Catalina+ due to SIP
 #launchctl unload -w /System/Library/LaunchAgents/com.apple.notificationcenterui.plist 2> /dev/null
 
-# Disable automatic capitalization as it’s annoying when typing code
+# WHAT: Disables automatic capitalization of first letter in sentences
+# WHY: Prevents unwanted capitalization when typing code, commands, or technical content
+# STATUS: Commented out - Uses system default (enabled)
+# COMPAT: macOS Sierra 10.12+; uncomment if you frequently type code in text fields
 #defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
 
-# Disable smart dashes as they’re annoying when typing code
+# WHAT: Disables smart dashes (-- becomes em dash —, - becomes en dash –)
+# WHY: Prevents unwanted character substitution when typing code or technical documentation
+# STATUS: Commented out - Uses system default (enabled)
+# COMPAT: macOS Sierra 10.12+; uncomment if you frequently type code with dashes
 #defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
 
-# Disable automatic period substitution as it’s annoying when typing code
+# WHAT: Disables automatic period insertion after double-space
+# WHY: Prevents unwanted periods when typing code or using double-space intentionally
+# STATUS: Commented out - Uses system default (enabled)
+# COMPAT: macOS Sierra 10.12+; uncomment if you frequently type code
 #defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false
 
-# Disable smart quotes as they’re annoying when typing code
+# WHAT: Disables smart quotes (" " becomes " ", ' ' becomes ' ')
+# WHY: Prevents curly quotes that break code; keeps straight quotes for programming
+# STATUS: Commented out - Uses system default (enabled)
+# COMPAT: All macOS versions; uncomment if you frequently type code
 #defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
 
-# Disable auto-correct
+# WHAT: Disables automatic spelling correction
+# WHY: Prevents unwanted word changes; useful for technical writing, code, or non-English content
+# STATUS: Commented out - Uses system default (enabled)
+# COMPAT: All macOS versions; uncomment if auto-correct interferes with your work
 #defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
 
-# Set a custom wallpaper image. `DefaultDesktop.jpg` is already a symlink, and
-# all wallpapers are in `/Library/Desktop Pictures/`. The default is `Wave.jpg`.
+# WHAT: Sets custom desktop wallpaper by replacing system default
+# WHY: Allows setting wallpaper that persists across user accounts and system updates
+# STATUS: Commented out - Requires SIP disabled; not recommended
+# COMPAT: All macOS versions; protected by SIP on El Capitan 10.11+; use System Settings instead
 #rm -rf ~/Library/Application Support/Dock/desktoppicture.db
 #sudo rm -rf /System/Library/CoreServices/DefaultDesktop.jpg
 #sudo ln -s /path/to/your/image /System/Library/CoreServices/DefaultDesktop.jpg
@@ -137,57 +223,94 @@ sudo defaults write /Library/Preferences/com.apple.loginwindow AdminHostInfo Hos
 # Trackpad, mouse, keyboard, Bluetooth accessories, and input                 #
 ###############################################################################
 
-# Trackpad: enable tap to click for this user and for the login screen
+# WHAT: Enables tap-to-click on trackpad for current user and login screen
+# WHY: More convenient than physical click; reduces trackpad wear; quieter in meetings
+# STATUS: Commented out - Uses system default (disabled)
+# COMPAT: All macOS versions; requires three separate commands for full coverage
 #defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
 #defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 #defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 
-# Trackpad: map bottom right corner to right-click
+# WHAT: Maps bottom-right corner of trackpad to right-click (secondary click)
+# WHY: Provides right-click without two-finger tap; useful for users preferring corner clicks
+# STATUS: Commented out - Uses system default (two-finger tap for right-click)
+# COMPAT: All macOS versions; value 2 = bottom-right corner (1 = bottom-left)
 #defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadCornerSecondaryClick -int 2
 #defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadRightClick -bool true
 #defaults -currentHost write NSGlobalDomain com.apple.trackpad.trackpadCornerClickBehavior -int 1
 #defaults -currentHost write NSGlobalDomain com.apple.trackpad.enableSecondaryClick -bool true
 
-# Disable “natural” (Lion-style) scrolling
+# WHAT: Disables "natural" scrolling (reverses scroll direction to traditional)
+# WHY: Matches traditional mouse/Windows scrolling; preferred by users coming from other platforms
+# STATUS: Commented out - Uses system default (natural scrolling enabled)
+# COMPAT: macOS Lion 10.7+ (when natural scrolling was introduced); false = traditional scroll
 #defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
 
-# Increase sound quality for Bluetooth headphones/headsets
+# WHAT: Increases Bluetooth audio quality by setting minimum bitpool to 40
+# WHY: Improves audio quality for Bluetooth headphones; default range 4-64 is too low
+# STATUS: Active - Sets minimum to 40 (max is 80 for SBC codec)
+# COMPAT: All macOS versions; higher values = better quality but may cause stuttering on weak connections
 defaults write com.apple.BluetoothAudioAgent "Apple Bitpool Min (editable)" -int 40
 
-# Enable full keyboard access for all controls
-# (e.g. enable Tab in modal dialogs)
+# WHAT: Enables full keyboard access for all UI controls (mode 3)
+# WHY: Allows Tab key to navigate all controls including buttons in dialogs, not just text fields
+# STATUS: Active - Mode 3 enables Tab navigation for all controls
+# COMPAT: All macOS versions; mode 1 = text boxes only, mode 3 = all controls
 defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
 
-# Use scroll gesture with the Ctrl (^) modifier key to zoom
+# WHAT: Enables zoom functionality using Ctrl+scroll gesture
+# WHY: Provides screen magnification for accessibility; useful for presentations or vision assistance
+# STATUS: Active - Ctrl (^) modifier + scroll wheel/gesture to zoom
+# COMPAT: All macOS versions; HIDScrollZoomModifierMask 262144 = Ctrl key
 defaults write com.apple.universalaccess closeViewScrollWheelToggle -bool true
 defaults write com.apple.universalaccess HIDScrollZoomModifierMask -int 262144
-# Follow the keyboard focus while zoomed in
+
+# WHAT: Makes zoom follow keyboard focus (cursor position)
+# WHY: Automatically pans zoomed view to show where you're typing
+# STATUS: Active - Zoom follows text cursor and UI focus
+# COMPAT: All macOS versions; useful when zoom is enabled
 defaults write com.apple.universalaccess closeViewZoomFollowsFocus -bool true
 
-# Disable press-and-hold for keys in favor of key repeat
+# WHAT: Disables press-and-hold for accent characters, enables key repeat instead
+# WHY: Allows holding keys to repeat (like vim hjkl navigation); disables accent menu popup
+# STATUS: Active - Essential for developers and vim users
+# COMPAT: macOS Lion 10.7+ (when press-and-hold was introduced); false = key repeat enabled
 defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
 
-# Set a blazingly fast keyboard repeat rate
+# WHAT: Sets extremely fast keyboard repeat rate (1 = 15ms, fastest possible)
+# WHY: Makes cursor movement and text editing much faster; preferred by power users
+# STATUS: Active - KeyRepeat 1 = 15ms between repeats, InitialKeyRepeat 10 = 150ms initial delay
+# COMPAT: All macOS versions; normal minimum is KeyRepeat 2 (30ms), InitialKeyRepeat 15 (225ms)
+# WARNING: Values below 10 for InitialKeyRepeat may cause unintended repeated characters
 defaults write NSGlobalDomain KeyRepeat -int 1
 defaults write NSGlobalDomain InitialKeyRepeat -int 10
 
-# Set language and text formats
-# Configured via .extra file (MACOS_LANGUAGES, MACOS_LOCALE, etc.)
+# WHAT: Sets system language, locale, measurement units, and metric system preferences
+# WHY: Configures regional settings for language, date/time formats, currency, and units
+# STATUS: Active - Uses variables from ~/.extra file (MACOS_LANGUAGES, MACOS_LOCALE, etc.)
+# COMPAT: All macOS versions; AppleLanguages accepts array of language codes (e.g., "en" "es")
 defaults write NSGlobalDomain AppleLanguages -array ${MACOS_LANGUAGES[@]}
 defaults write NSGlobalDomain AppleLocale -string "$MACOS_LOCALE"
 defaults write NSGlobalDomain AppleMeasurementUnits -string "$MACOS_MEASUREMENT_UNITS"
 defaults write NSGlobalDomain AppleMetricUnits -bool $MACOS_METRIC_UNITS
 
-# Show language menu in the top right corner of the boot screen
+# WHAT: Shows language/input method menu in menu bar on login screen
+# WHY: Allows selecting keyboard layout before logging in; useful for multilingual users
+# STATUS: Active
+# COMPAT: All macOS versions
 sudo defaults write /Library/Preferences/com.apple.loginwindow showInputMenu -bool true
 
-# Set the timezone; see `sudo systemsetup -listtimezones` for other values
+# WHAT: Sets system timezone
+# WHY: Ensures correct time display and scheduling; uses MACOS_TIMEZONE variable from ~/.extra
+# STATUS: Active - Run `sudo systemsetup -listtimezones` to see available values
+# COMPAT: All macOS versions; example values: "Europe/Madrid", "America/New_York", "Asia/Tokyo"
 sudo systemsetup -settimezone "$MACOS_TIMEZONE" > /dev/null
 
-# Stop Music/iTunes from responding to the keyboard media keys
-# Note: This path doesn't exist on macOS Catalina+ (Music.app replaced iTunes)
-# On modern macOS, use: launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist
-# However, this file no longer exists, so this command is kept for backwards compatibility only
+# WHAT: Prevents Music/iTunes from responding to keyboard media keys (play/pause, next, previous)
+# WHY: Stops Music app from hijacking media keys; allows other apps to use them
+# STATUS: Commented out - File no longer exists on macOS Catalina 10.15+
+# COMPAT: macOS Mojave 10.14 and earlier; deprecated on Catalina+ when iTunes became Music.app
+# NOTE: On modern macOS, media keys are controlled by the active media app automatically
 if [ -f /System/Library/LaunchAgents/com.apple.rcd.plist ]; then
     launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2>/dev/null || true
 fi
@@ -196,46 +319,68 @@ fi
 # Energy saving                                                               #
 ###############################################################################
 
-# Enable lid wakeup
+# WHAT: Enables waking Mac when laptop lid is opened
+# WHY: Convenient automatic wake when opening laptop; standard expected behavior
+# STATUS: Active - Applies to all power sources (-a flag)
+# COMPAT: All macOS versions; 1 = enabled, 0 = disabled
 sudo pmset -a lidwake 1
 
-# Restart automatically on power loss
+# WHAT: Automatically restarts Mac after power loss (AC power restored)
+# WHY: Ensures servers/always-on Macs resume operation after power outages
+# STATUS: Active - Applies to all power sources
+# COMPAT: All macOS versions; useful for home servers, media centers, or critical systems
 sudo pmset -a autorestart 1
 
-# Restart automatically if the computer freezes
+# WHAT: Automatically restarts Mac if system freezes/hangs
+# WHY: Provides automatic recovery from system hangs; reduces downtime
+# STATUS: Active
+# COMPAT: All macOS versions; uses systemsetup command (not pmset)
 sudo systemsetup -setrestartfreeze on
 
-# Sleep the display after 15 minutes
+# WHAT: Sets display sleep timeout to 15 minutes
+# WHY: Saves energy and prevents screen burn-in while keeping system responsive
+# STATUS: Active - Applies to all power sources
+# COMPAT: All macOS versions; value in minutes
 sudo pmset -a displaysleep 15
 
-# Disable machine sleep while charging
+# WHAT: Disables system sleep when connected to AC power (charging)
+# WHY: Keeps Mac always available when plugged in; useful for servers or development machines
+# STATUS: Active - Only applies to AC power (-c flag)
+# COMPAT: All macOS versions; 0 = never sleep
 sudo pmset -c sleep 0
 
-# Set machine sleep to 5 minutes on battery
+# WHAT: Sets system sleep timeout to 5 minutes when on battery power
+# WHY: Conserves battery life when unplugged; balances power saving with convenience
+# STATUS: Active - Only applies to battery power (-b flag)
+# COMPAT: All macOS versions; value in minutes
 sudo pmset -b sleep 5
 
-# Set standby delay to 24 hours (default is 1 hour)
+# WHAT: Sets standby delay to 24 hours (86400 seconds)
+# WHY: Delays deep sleep/hibernation; keeps Mac in regular sleep for faster wake
+# STATUS: Active - Default is 1 hour (3600 seconds)
+# COMPAT: All macOS versions; standby writes RAM to disk and powers off RAM to save battery
 sudo pmset -a standbydelay 86400
 
-# Never go into computer sleep mode
+# WHAT: Disables automatic system sleep entirely
+# WHY: Keeps Mac always on (display may still sleep); overrides other sleep settings
+# STATUS: Active - Conflicts with per-power-source sleep settings above
+# COMPAT: All macOS versions; "Off" = never sleep, or specify minutes
+# NOTE: This overrides the battery sleep setting above; consider removing one or the other
 sudo systemsetup -setcomputersleep Off > /dev/null
 
-# Hibernation mode
-# 0: Disable hibernation (speeds up entering sleep mode)
-# 3: Copy RAM to disk so the system state can still be restored in case of a
-#    power failure.
-# Note: On Apple Silicon, hibernation (mode 3) is efficient and recommended.
-# On Intel Macs, mode 0 was preferred to save disk space.
-# Commented out to use system defaults (mode 3 on Apple Silicon).
+# WHAT: Sets hibernation mode (how Mac saves state during sleep)
+# WHY: Mode 0 = no hibernation (faster sleep/wake), Mode 3 = save RAM to disk (safe sleep)
+# STATUS: Commented out - Uses system default (mode 3)
+# COMPAT: All macOS versions; mode 0 saves disk space, mode 3 protects against power loss
+# NOTE: Mode 3 recommended for Apple Silicon (efficient), mode 0 was preferred on Intel (saves space)
 #sudo pmset -a hibernatemode 0
 
-# Remove the sleep image file to save disk space
-# Note: Commented out as this can cause data loss if power is lost during sleep.
-# The sleepimage file stores RAM contents for hibernation (safe sleep mode).
-# On Intel Macs, this can be several GB. On Apple Silicon, hibernation is more efficient.
-# This removes the file and prevents it from being recreated to save disk space.
-# Trade-off: If power is lost during sleep, you may lose unsaved work.
-# Uncomment if you want to save disk space and accept the risk.
+# WHAT: Removes sleep image file and prevents recreation to save disk space
+# WHY: Sleep image can be several GB (size of RAM); reclaims disk space
+# STATUS: Commented out - RISK: Data loss if power fails during sleep
+# COMPAT: All macOS versions; sleepimage stores RAM contents for hibernation
+# WARNING: Without sleepimage, losing power during sleep = losing unsaved work
+# NOTE: More important on Intel Macs (large files); Apple Silicon hibernation is more efficient
 # if [ -f /private/var/vm/sleepimage ]; then
 #     sudo rm -f /private/var/vm/sleepimage
 #     # Create a zero-byte file instead…
@@ -248,141 +393,245 @@ sudo systemsetup -setcomputersleep Off > /dev/null
 # Screen                                                                      #
 ###############################################################################
 
-# Require password immediately after sleep or screen saver begins
+# WHAT: Requires password immediately when screen saver starts or Mac sleeps
+# WHY: Maximum security; prevents unauthorized access when stepping away
+# STATUS: Active - askForPassword 1 = enabled, askForPasswordDelay 0 = no grace period
+# COMPAT: All macOS versions; delay in seconds (0 = immediate)
 defaults write com.apple.screensaver askForPassword -int 1
 defaults write com.apple.screensaver askForPasswordDelay -int 0
 
-# Save screenshots to the desktop
+# WHAT: Sets default location for screenshots to Desktop
+# WHY: Easy to find screenshots; Desktop is default and most convenient location
+# STATUS: Active - Can be changed to any path (e.g., ~/Pictures/Screenshots)
+# COMPAT: All macOS versions; use full path with ${HOME} variable
 defaults write com.apple.screencapture location -string "${HOME}/Desktop"
 
-# Save screenshots in PNG format (other options: BMP, GIF, JPG, PDF, TIFF)
+# WHAT: Sets screenshot format to PNG (lossless compression)
+# WHY: PNG provides best quality for screenshots; smaller than TIFF, better than JPG
+# STATUS: Active - Other options: BMP, GIF, JPG, PDF, TIFF
+# COMPAT: All macOS versions; PNG is recommended for text/UI screenshots
 defaults write com.apple.screencapture type -string "png"
 
-# Disable shadow in screenshots
+# WHAT: Disables drop shadow effect in window screenshots
+# WHY: Cleaner screenshots without shadow; better for documentation/presentations
+# STATUS: Commented out - Uses system default (shadow enabled)
+# COMPAT: All macOS versions; uncomment to remove shadows from screenshots
 #defaults write com.apple.screencapture disable-shadow -bool true
 
-# Enable subpixel font rendering on non-Apple LCDs
-# Reference: https://github.com/kevinSuttle/macOS-Defaults/issues/17#issuecomment-266633501
+# WHAT: Enables subpixel font rendering on non-Apple displays
+# WHY: Improves text clarity on external monitors; compensates for different pixel layouts
+# STATUS: Active - Value 1 = light smoothing (recommended for most displays)
+# COMPAT: All macOS versions; values: 0=off, 1=light, 2=medium, 3=strong
+# NOTE: May cause blurry text on Retina displays; test on your specific monitor
 defaults write NSGlobalDomain AppleFontSmoothing -int 1
 
-# Enable HiDPI display modes (requires restart)
+# WHAT: Enables HiDPI (Retina) display modes for non-Retina displays
+# WHY: Allows scaling options for sharper text on high-resolution external monitors
+# STATUS: Active - Requires restart to take effect
+# COMPAT: All macOS versions; enables additional resolution options in System Settings
 sudo defaults write /Library/Preferences/com.apple.windowserver DisplayResolutionEnabled -bool true
 
 ###############################################################################
 # Finder                                                                      #
 ###############################################################################
 
-# Finder: allow quitting via ⌘ + Q; doing so will also hide desktop icons
+# WHAT: Adds "Quit Finder" menu item (⌘+Q) to Finder menu bar
+# WHY: Allows quitting Finder to hide desktop icons; useful for presentations or screenshots
+# STATUS: Active - Quitting Finder also hides all desktop icons
+# COMPAT: All macOS versions; Finder automatically relaunches when needed
 defaults write com.apple.finder QuitMenuItem -bool true
 
-# Finder: disable window animations and Get Info animations
+# WHAT: Disables Finder window animations and Get Info window animations
+# WHY: Faster Finder operations; reduces visual distractions; improves performance on older Macs
+# STATUS: Active - Affects window opening/closing and Get Info panel animations
+# COMPAT: All macOS versions
 defaults write com.apple.finder DisableAllAnimations -bool true
 
-# Set Desktop as the default location for new Finder windows
-# For other paths, use `PfLo` and `file:///full/path/here/`
+# WHAT: Sets Desktop as default location for new Finder windows
+# WHY: Convenient starting point; Desktop is easily accessible
+# STATUS: Active - Other options: PfHm (Home), PfDo (Documents), PfLo (custom path)
+# COMPAT: All macOS versions; use NewWindowTargetPath for custom locations
 defaults write com.apple.finder NewWindowTarget -string "PfDe"
 defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/Desktop/"
 
-# Show icons for hard drives, servers, and removable media on the desktop
+# WHAT: Shows icons for drives and volumes on Desktop
+# WHY: Quick access to external drives, network shares, and internal volumes
+# STATUS: Active - Shows all types of storage devices on Desktop
+# COMPAT: All macOS versions; useful for users who frequently access external storage
 defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true
 defaults write com.apple.finder ShowHardDrivesOnDesktop -bool true
 defaults write com.apple.finder ShowMountedServersOnDesktop -bool true
 defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true
 
-# Finder: show hidden files by default
-#defaults write com.apple.finder AppleShowAllFiles -bool true
+# WHAT: Shows hidden files and folders in Finder (files starting with .)
+# WHY: Access to system files, dotfiles, and hidden configuration files
+# STATUS: Commented out - Uses system default (hidden files not shown)
+# COMPAT: All macOS versions; useful for developers; can clutter Finder for regular users
+defaults write com.apple.finder AppleShowAllFiles -bool true
 
-# Finder: show all filename extensions
+# WHAT: Shows file extensions for all files in Finder
+# WHY: Prevents file type confusion; important for security (e.g., .exe vs .pdf)
+# STATUS: Active - Overrides per-file "Hide extension" checkbox
+# COMPAT: All macOS versions; recommended for developers and power users
 defaults write NSGlobalDomain AppleShowAllExtensions -bool true
 
-# Finder: show status bar
+# WHAT: Shows status bar at bottom of Finder windows
+# WHY: Displays item count, available space, and selection info
+# STATUS: Active - Shows useful information about current folder
+# COMPAT: All macOS versions
 defaults write com.apple.finder ShowStatusBar -bool true
 
-# Finder: show path bar
+# WHAT: Shows path bar at bottom of Finder windows (below status bar)
+# WHY: Displays current folder hierarchy; allows quick navigation to parent folders
+# STATUS: Active - Shows clickable path breadcrumbs
+# COMPAT: All macOS versions
 defaults write com.apple.finder ShowPathbar -bool true
 
-# Display full POSIX path as Finder window title
+# WHAT: Shows full POSIX path in Finder window title bar
+# WHY: Displays complete file path (e.g., /Users/username/Documents); useful for developers
+# STATUS: Active - Replaces folder name with full path in title
+# COMPAT: All macOS versions; helpful for terminal users
 defaults write com.apple.finder _FXShowPosixPathInTitle -bool true
 
-# Keep folders on top when sorting by name
-defaults write com.apple.finder _FXSortFoldersFirst -bool true
+# WHAT: Keeps folders at top when sorting files by name
+# WHY: Folders always appear before files; matches Windows behavior; easier navigation
+# STATUS: Active - Applies to all Finder view modes
+# COMPAT: macOS Sierra 10.12+
+# defaults write com.apple.finder _FXSortFoldersFirst -bool true
 
-# When performing a search, search the current folder by default
+# WHAT: Sets default search scope to current folder (SCcf)
+# WHY: Searches only current folder instead of entire Mac; faster, more relevant results
+# STATUS: Active - Other options: SCev (This Mac), SCsp (Previous Scope)
+# COMPAT: All macOS versions
 defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
 
-# Disable the warning when changing a file extension
+# WHAT: Disables warning dialog when changing file extension
+# WHY: Removes annoying confirmation; useful when frequently renaming files
+# STATUS: Active - No warning when changing .txt to .md, etc.
+# COMPAT: All macOS versions; be careful not to accidentally break file associations
 defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
 
-# Enable spring loading for directories
+# WHAT: Enables spring-loaded folders (drag file over folder, it opens automatically)
+# WHY: Allows dragging files deep into folder hierarchies without multiple windows
+# STATUS: Active - Hold file over folder briefly to open it
+# COMPAT: All macOS versions; classic Mac OS feature
 defaults write NSGlobalDomain com.apple.springing.enabled -bool true
 
-# Remove the spring loading delay for directories
+# WHAT: Removes delay before spring-loaded folders open (instant opening)
+# WHY: Faster navigation when dragging files; no waiting
+# STATUS: Active - Folders open immediately when hovering with dragged file
+# COMPAT: All macOS versions; 0 = instant, default is ~0.5 seconds
 defaults write NSGlobalDomain com.apple.springing.delay -float 0
 
-# Avoid creating .DS_Store files on network or USB volumes
+# WHAT: Prevents creation of .DS_Store files on network and USB volumes
+# WHY: Avoids cluttering network shares and USB drives with macOS metadata files
+# STATUS: Active - .DS_Store files still created on local drives
+# COMPAT: All macOS versions; .DS_Store stores Finder view settings (icon positions, etc.)
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 
-# Disable disk image verification
+# WHAT: Disables verification of disk images (DMG files) when mounting
+# WHY: Speeds up mounting of disk images; skips integrity checks
+# STATUS: Active - Applies to all disk images (read-only, locked, and remote)
+# COMPAT: All macOS versions; reduces security - corrupted DMGs won't be detected
 defaults write com.apple.frameworks.diskimages skip-verify -bool true
 defaults write com.apple.frameworks.diskimages skip-verify-locked -bool true
 defaults write com.apple.frameworks.diskimages skip-verify-remote -bool true
 
-# Automatically open a new Finder window when a volume is mounted
+# WHAT: Automatically opens Finder window when volumes are mounted
+# WHY: Convenient access to newly mounted drives, disk images, and removable media
+# STATUS: Active - Opens window for all volume types (read-only, read-write, removable)
+# COMPAT: All macOS versions; auto-open-ro-root = read-only, auto-open-rw-root = read-write
 defaults write com.apple.frameworks.diskimages auto-open-ro-root -bool true
 defaults write com.apple.frameworks.diskimages auto-open-rw-root -bool true
 defaults write com.apple.finder OpenWindowForNewRemovableDisk -bool true
-
-# Show item info near icons on the desktop and in other icon views
+# YO!
+# WHAT: Shows file information (size, kind, date) below icon names in icon view
+# WHY: Provides quick file details without opening Get Info; useful for file management
+# STATUS: Active - Applies to Desktop, standard folders (FK_), and all icon views
+# COMPAT: All macOS versions; uses PlistBuddy to modify Finder preferences directly
+# NOTE: DesktopViewSettings = Desktop, FK_StandardViewSettings = new folders, StandardViewSettings = existing folders
 /usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:showItemInfo true" ~/Library/Preferences/com.apple.finder.plist
 /usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:showItemInfo true" ~/Library/Preferences/com.apple.finder.plist
 /usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:showItemInfo true" ~/Library/Preferences/com.apple.finder.plist
 
-# Show item info to the right of the icons on the desktop
+# WHAT: Positions icon labels to the right of icons instead of below (Desktop only)
+# WHY: Saves vertical space on Desktop; allows more icons in same area
+# STATUS: Active - Only affects Desktop view (labelOnBottom false = label on right)
+# COMPAT: All macOS versions; classic Mac OS style
 /usr/libexec/PlistBuddy -c "Set DesktopViewSettings:IconViewSettings:labelOnBottom false" ~/Library/Preferences/com.apple.finder.plist
+# Undo:
+# /usr/libexec/PlistBuddy -c "Set DesktopViewSettings:IconViewSettings:labelOnBottom true" ~/Library/Preferences/com.apple.finder.plist
 
-# Enable snap-to-grid for icons on the desktop and in other icon views
+# WHAT: Enables snap-to-grid for icons in icon view (auto-arranges icons in grid)
+# WHY: Keeps icons organized and aligned; prevents overlapping icons
+# STATUS: Active - Applies to Desktop and all icon view folders
+# COMPAT: All macOS versions; "grid" = snap to grid, "none" = free positioning
 /usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
 /usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
 /usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:arrangeBy grid" ~/Library/Preferences/com.apple.finder.plist
 
-# Increase grid spacing for icons on the desktop and in other icon views
-/usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:gridSpacing 100" ~/Library/Preferences/com.apple.finder.plist
-/usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:gridSpacing 100" ~/Library/Preferences/com.apple.finder.plist
-/usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:gridSpacing 100" ~/Library/Preferences/com.apple.finder.plist
+# WHAT: Sets grid spacing to 100 pixels between icons in icon view
+# WHY: Provides more breathing room between icons; easier to read labels
+# STATUS: Active - Larger spacing than default (~54 pixels)
+# COMPAT: All macOS versions; range typically 0-200 pixels
+# /usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:gridSpacing 100" ~/Library/Preferences/com.apple.finder.plist
+# /usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:gridSpacing 100" ~/Library/Preferences/com.apple.finder.plist
+# /usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:gridSpacing 100" ~/Library/Preferences/com.apple.finder.plist
 
-# Increase the size of icons on the desktop and in other icon views
-/usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:iconSize 80" ~/Library/Preferences/com.apple.finder.plist
-/usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:iconSize 80" ~/Library/Preferences/com.apple.finder.plist
-/usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:iconSize 80" ~/Library/Preferences/com.apple.finder.plist
+# WHAT: Sets icon size to 80 pixels in icon view
+# WHY: Larger icons are easier to see and identify; good for high-resolution displays
+# STATUS: Active - Larger than default (64 pixels)
+# COMPAT: All macOS versions; range typically 16-512 pixels
+# /usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:iconSize 80" ~/Library/Preferences/com.apple.finder.plist
+# /usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:iconSize 80" ~/Library/Preferences/com.apple.finder.plist
+# /usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:iconSize 80" ~/Library/Preferences/com.apple.finder.plist
 
-# Use list view in all Finder windows by default
-# Four-letter codes for the other view modes: `icnv`, `clmv`, `glyv`
+# WHAT: Sets default Finder view mode to List view (Nlsv) for all new windows
+# WHY: List view shows more files at once; better for file management and sorting
+# STATUS: Active - Other view modes: icnv (Icon), clmv (Column), Flwv (Cover Flow), glyv (Gallery)
+# COMPAT: All macOS versions; glyv (Gallery view) available on macOS Mojave 10.14+
 defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
 
-# Disable the warning before emptying the Trash
+# WHAT: Disables warning dialog when emptying Trash
+# WHY: Removes confirmation step; faster Trash emptying
+# STATUS: Active - No "Are you sure?" prompt when emptying Trash
+# COMPAT: All macOS versions; be careful not to accidentally delete important files
 defaults write com.apple.finder WarnOnEmptyTrash -bool false
 
-# Enable AirDrop over Ethernet and on unsupported Macs running Lion
+# WHAT: Enables AirDrop over Ethernet and on older/unsupported Macs
+# WHY: Allows AirDrop to work on wired connections and Macs that don't officially support it
+# STATUS: Active - BrowseAllInterfaces enables AirDrop on all network interfaces
+# COMPAT: macOS Lion 10.7+ (when AirDrop was introduced); useful for older Macs or wired networks
 defaults write com.apple.NetworkBrowser BrowseAllInterfaces -bool true
 
-# Show the ~/Library folder
-# Note: xattr removal may fail on modern macOS due to SIP, but chflags still works
+# WHAT: Makes ~/Library folder visible in Finder
+# WHY: Access to application support files, preferences, and caches; essential for troubleshooting
+# STATUS: Active - chflags removes hidden flag; xattr removes Finder metadata
+# COMPAT: All macOS versions; xattr may fail on modern macOS due to SIP (error suppressed)
+# NOTE: Library folder contains important system files; be careful when modifying contents
 chflags nohidden ~/Library
 xattr -d com.apple.FinderInfo ~/Library 2>/dev/null || true
 
-# Show the /Volumes folder
-# Note: This is protected by SIP on modern macOS and will fail unless SIP is disabled
-# Skipping this command on macOS Catalina+ as it's not recommended to disable SIP
-# Uncomment only if you've disabled SIP and understand the security implications
+# WHAT: Makes /Volumes folder visible in Finder
+# WHY: Shows all mounted volumes in one location; useful for managing multiple drives
+# STATUS: Commented out - Protected by SIP on macOS El Capitan 10.11+
+# COMPAT: macOS El Capitan 10.11+; requires SIP disabled (not recommended)
+# NOTE: Disabling SIP reduces system security; only do this if absolutely necessary
 # sudo chflags nohidden /Volumes 2>/dev/null || true
+# How can we do that then? 
 
-# Remove Dropbox’s green checkmark icons in Finder
-file=/Applications/Dropbox.app/Contents/Resources/emblem-dropbox-uptodate.icns
-[ -e "${file}" ] && mv -f "${file}" "${file}.bak"
+# WHAT: Removes Dropbox's green checkmark overlay icons from Finder
+# WHY: Reduces visual clutter; Dropbox sync status icons can be distracting
+# STATUS: Active - Renames icon file to .bak if Dropbox is installed
+# COMPAT: All macOS versions with Dropbox installed; harmless if Dropbox not present
+# file=/Applications/Dropbox.app/Contents/Resources/emblem-dropbox-uptodate.icns
+# [ -e "${file}" ] && mv -f "${file}" "${file}.bak"
 
-# Expand the following File Info panes:
-# “General”, “Open with”, and “Sharing & Permissions”
+# WHAT: Expands File Info panes by default in Get Info window (⌘+I)
+# WHY: Shows General, Open With, and Permissions sections without clicking disclosure triangles
+# STATUS: Active - Saves clicks when viewing file information
+# COMPAT: All macOS versions; FXInfoPanesExpanded dictionary controls which panes are expanded
 defaults write com.apple.finder FXInfoPanesExpanded -dict \
 	General -bool true \
 	OpenWith -bool true \
@@ -392,100 +641,192 @@ defaults write com.apple.finder FXInfoPanesExpanded -dict \
 # Dock, Dashboard, and hot corners                                            #
 ###############################################################################
 
-# Enable highlight hover effect for the grid view of a stack (Dock)
+# WHAT: Enables highlight effect when hovering over Dock stack icons in grid view
+# WHY: Visual feedback when hovering over stacked folders; easier to see which item you're about to click
+# STATUS: Active
+# COMPAT: All macOS versions; only affects stacks (folders) in Dock, not app icons
 defaults write com.apple.dock mouse-over-hilite-stack -bool true
 
-# Set the icon size of Dock items to 36 pixels
-defaults write com.apple.dock tilesize -int 36
+# WHAT: Sets Dock icon size to 36 pixels
+# WHY: Smaller icons save screen space; allows more apps in Dock
+# STATUS: Active - Default is typically 48-64 pixels
+# COMPAT: All macOS versions; range 16-128 pixels
+# defaults write com.apple.dock tilesize -int 36
 
-# Change minimize/maximize window effect
-defaults write com.apple.dock mineffect -string "scale"
+# WHAT: Sets window minimize animation effect to "scale" (zoom effect)
+# WHY: Faster than "genie" effect; less distracting; better performance
+# STATUS: Active - Other options: "genie" (classic), "suck" (deprecated)
+# COMPAT: All macOS versions; "scale" is faster and more modern
+# defaults write com.apple.dock mineffect -string "scale"
+# TODO: the defalt in sequoia is: "genie"? research
 
-# Minimize windows into their application’s icon
+# WHAT: Minimizes windows into their application's Dock icon instead of separate window tile
+# WHY: Reduces Dock clutter; keeps related windows grouped with their app
+# STATUS: Active - Windows minimize into app icon, not separate tile in Dock
+# COMPAT: All macOS versions
 defaults write com.apple.dock minimize-to-application -bool true
 
-# Enable spring loading for all Dock items
+# WHAT: Enables spring-loading for all Dock items (drag file over app to open it)
+# WHY: Allows opening apps by hovering with dragged file; useful for "Open With" workflow
+# STATUS: Active - Hold file over Dock app icon briefly to launch app
+# COMPAT: All macOS versions; similar to Finder spring-loaded folders
 defaults write com.apple.dock enable-spring-load-actions-on-all-items -bool true
 
-# Show indicator lights for open applications in the Dock
+# WHAT: Shows indicator lights (dots) under running applications in Dock
+# WHY: Visual indication of which apps are currently running
+# STATUS: Active - Small dot appears under active app icons
+# COMPAT: All macOS versions; standard macOS behavior
 defaults write com.apple.dock show-process-indicators -bool true
+# TODO: if this is the standard behavior, why is it being set?
 
-# Wipe all (default) app icons from the Dock
-# This is only really useful when setting up a new Mac, or if you don’t use
-# the Dock to launch apps.
-defaults write com.apple.dock persistent-apps -array
+# WHAT: Removes all default application icons from Dock
+# WHY: Clean slate for customizing Dock; useful for new Mac setup or minimal Dock users
+# STATUS: Active - Empties persistent-apps array (removes all pinned apps)
+# COMPAT: All macOS versions; only removes pinned apps, running apps still appear
+# NOTE: Useful when setting up new Mac or if you don't use Dock to launch apps
+# defaults write com.apple.dock persistent-apps -array
 
-# Show only open applications in the Dock
+# WHAT: Shows only currently running applications in Dock (hides pinned apps)
+# WHY: Minimal Dock showing only active apps; reduces clutter
+# STATUS: Commented out - Uses system default (shows both pinned and running apps)
+# COMPAT: All macOS versions; uncomment for ultra-minimal Dock
 #defaults write com.apple.dock static-only -bool true
 
-# Don’t animate opening applications from the Dock
-defaults write com.apple.dock launchanim -bool false
+# WHAT: Disables bounce animation when launching apps from Dock
+# WHY: Faster app launches; reduces visual distractions
+# STATUS: Active - Apps launch without bouncing icon animation
+# COMPAT: All macOS versions
+# defaults write com.apple.dock launchanim -bool false
 
-# Speed up Mission Control animations
+# WHAT: Speeds up Mission Control animation to 0.1 seconds (nearly instant)
+# WHY: Faster workspace switching; more responsive multitasking
+# STATUS: Active - Default is ~0.75 seconds
+# COMPAT: All macOS versions; affects Mission Control, Spaces, and Exposé animations
 defaults write com.apple.dock expose-animation-duration -float 0.1
+#  TODO: doesnt seem to make any difference, just tested it and it looks the same
 
-# Don’t group windows by application in Mission Control
-# (i.e. use the old Exposé behavior instead)
+# WHAT: Disables grouping windows by application in Mission Control
+# WHY: Shows all windows individually like classic Exposé; easier to find specific windows
+# STATUS: Active - Windows spread out individually instead of grouped by app
+# COMPAT: macOS Sequoia 15.0+ uses 'expose-group-apps', older versions use 'expose-group-by-app'
+# NOTE: In Sequoia, the key was renamed from 'expose-group-by-app' to 'expose-group-apps'
+#       The old key (expose-group-by-app) is kept for backwards compatibility but is no longer active
+defaults write com.apple.dock expose-group-apps -bool false
 defaults write com.apple.dock expose-group-by-app -bool false
 
-# Disable Dashboard (removed in macOS Catalina+, kept for compatibility)
+# WHAT: Disables Dashboard (widget layer)
+# WHY: Dashboard is deprecated and removed; reclaims system resources
+# STATUS: Commented out - Dashboard removed in macOS Catalina 10.15+
+# COMPAT: macOS Yosemite 10.10 - Mojave 10.14; no effect on Catalina+
+# NOTE: Dashboard was replaced by Notification Center widgets
 # defaults write com.apple.dashboard mcx-disabled -bool true
+# TODO: is that even needed anymore?
 
-# Don't show Dashboard as a Space (removed in macOS Catalina+)
+# WHAT: Prevents Dashboard from appearing as a separate Space
+# WHY: Keeps Dashboard as overlay instead of full-screen Space
+# STATUS: Commented out - Dashboard removed in macOS Catalina 10.15+
+# COMPAT: macOS Yosemite 10.10 - Mojave 10.14; no effect on Catalina+
 # defaults write com.apple.dock dashboard-in-overlay -bool true
 
-# Don’t automatically rearrange Spaces based on most recent use
+# WHAT: Disables automatic rearrangement of Spaces based on recent use
+# WHY: Keeps Spaces in fixed order; prevents confusing reordering
+# STATUS: Active - Spaces stay in the order you arrange them
+# COMPAT: macOS Lion 10.7+ (when Spaces was introduced); false = fixed order
 defaults write com.apple.dock mru-spaces -bool false
 
-# Remove the auto-hiding Dock delay
+# WHAT: Removes delay before Dock appears when auto-hide is enabled
+# WHY: Instant Dock appearance when cursor reaches screen edge
+# STATUS: Active - Dock appears immediately (0 seconds delay)
+# COMPAT: All macOS versions; default delay is ~0.5 seconds
 defaults write com.apple.dock autohide-delay -float 0
-# Remove the animation when hiding/showing the Dock
-defaults write com.apple.dock autohide-time-modifier -float 0
 
-# Automatically hide and show the Dock
+# WHAT: Removes animation when showing/hiding Dock
+# WHY: Instant Dock show/hide; more responsive feel
+# STATUS: Active - Dock appears/disappears instantly without slide animation
+# COMPAT: All macOS versions; 0 = instant, default is ~0.5 seconds
+# defaults write com.apple.dock autohide-time-modifier -float 0
+
+# WHAT: Enables auto-hide for Dock (hides when not in use)
+# WHY: Maximizes screen space; Dock appears when cursor reaches screen edge
+# STATUS: Active - Dock automatically hides when not needed
+# COMPAT: All macOS versions; standard feature
 defaults write com.apple.dock autohide -bool true
 
-# Make Dock icons of hidden applications translucent
+# WHAT: Makes icons of hidden applications translucent/dimmed in Dock
+# WHY: Visual indication of which apps are hidden (⌘+H); easier to identify hidden apps
+# STATUS: Active - Hidden app icons appear semi-transparent
+# COMPAT: All macOS versions
 defaults write com.apple.dock showhidden -bool true
 
-# Don’t show recent applications in Dock
-defaults write com.apple.dock show-recents -bool false
+# WHAT: Disables "Recent Applications" section in Dock
+# WHY: Reduces Dock clutter; prevents automatic addition of recently used apps
+# STATUS: Active - No recent apps section appears in Dock
+# COMPAT: macOS Mojave 10.14+ (when recent apps feature was added)
+# defaults write com.apple.dock show-recents -bool false
 
-# Disable the Launchpad gesture (pinch with thumb and three fingers)
+# WHAT: Disables Launchpad gesture (pinch with thumb and three fingers)
+# WHY: Prevents accidental Launchpad activation; frees up gesture for other uses
+# STATUS: Commented out - Uses system default (gesture enabled)
+# COMPAT: All macOS versions with trackpad; 0 = disabled, 1 = enabled
 #defaults write com.apple.dock showLaunchpadGestureEnabled -int 0
 
-# Reset Launchpad, but keep the desktop wallpaper intact
+# WHAT: Resets Launchpad layout by deleting its database files
+# WHY: Fixes Launchpad organization issues; removes duplicate icons; restarts fresh layout
+# STATUS: Active - Deletes Launchpad database files (*.db) in Dock support folder
+# COMPAT: All macOS versions; Launchpad will rebuild layout on next launch
+# NOTE: Does not affect desktop wallpaper or other Dock settings
 find "${HOME}/Library/Application Support/Dock" -name "*-*.db" -maxdepth 1 -delete
 
-# Add iOS & Watch Simulator to Launchpad
+# WHAT: Adds iOS and Watch Simulator apps to Launchpad
+# WHY: Quick access to Xcode simulators from Launchpad
+# STATUS: Commented out - Only useful for iOS/watchOS developers with Xcode installed
+# COMPAT: All macOS versions with Xcode; creates symlinks in /Applications
 #sudo ln -sf "/Applications/Xcode.app/Contents/Developer/Applications/Simulator.app" "/Applications/Simulator.app"
 #sudo ln -sf "/Applications/Xcode.app/Contents/Developer/Applications/Simulator (Watch).app" "/Applications/Simulator (Watch).app"
 
-# Add a spacer to the left side of the Dock (where the applications are)
+# WHAT: Adds invisible spacer tiles to Dock for visual organization
+# WHY: Groups related apps together; creates visual separation in Dock
+# STATUS: Commented out - Adds blank space between app icons
+# COMPAT: All macOS versions; persistent-apps = left side (apps), persistent-others = right side (files/folders)
+# NOTE: Run multiple times to add multiple spacers; drag spacers to reposition
 #defaults write com.apple.dock persistent-apps -array-add '{tile-data={}; tile-type="spacer-tile";}'
-# Add a spacer to the right side of the Dock (where the Trash is)
 #defaults write com.apple.dock persistent-others -array-add '{tile-data={}; tile-type="spacer-tile";}'
 
-# Hot corners
-# Possible values:
-#  0: no-op
-#  2: Mission Control
-#  3: Show application windows
-#  4: Desktop
+# WHAT: Configures hot corners (screen corner actions)
+# WHY: Quick access to common actions by moving cursor to screen corners
+# STATUS: All commented out - Uses system defaults (no hot corners configured)
+# COMPAT: All macOS versions; wvous = "warp or vigorous mouse" (Apple's internal name)
+#
+# Hot corner action values:
+#  0: No action (disabled)
+#  2: Mission Control (all windows overview)
+#  3: Application windows (current app's windows)
+#  4: Desktop (show desktop, hide all windows)
 #  5: Start screen saver
 #  6: Disable screen saver
-#  7: Dashboard
+#  7: Dashboard (deprecated on Catalina+)
 # 10: Put display to sleep
 # 11: Launchpad
 # 12: Notification Center
-# 13: Lock Screen
-# Top left screen corner → Mission Control
+# 13: Lock Screen (macOS Catalina 10.15+)
+#
+# Modifier values (add to enable with modifier key):
+#  0: No modifier required
+#  1048576: Shift key
+#  524288: Control key
+#  262144: Option key
+#  131072: Command key
+#
+# Corner positions:
+# tl = top-left, tr = top-right, bl = bottom-left, br = bottom-right
+#
+# Example: Top left corner → Mission Control (no modifier required)
 #defaults write com.apple.dock wvous-tl-corner -int 2
 #defaults write com.apple.dock wvous-tl-modifier -int 0
-# Top right screen corner → Desktop
+# Example: Top right corner → Desktop (no modifier required)
 #defaults write com.apple.dock wvous-tr-corner -int 4
 #defaults write com.apple.dock wvous-tr-modifier -int 0
-# Bottom left screen corner → Start screen saver
+# Example: Bottom left corner → Start screen saver (no modifier required)
 #defaults write com.apple.dock wvous-bl-corner -int 5
 #defaults write com.apple.dock wvous-bl-modifier -int 0
 
@@ -493,134 +834,241 @@ find "${HOME}/Library/Application Support/Dock" -name "*-*.db" -maxdepth 1 -dele
 # Safari & WebKit                                                             #
 ###############################################################################
 
-# Privacy: don’t send search queries to Apple
-defaults write com.apple.Safari UniversalSearchEnabled -bool false
-defaults write com.apple.Safari SuppressSearchSuggestions -bool true
+# WHAT: Disables Siri suggestions in Safari's address bar (formerly "Universal Search")
+# WHY: Privacy - prevents Apple from seeing your search queries; keeps searches local
+# STATUS: Active - Modern replacement for legacy UniversalSearchEnabled/SuppressSearchSuggestions
+# COMPAT: doesn't work anymore in macOS Sequoia 15.0+
+# defaults write com.apple.Safari UniversalSearchEnabled -bool false
+# defaults write com.apple.Safari SuppressSearchSuggestions -bool true
 
-# Press Tab to highlight each item on a web page
+# WHAT: Enables Tab key to navigate all clickable elements on web pages
+# WHY: Accessibility and keyboard navigation; allows tabbing through links, buttons, form fields
+# STATUS: Active - Both WebKit and WebKit2 settings for compatibility
+# COMPAT: All macOS versions; essential for keyboard-only navigation
 defaults write com.apple.Safari WebKitTabToLinksPreferenceKey -bool true
 defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2TabsToLinks -bool true
 
-# Show the full URL in the address bar (note: this still hides the scheme)
+# WHAT: Shows full URL in address bar (domain + path)
+# WHY: Security - see complete URL to identify phishing sites; useful for developers
+# STATUS: Active - Still hides protocol (http://, https://)
+# COMPAT: All macOS versions; note that scheme (protocol) is still hidden for security
 defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool true
 
-# Set Safari’s home page to `about:blank` for faster loading
+# WHAT: Sets Safari home page to blank page (about:blank)
+# WHY: Faster Safari startup; no network requests on launch; privacy (no default page tracking)
+# STATUS: Active - Opens to empty page instead of Apple's default or custom page
+# COMPAT: All macOS versions
 defaults write com.apple.Safari HomePage -string "about:blank"
 
-# Prevent Safari from opening ‘safe’ files automatically after downloading
+# WHAT: Prevents Safari from automatically opening "safe" downloaded files
+# WHY: Security - prevents auto-execution of potentially malicious files disguised as safe
+# STATUS: Active - Files stay in Downloads folder until manually opened
+# COMPAT: All macOS versions; "safe" files include images, movies, PDFs, text files
+# NOTE: Important security setting - prevents drive-by downloads from auto-opening
 defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
 
-# Allow hitting the Backspace key to go to the previous page in history
+# WHAT: Enables Backspace key to navigate to previous page in history
+# WHY: Convenient keyboard navigation; matches browser behavior from other platforms
+# STATUS: Active - Backspace = back, Shift+Backspace = forward
+# COMPAT: All macOS versions; WebKit2 setting for modern Safari
 defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2BackspaceKeyNavigationEnabled -bool true
 
-# Hide Safari’s bookmarks bar by default
-#defaults write com.apple.Safari ShowFavoritesBar -bool false
+# WHAT: Hides Safari's Favorites/Bookmarks bar below address bar
+# WHY: Maximizes vertical space for web content; cleaner interface
+# STATUS: Commented out - Uses system default (bookmarks bar visible)
+# COMPAT: doesn't work anymore in macOS Sequoia 15.0+
+# defaults write com.apple.Safari ShowFavoritesBar -bool false
 
-# Hide Safari’s sidebar in Top Sites
+# WHAT: Hides sidebar in Safari's Top Sites view (Favorites page)
+# WHY: Cleaner Top Sites view; more space for site thumbnails
+# STATUS: Active - No sidebar when viewing Top Sites
+# COMPAT: All macOS versions
 defaults write com.apple.Safari ShowSidebarInTopSites -bool false
 
-# Disable Safari’s thumbnail cache for History and Top Sites
+# WHAT: Disables thumbnail cache for History and Top Sites
+# WHY: Saves disk space; improves privacy (no cached page previews)
+# STATUS: Active - DebugSnapshotsUpdatePolicy 2 = never update thumbnails
+# COMPAT: All macOS versions; 0 = always update, 1 = update when needed, 2 = never update
 defaults write com.apple.Safari DebugSnapshotsUpdatePolicy -int 2
 
-# Enable Safari’s debug menu
-defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
+# WHAT: (Deprecated) Previously enabled Safari's internal debug menu
+# WHY: Historically used to access experimental debug features; replaced/renamed on modern macOS
+# STATUS: Commented out on Sequoia — key no longer present/used (See IncludeDevelopMenu below)
+# COMPAT: Older macOS versions only. On Sequoia (macOS 15+) use IncludeDevelopMenu / WebKitDeveloperExtras instead.
+#defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
 
-# Make Safari’s search banners default to Contains instead of Starts With
+# WHAT: Changes Find on Page search behavior to "Contains" instead of "Starts With"
+# WHY: More flexible search; finds text anywhere in words, not just at beginning
+# STATUS: Active - false = Contains (search anywhere), true = Starts With
+# COMPAT: All macOS versions
 defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
 
-# Remove useless icons from Safari’s bookmarks bar
+# WHAT: Removes proxy icons from Safari's bookmarks bar
+# WHY: Cleaner bookmarks bar; removes unnecessary visual clutter
+# STATUS: Active - ProxiesInBookmarksBar set to empty array
+# COMPAT: All macOS versions; proxy icons are small favicons for bookmarks
 defaults write com.apple.Safari ProxiesInBookmarksBar "()"
 
-# Enable the Develop menu and the Web Inspector in Safari
+# WHAT: Enables Safari's Develop menu and Web Inspector (developer tools)
+# WHY: Essential for web development; inspect HTML/CSS/JavaScript, debug, test
+# STATUS: Active - Shows "Develop" menu in menu bar; enables right-click "Inspect Element"
+# COMPAT: All macOS versions; three settings ensure compatibility across WebKit versions
+# NOTE: IncludeDevelopMenu = menu bar, WebKitDeveloperExtras = inspector, WebKit2 = modern engine
 defaults write com.apple.Safari IncludeDevelopMenu -bool true
 defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
 defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
 
-# Add a context menu item for showing the Web Inspector in web views
+# WHAT: Adds "Inspect Element" to context menu in all WebKit-based apps
+# WHY: Enables Web Inspector in any app using WebKit (Mail, App Store, etc.)
+# STATUS: Active - Global setting affects all WebKit views system-wide
+# COMPAT: All macOS versions; useful for debugging web content in any app
 defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
 
-# Enable continuous spellchecking
+# WHAT: Enables continuous spell checking while typing in Safari
+# WHY: Catches typos in forms, comments, emails; improves writing quality
+# STATUS: Active - Red underlines appear under misspelled words
+# COMPAT: All macOS versions
 defaults write com.apple.Safari WebContinuousSpellCheckingEnabled -bool true
-# Disable auto-correct
+
+# WHAT: Disables automatic spelling correction in Safari
+# WHY: Prevents unwanted word changes; useful for technical writing, code, non-English
+# STATUS: Commented out - Uses system default (auto-correct enabled)
+# COMPAT: All macOS versions
 #defaults write com.apple.Safari WebAutomaticSpellingCorrectionEnabled -bool false
 
-# Disable AutoFill
+# WHAT: Disables Safari AutoFill for various data types
+# WHY: Privacy and security - prevents automatic form filling with personal data
+# STATUS: All commented out - Uses system defaults (AutoFill enabled)
+# COMPAT: All macOS versions
+# NOTE: AutoFillFromAddressBook = contact info, AutoFillPasswords = saved passwords,
+#       AutoFillCreditCardData = payment info, AutoFillMiscellaneousForms = other forms
 #defaults write com.apple.Safari AutoFillFromAddressBook -bool false
 #defaults write com.apple.Safari AutoFillPasswords -bool false
 #defaults write com.apple.Safari AutoFillCreditCardData -bool false
 #defaults write com.apple.Safari AutoFillMiscellaneousForms -bool false
 
-# Warn about fraudulent websites
+# WHAT: Enables warning when visiting suspected fraudulent/phishing websites
+# WHY: Security - protects against phishing attacks and malicious sites
+# STATUS: Active - Shows warning before loading suspicious sites
+# COMPAT: All macOS versions; uses Google Safe Browsing database
 defaults write com.apple.Safari WarnAboutFraudulentWebsites -bool true
 
-# Disable plug-ins
+# WHAT: Disables browser plug-ins (Flash, Silverlight, Java applets, etc.)
+# WHY: Security and performance - plug-ins are deprecated, security risks, slow
+# STATUS: Active - Both WebKit and WebKit2 settings for complete coverage
+# COMPAT: All macOS versions; most modern sites use HTML5 instead of plug-ins
+# NOTE: Flash and most plug-ins are deprecated and removed from modern browsers
 defaults write com.apple.Safari WebKitPluginsEnabled -bool false
 defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2PluginsEnabled -bool false
 
-# Disable Java
+# WHAT: Disables Java applets in Safari
+# WHY: Security - Java applets are major security risk, rarely used, deprecated
+# STATUS: Active - Disables Java for all pages including local files
+# COMPAT: All macOS versions; Java applets deprecated since 2017
+# NOTE: This only affects Java applets in browser, not Java applications
 defaults write com.apple.Safari WebKitJavaEnabled -bool false
 defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaEnabled -bool false
 defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaEnabledForLocalFiles -bool false
 
-# Block pop-up windows
+# WHAT: Blocks JavaScript from automatically opening pop-up windows
+# WHY: Blocks annoying pop-ups and pop-unders; improves browsing experience
+# STATUS: Active - JavaScript cannot open windows without user interaction
+# COMPAT: All macOS versions; both WebKit and WebKit2 settings
+# NOTE: Legitimate pop-ups (like OAuth login) may require manual allowing
 defaults write com.apple.Safari WebKitJavaScriptCanOpenWindowsAutomatically -bool false
 defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptCanOpenWindowsAutomatically -bool false
 
-# Disable auto-playing video
+# WHAT: Disables auto-playing video in Safari
+# WHY: Saves bandwidth; prevents annoying auto-play ads; improves battery life
+# STATUS: All commented out - Uses system default (controlled by per-site settings)
+# COMPAT: All macOS versions; affects both Safari and Safari Technology Preview
+# NOTE: Modern Safari has per-site auto-play controls in address bar
 #defaults write com.apple.Safari WebKitMediaPlaybackAllowsInline -bool false
 #defaults write com.apple.SafariTechnologyPreview WebKitMediaPlaybackAllowsInline -bool false
 #defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2AllowsInlineMediaPlayback -bool false
 #defaults write com.apple.SafariTechnologyPreview com.apple.Safari.ContentPageGroupIdentifier.WebKit2AllowsInlineMediaPlayback -bool false
 
-# Enable “Do Not Track”
+# WHAT: Enables "Do Not Track" HTTP header in Safari requests
+# WHY: Privacy - requests websites not to track your browsing behavior
+# STATUS: Active - Sends DNT: 1 header with all HTTP requests
+# COMPAT: All macOS versions; note that websites are not required to honor this request
 defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true
 
-# Update extensions automatically
+# WHAT: Enables automatic updates for Safari extensions
+# WHY: Security and features - keeps extensions up-to-date with latest fixes
+# STATUS: Active - Extensions update automatically in background
+# COMPAT: All macOS versions with Safari extensions support
 defaults write com.apple.Safari InstallExtensionUpdatesAutomatically -bool true
 
 ###############################################################################
 # Mail                                                                        #
 ###############################################################################
 
-# Disable send and reply animations in Mail.app
-defaults write com.apple.mail DisableReplyAnimations -bool true
-defaults write com.apple.mail DisableSendAnimations -bool true
+# WHAT: Disables reply and send animations in Mail.app
+# WHY: Faster email workflow; reduces visual distractions; improves performance
+# STATUS: Active - No sliding animations when replying or sending emails
+# COMPAT: macOS Lion 10.7 - High Sierra 10.13; animations removed in Mojave 10.14+
+# NOTE: These settings have no effect on macOS Mojave 10.14 and later (animations already removed)
+# defaults write com.apple.mail DisableReplyAnimations -bool true
+# defaults write com.apple.mail DisableSendAnimations -bool true
 
-# Copy email addresses as `foo@example.com` instead of `Foo Bar <foo@example.com>` in Mail.app
+# WHAT: Copies email addresses as plain text (foo@example.com) instead of formatted (Foo Bar <foo@example.com>)
+# WHY: Cleaner for pasting into forms, databases, or plain text documents
+# STATUS: Active - Copies only email address without display name
+# COMPAT: All macOS versions; useful when you need just the email address
 defaults write com.apple.mail AddressesIncludeNameOnPasteboard -bool false
 
-# Add the keyboard shortcut ⌘ + Enter to send an email in Mail.app
+# WHAT: Adds keyboard shortcut ⌘+Enter to send email in Mail.app
+# WHY: Faster email sending; matches Gmail and other email clients
+# STATUS: Active - Press ⌘+Enter to send instead of clicking Send button
+# COMPAT: All macOS versions; \U21a9 is Unicode for Return symbol (⏎)
 defaults write com.apple.mail NSUserKeyEquivalents -dict-add "Send" "@\U21a9"
 
-# Display emails in threaded mode, sorted by date (oldest at the top)
+# WHAT: Displays emails in threaded/conversation mode, sorted by date (oldest first)
+# WHY: Groups related emails together; easier to follow email conversations
+# STATUS: Active - Shows email threads like Gmail; oldest messages at top
+# COMPAT: All macOS versions; DraftsViewerAttributes controls message list view
+# NOTE: "yes" = descending (oldest first), "no" = ascending (newest first)
 defaults write com.apple.mail DraftsViewerAttributes -dict-add "DisplayInThreadedMode" -string "yes"
 defaults write com.apple.mail DraftsViewerAttributes -dict-add "SortedDescending" -string "yes"
 defaults write com.apple.mail DraftsViewerAttributes -dict-add "SortOrder" -string "received-date"
 
-# Disable inline attachments (just show the icons)
+# WHAT: Disables inline display of image attachments (shows as icons instead)
+# WHY: Faster email loading; saves bandwidth; prevents auto-loading of tracking pixels
+# STATUS: Active - Attachments appear as downloadable icons, not embedded images
+# COMPAT: All macOS versions; improves privacy by not auto-loading remote images
 defaults write com.apple.mail DisableInlineAttachmentViewing -bool true
 
-# Disable automatic spell checking
+# WHAT: Disables automatic spell checking in Mail.app
+# WHY: Prevents red underlines; useful for technical emails with code or jargon
+# STATUS: Active - No spell checking while composing emails
+# COMPAT: All macOS versions; "NoSpellCheckingEnabled" = completely disabled
 defaults write com.apple.mail SpellCheckingBehavior -string "NoSpellCheckingEnabled"
 
 ###############################################################################
 # Spotlight                                                                   #
 ###############################################################################
 
-# Hide Spotlight tray-icon (and subsequent helper)
+# WHAT: Hides Spotlight menu bar icon and helper process
+# WHY: Reclaims menu bar space; reduces system resource usage
+# STATUS: Commented out - Protected by SIP on macOS El Capitan 10.11+
+# COMPAT: macOS Yosemite 10.10 and earlier; requires SIP disabled on newer versions
+# NOTE: Disabling SIP reduces system security; not recommended
 #sudo chmod 600 /System/Library/CoreServices/Search.bundle/Contents/MacOS/Search
-# Disable Spotlight indexing for any volume that gets mounted and has not yet
-# been indexed before.
-# Use `sudo mdutil -i off "/Volumes/foo"` to stop indexing any volume.
+
+# WHAT: Prevents Spotlight from indexing newly mounted volumes automatically
+# WHY: Saves CPU/battery on external drives; prevents indexing network shares
+# STATUS: Active - New volumes in /Volumes won't be indexed unless manually enabled
+# COMPAT: All macOS versions; use `sudo mdutil -i off "/Volumes/foo"` to disable specific volume
+# NOTE: Main system drive (/) is still indexed; only affects external/network volumes
 sudo defaults write /.Spotlight-V100/VolumeConfiguration Exclusions -array "/Volumes"
-# Change indexing order and disable some search results
-# Yosemite-specific search results (remove them if you are using macOS 10.9 or older):
-# 	MENU_DEFINITION
-# 	MENU_CONVERSION
-# 	MENU_EXPRESSION
-# 	MENU_SPOTLIGHT_SUGGESTIONS (send search queries to Apple)
-# 	MENU_WEBSEARCH             (send search queries to Apple)
-# 	MENU_OTHER
+
+# WHAT: Configures which categories appear in Spotlight search results
+# WHY: Faster searches by excluding irrelevant categories; improves privacy
+# STATUS: Active - Enables: Apps, System Prefs, Folders, PDFs, Fonts; Disables: everything else
+# COMPAT: macOS Yosemite 10.10+ (MENU_* categories); older versions ignore unknown categories
+# NOTE: enabled=1 shows category, enabled=0 hides it
+# Privacy categories disabled: MENU_SPOTLIGHT_SUGGESTIONS, MENU_WEBSEARCH (send queries to Apple)
 defaults write com.apple.spotlight orderedItems -array \
 	'{"enabled" = 1;"name" = "APPLICATIONS";}' \
 	'{"enabled" = 1;"name" = "SYSTEM_PREFS";}' \
@@ -644,44 +1092,79 @@ defaults write com.apple.spotlight orderedItems -array \
 	'{"enabled" = 0;"name" = "MENU_EXPRESSION";}' \
 	'{"enabled" = 0;"name" = "MENU_WEBSEARCH";}' \
 	'{"enabled" = 0;"name" = "MENU_SPOTLIGHT_SUGGESTIONS";}'
-# Load new settings before rebuilding the index
+
+# WHAT: Restarts Spotlight metadata server to apply new settings
+# WHY: Forces Spotlight to reload configuration immediately
+# STATUS: Active - Kills mds (metadata server) process; macOS automatically restarts it
+# COMPAT: All macOS versions; mds is core Spotlight component
 killall mds > /dev/null 2>&1
-# Make sure indexing is enabled for the main volume
+
+# WHAT: Ensures Spotlight indexing is enabled for main system volume
+# WHY: Keeps system drive searchable; only external volumes are excluded above
+# STATUS: Active - Enables indexing on root volume (/)
+# COMPAT: All macOS versions; mdutil is Spotlight management utility
 sudo mdutil -i on / > /dev/null
-# Rebuild the index from scratch
+
+# WHAT: Rebuilds Spotlight index from scratch for main system volume
+# WHY: Fixes corrupted index; applies new category settings; improves search accuracy
+# STATUS: Active - Erases and rebuilds entire Spotlight database
+# COMPAT: All macOS versions; -E flag erases and rebuilds index
+# NOTE: Indexing may take hours on large drives; Mac may be slow during rebuild
 sudo mdutil -E / > /dev/null
 
 ###############################################################################
 # Terminal & iTerm 2                                                          #
 ###############################################################################
 
-# Only use UTF-8 in Terminal.app
+# WHAT: Restricts Terminal.app to UTF-8 encoding only
+# WHY: Ensures consistent text encoding; prevents encoding issues with scripts/files
+# STATUS: Active - StringEncodings array 4 = UTF-8 (Unicode)
+# COMPAT: All macOS versions; other encodings: 1=ASCII, 5=ISO Latin 1, 10=Mac Roman
 defaults write com.apple.terminal StringEncodings -array 4
 
-# Enable “focus follows mouse” for Terminal.app and all X11 apps
-# i.e. hover over a window and start typing in it without clicking first
+# WHAT: Enables "focus follows mouse" for Terminal and X11 apps
+# WHY: X11-style window focus; type in window without clicking (hover to focus)
+# STATUS: Commented out - Uses system default (click to focus)
+# COMPAT: All macOS versions; useful for users coming from Linux/Unix
+# NOTE: Can be confusing if you're used to macOS click-to-focus behavior
 #defaults write com.apple.terminal FocusFollowsMouse -bool true
 #defaults write org.x.X11 wm_ffm -bool true
 
-# Enable Secure Keyboard Entry in Terminal.app
-# See: https://security.stackexchange.com/a/47786/8918
-defaults write com.apple.terminal SecureKeyboardEntry -bool true
+# WHAT: Enables Secure Keyboard Entry in Terminal.app
+# WHY: Security - prevents other apps from reading Terminal keyboard input (passwords, keys)
+# STATUS: Active - Protects against keyloggers when typing sensitive data
+# COMPAT: All macOS versions; see https://security.stackexchange.com/a/47786/8918
+# NOTE: May interfere with some password managers or clipboard utilities
+# defaults write com.apple.terminal SecureKeyboardEntry -bool true
 
-# Disable the annoying line marks
-defaults write com.apple.Terminal ShowLineMarks -int 0
+# WHAT: Disables line marks (horizontal lines) in Terminal.app
+# WHY: Cleaner terminal output; removes visual clutter from command prompts
+# STATUS: Active - No line marks between commands
+# COMPAT: macOS El Capitan 10.11+ (when line marks were introduced); 0=disabled, 1=enabled
+# defaults write com.apple.Terminal ShowLineMarks -int 0
 
-# Don't display the annoying prompt when quitting iTerm
-defaults write com.googlecode.iterm2 PromptOnQuit -bool false
+# WHAT: Disables quit confirmation prompt in iTerm2
+# WHY: Faster quitting; removes "Are you sure?" dialog
+# STATUS: Active - iTerm2 quits immediately without confirmation
+# COMPAT: All iTerm2 versions; be careful not to accidentally quit with unsaved work
+# defaults write com.googlecode.iterm2 PromptOnQuit -bool false
 
 ###############################################################################
 # Time Machine                                                                #
 ###############################################################################
 
-# Prevent Time Machine from prompting to use new hard drives as backup volume
+# WHAT: Prevents Time Machine from prompting to use new drives as backup volumes
+# WHY: Stops annoying "Do you want to use this disk for Time Machine?" dialog
+# STATUS: Active - New external drives won't trigger backup prompt
+# COMPAT: All macOS versions; useful if you frequently connect external drives
 defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
 
-# Disable local Time Machine snapshots (Apple Silicon compatible)
-# Note: 'disablelocal' is deprecated, use 'disable' for local snapshots
+# WHAT: Disables local Time Machine snapshots (APFS snapshots on system drive)
+# WHY: Saves disk space; local snapshots can consume significant storage
+# STATUS: Active - Only keeps backups on external Time Machine drive
+# COMPAT: macOS High Sierra 10.13+ (APFS); 'disablelocal' deprecated, use 'disable'
+# NOTE: Without local snapshots, you can't restore files if backup drive is unavailable
+# WARNING: Apple Silicon Macs benefit from local snapshots for fast recovery
 if hash tmutil &> /dev/null; then
     sudo tmutil disable 2>/dev/null || true
 fi
@@ -690,16 +1173,28 @@ fi
 # Activity Monitor                                                            #
 ###############################################################################
 
-# Show the main window when launching Activity Monitor
+# WHAT: Shows Activity Monitor main window when launching app
+# WHY: Immediately displays process list instead of just menu bar icon
+# STATUS: Active - Window appears on launch
+# COMPAT: All macOS versions
 defaults write com.apple.ActivityMonitor OpenMainWindow -bool true
 
-# Visualize CPU usage in the Activity Monitor Dock icon
+# WHAT: Shows CPU usage graph in Activity Monitor's Dock icon
+# WHY: Visual monitoring of CPU usage without opening app; useful for performance monitoring
+# STATUS: Active - IconType 5 = CPU Usage; other values: 2=Network, 3=Disk, 6=GPU (if available)
+# COMPAT: All macOS versions; live graph updates in Dock icon
 defaults write com.apple.ActivityMonitor IconType -int 5
 
-# Show all processes in Activity Monitor
+# WHAT: Shows all processes in Activity Monitor (not just user processes)
+# WHY: Complete system view; see system daemons and root processes
+# STATUS: Active - ShowCategory 0 = All Processes; other values: 100=My Processes, 101=System, etc.
+# COMPAT: All macOS versions; essential for system troubleshooting
 defaults write com.apple.ActivityMonitor ShowCategory -int 0
 
-# Sort Activity Monitor results by CPU usage
+# WHAT: Sorts Activity Monitor process list by CPU usage (descending)
+# WHY: Immediately see which processes are using most CPU; easier performance troubleshooting
+# STATUS: Active - SortColumn "CPUUsage", SortDirection 0 = descending (highest first)
+# COMPAT: All macOS versions; other columns: "CPUTime", "Memory", "PID", etc.
 defaults write com.apple.ActivityMonitor SortColumn -string "CPUUsage"
 defaults write com.apple.ActivityMonitor SortDirection -int 0
 
@@ -707,96 +1202,175 @@ defaults write com.apple.ActivityMonitor SortDirection -int 0
 # Address Book, Dashboard, iCal, TextEdit, and Disk Utility                   #
 ###############################################################################
 
-# Enable the debug menu in Contacts (formerly Address Book)
+# WHAT: Enables debug menu in Contacts app (formerly Address Book)
+# WHY: Access to advanced features and troubleshooting tools for contact management
+# STATUS: Active - Shows "Debug" menu in Contacts menu bar
+# COMPAT: All macOS versions; useful for developers and power users
 defaults write com.apple.addressbook ABShowDebugMenu -bool true
 
-# Enable Dashboard dev mode (removed in macOS Catalina+, kept for compatibility)
+# WHAT: Enables Dashboard developer mode (allows adding widgets as files)
+# WHY: Allows installing custom Dashboard widgets without restrictions
+# STATUS: Commented out - Dashboard removed in macOS Catalina 10.15+
+# COMPAT: macOS Yosemite 10.10 - Mojave 10.14; no effect on Catalina+
+# NOTE: Dashboard was replaced by Notification Center widgets
 # defaults write com.apple.dashboard devmode -bool true
 
-# Enable the debug menu in Calendar (formerly iCal)
+# WHAT: Enables debug menu in Calendar app (formerly iCal)
+# WHY: Access to advanced calendar features and troubleshooting tools
+# STATUS: Active - Shows "Debug" menu in Calendar menu bar
+# COMPAT: All macOS versions; useful for debugging calendar sync issues
 defaults write com.apple.iCal IncludeDebugMenu -bool true
 
-# Use plain text mode for new TextEdit documents
+# WHAT: Sets TextEdit to use plain text mode by default for new documents
+# WHY: Better for code, markdown, and technical writing; no formatting overhead
+# STATUS: Active - RichText 0 = plain text, 1 = rich text (RTF)
+# COMPAT: All macOS versions; new documents open as .txt instead of .rtf
 defaults write com.apple.TextEdit RichText -int 0
-# Open and save files as UTF-8 in TextEdit
+
+# WHAT: Sets TextEdit to use UTF-8 encoding for opening and saving files
+# WHY: Universal encoding support; prevents character encoding issues
+# STATUS: Active - PlainTextEncoding 4 = UTF-8, PlainTextEncodingForWrite 4 = save as UTF-8
+# COMPAT: All macOS versions; essential for international characters and emoji
+# NOTE: Other encodings: 1=ASCII, 5=ISO Latin 1, 10=Mac Roman, 30=Mac OS Roman
 defaults write com.apple.TextEdit PlainTextEncoding -int 4
 defaults write com.apple.TextEdit PlainTextEncodingForWrite -int 4
 
-# Enable the debug menu in Disk Utility
+# WHAT: Enables debug menu and advanced options in Disk Utility
+# WHY: Access to advanced disk operations and hidden features
+# STATUS: Active - Shows "Debug" menu and advanced image options
+# COMPAT: All macOS versions; useful for disk troubleshooting and advanced operations
+# NOTE: Provides access to features like showing all devices, RAID options, etc.
 defaults write com.apple.DiskUtility DUDebugMenuEnabled -bool true
 defaults write com.apple.DiskUtility advanced-image-options -bool true
 
-# Auto-play videos when opened with QuickTime Player
+# WHAT: Automatically plays videos when opened in QuickTime Player
+# WHY: Convenient for quick video playback; skips manual play button click
+# STATUS: Active - Videos start playing immediately upon opening
+# COMPAT: macOS Lion 10.7+ (QuickTime Player X); MGPlayMovieOnOpen = "Movie Gallery Play Movie On Open"
 defaults write com.apple.QuickTimePlayerX MGPlayMovieOnOpen -bool true
 
 ###############################################################################
 # Mac App Store                                                               #
 ###############################################################################
 
-# Enable the WebKit Developer Tools in the Mac App Store
+# WHAT: Enables WebKit Developer Tools in Mac App Store app
+# WHY: Allows inspecting App Store web content; useful for debugging or examining store pages
+# STATUS: Active - Right-click "Inspect Element" available in App Store
+# COMPAT: All macOS versions; App Store uses WebKit to render content
 defaults write com.apple.appstore WebKitDeveloperExtras -bool true
 
-# Enable Debug Menu in the Mac App Store
+# WHAT: Enables Debug menu in Mac App Store
+# WHY: Access to advanced App Store features and troubleshooting tools
+# STATUS: Active - Shows "Debug" menu in App Store menu bar
+# COMPAT: All macOS versions; useful for developers and troubleshooting
 defaults write com.apple.appstore ShowDebugMenu -bool true
 
-# Enable the automatic update check
+# WHAT: Enables automatic checking for macOS and app updates
+# WHY: Keeps system secure and up-to-date; checks for updates automatically
+# STATUS: Active - System checks for updates in background
+# COMPAT: All macOS versions; recommended for security
 defaults write com.apple.SoftwareUpdate AutomaticCheckEnabled -bool true
 
-# Check for software updates daily, not just once per week
+# WHAT: Sets update check frequency to daily (1 = daily, 7 = weekly)
+# WHY: More frequent checks ensure faster security updates; default is weekly
+# STATUS: Active - Checks for updates every day instead of once per week
+# COMPAT: All macOS versions; 1 = daily, 7 = weekly (default)
 defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
 
-# Download newly available updates in background
+# WHAT: Automatically downloads available updates in background
+# WHY: Updates ready to install when convenient; saves time when updating
+# STATUS: Active - Downloads updates without prompting (1 = enabled, 0 = disabled)
+# COMPAT: All macOS versions; updates downloaded but not installed automatically
 defaults write com.apple.SoftwareUpdate AutomaticDownload -int 1
 
-# Install System data files & security updates
+# WHAT: Automatically installs system data files and security updates
+# WHY: Critical security patches installed immediately; keeps system secure
+# STATUS: Active - Security updates install without user intervention
+# COMPAT: All macOS versions; 1 = enabled, 0 = disabled
+# NOTE: Only installs critical security updates, not full macOS upgrades
 defaults write com.apple.SoftwareUpdate CriticalUpdateInstall -int 1
 
-# Automatically download apps purchased on other Macs
+# WHAT: Automatically downloads apps purchased on other Macs (same Apple ID)
+# WHY: Keeps apps synchronized across multiple Macs; convenient for multi-device users
+# STATUS: Active - Apps purchased elsewhere download automatically
+# COMPAT: All macOS versions; 1 = enabled, 0 = disabled
 defaults write com.apple.SoftwareUpdate ConfigDataInstall -int 1
 
-# Turn on app auto-update
+# WHAT: Enables automatic updates for Mac App Store apps
+# WHY: Keeps apps up-to-date with latest features and security fixes
+# STATUS: Active - App Store apps update automatically in background
+# COMPAT: All macOS versions; apps update without user intervention
 defaults write com.apple.commerce AutoUpdate -bool true
 
-# Allow the App Store to reboot machine on macOS updates
+# WHAT: Allows App Store to automatically restart Mac after installing macOS updates
+# WHY: Completes update installation without user intervention; convenient for overnight updates
+# STATUS: Active - Mac may restart automatically after updates
+# COMPAT: All macOS versions; only restarts when necessary for update completion
+# WARNING: May interrupt work if Mac restarts unexpectedly; consider disabling for critical systems
 defaults write com.apple.commerce AutoUpdateRestartRequired -bool true
 
 ###############################################################################
 # Photos                                                                      #
 ###############################################################################
 
-# Prevent Photos from opening automatically when devices are plugged in
+# WHAT: Prevents Photos app from opening automatically when cameras/phones are connected
+# WHY: Stops annoying auto-launch when plugging in iPhone, camera, or SD card
+# STATUS: Active - Photos won't open automatically when devices are connected
+# COMPAT: All macOS versions; disableHotPlug = disable automatic launch on device connection
+# NOTE: You can still open Photos manually or import from other apps
 defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
 
 ###############################################################################
 # Messages                                                                    #
 ###############################################################################
 
-# Disable automatic emoji substitution (i.e. use plain text smileys)
+# WHAT: Disables automatic emoji substitution in Messages (keeps plain text smileys)
+# WHY: Prevents :) from becoming 😊; useful for technical discussions or preference for text
+# STATUS: Commented out - Uses system default (emoji substitution enabled)
+# COMPAT: All macOS versions; uncomment to keep plain text emoticons
 #defaults write com.apple.messageshelper.MessageController SOInputLineSettings -dict-add "automaticEmojiSubstitutionEnablediMessage" -bool false
 
-# Disable smart quotes as it’s annoying for messages that contain code
+# WHAT: Disables smart quotes in Messages (keeps straight quotes)
+# WHY: Prevents curly quotes that break code snippets in messages
+# STATUS: Commented out - Uses system default (smart quotes enabled)
+# COMPAT: All macOS versions; uncomment if you frequently share code in Messages
 #defaults write com.apple.messageshelper.MessageController SOInputLineSettings -dict-add "automaticQuoteSubstitutionEnabled" -bool false
 
-# Disable continuous spell checking
+# WHAT: Disables continuous spell checking in Messages
+# WHY: Removes red underlines under misspelled words; less distracting
+# STATUS: Commented out - Uses system default (spell checking enabled)
+# COMPAT: All macOS versions; uncomment to disable spell checking
 #defaults write com.apple.messageshelper.MessageController SOInputLineSettings -dict-add "continuousSpellCheckingEnabled" -bool false
 
 ###############################################################################
 # Google Chrome & Google Chrome Canary                                        #
 ###############################################################################
 
-# Disable the all too sensitive backswipe on trackpads
+# WHAT: Disables two-finger swipe navigation (back/forward) on trackpad in Chrome
+# WHY: Prevents accidental page navigation when scrolling; reduces frustration
+# STATUS: Commented out - Uses Chrome default (swipe navigation enabled)
+# COMPAT: All Chrome versions; uncomment if you frequently trigger navigation accidentally
 #defaults write com.google.Chrome AppleEnableSwipeNavigateWithScrolls -bool false
 #defaults write com.google.Chrome.canary AppleEnableSwipeNavigateWithScrolls -bool false
 
-# Disable the all too sensitive backswipe on Magic Mouse
+# WHAT: Disables swipe navigation (back/forward) on Magic Mouse in Chrome
+# WHY: Prevents accidental page navigation with Magic Mouse gestures
+# STATUS: Commented out - Uses Chrome default (swipe navigation enabled)
+# COMPAT: All Chrome versions; uncomment if you use Magic Mouse and trigger navigation accidentally
 #defaults write com.google.Chrome AppleEnableMouseSwipeNavigateWithScrolls -bool false
 #defaults write com.google.Chrome.canary AppleEnableMouseSwipeNavigateWithScrolls -bool false
 
-# Use the system-native print preview dialog
+# WHAT: Uses macOS native print dialog instead of Chrome's custom print preview
+# WHY: Consistent with other macOS apps; faster printing; familiar interface
+# STATUS: Commented out - Uses Chrome default (Chrome print preview)
+# COMPAT: All Chrome versions; uncomment for native macOS print dialog
 #defaults write com.google.Chrome DisablePrintPreview -bool true
 #defaults write com.google.Chrome.canary DisablePrintPreview -bool true
 
-# Expand the print dialog by default
+# WHAT: Expands print dialog to show all options by default in Chrome
+# WHY: Immediate access to advanced print settings without clicking "Show Details"
+# STATUS: Commented out - Uses Chrome default (collapsed print dialog)
+# COMPAT: All Chrome versions; matches macOS print dialog behavior
 #defaults write com.google.Chrome PMPrintingExpandedStateForPrint2 -bool true
 #defaults write com.google.Chrome.canary PMPrintingExpandedStateForPrint2 -bool true
 
@@ -804,14 +1378,22 @@ defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
 # GPGMail 2                                                                   #
 ###############################################################################
 
-# Disable signing emails by default
+# WHAT: Disables automatic PGP/GPG signing of new emails by default
+# WHY: Prevents signing every email; useful when not all recipients use PGP
+# STATUS: Active - New emails not signed by default (can still sign manually)
+# COMPAT: All macOS versions with GPGMail plugin installed
+# NOTE: GPGMail is a Mail.app plugin for PGP encryption; only affects users with GPGTools installed
 defaults write ~/Library/Preferences/org.gpgtools.gpgmail SignNewEmailsByDefault -bool false
 
 ###############################################################################
 # Opera & Opera Developer                                                     #
 ###############################################################################
 
-# Expand the print dialog by default
+# WHAT: Expands print dialog to show all options by default in Opera browsers
+# WHY: Immediate access to advanced print settings without clicking "Show Details"
+# STATUS: Active - Print dialog opens fully expanded
+# COMPAT: All Opera versions; matches macOS print dialog behavior
+# NOTE: Applies to both Opera stable and Opera Developer editions
 defaults write com.operasoftware.Opera PMPrintingExpandedStateForPrint2 -boolean true
 defaults write com.operasoftware.OperaDeveloper PMPrintingExpandedStateForPrint2 -boolean true
 
@@ -819,90 +1401,158 @@ defaults write com.operasoftware.OperaDeveloper PMPrintingExpandedStateForPrint2
 # SizeUp.app                                                                  #
 ###############################################################################
 
-# Start SizeUp at login
+# WHAT: Configures SizeUp window management app to start at login
+# WHY: Ensures window management shortcuts available immediately after login
+# STATUS: Commented out - Only useful if SizeUp is installed
+# COMPAT: All macOS versions with SizeUp installed; SizeUp is a paid window management tool
+# NOTE: SizeUp provides keyboard shortcuts for window positioning and resizing
 #defaults write com.irradiatedsoftware.SizeUp StartAtLogin -bool true
 
-# Don’t show the preferences window on next start
+# WHAT: Prevents SizeUp preferences window from appearing on next launch
+# WHY: Cleaner startup; preferences already configured
+# STATUS: Commented out - Only useful if SizeUp is installed
+# COMPAT: All macOS versions with SizeUp installed
 #defaults write com.irradiatedsoftware.SizeUp ShowPrefsOnNextStart -bool false
 
 ###############################################################################
 # Spectacle.app                                                               #
 ###############################################################################
 
-# Set up my preferred keyboard shortcuts
+# WHAT: Copies custom keyboard shortcuts configuration for Spectacle window manager
+# WHY: Restores preferred window management shortcuts from backup
+# STATUS: Commented out - Requires init/spectacle.json file with custom shortcuts
+# COMPAT: All macOS versions with Spectacle installed; Spectacle is free window management tool
+# NOTE: Spectacle is no longer maintained; consider Rectangle as modern alternative
 #cp -r init/spectacle.json ~/Library/Application\ Support/Spectacle/Shortcuts.json 2> /dev/null
 
 ###############################################################################
 # Transmission.app                                                            #
 ###############################################################################
 
-# Use `~/Documents/Torrents` to store incomplete downloads
+# WHAT: Configures Transmission to store incomplete downloads in ~/Documents/Torrents
+# WHY: Separates incomplete downloads from completed ones; easier to manage
+# STATUS: Active - Creates Torrents folder if it doesn't exist
+# COMPAT: All macOS versions with Transmission installed; Transmission is free BitTorrent client
 defaults write org.m0k.transmission UseIncompleteDownloadFolder -bool true
 defaults write org.m0k.transmission IncompleteDownloadFolder -string "${HOME}/Documents/Torrents"
 
-# Use `~/Downloads` to store completed downloads
+# WHAT: Sets completed downloads location to ~/Downloads (constant location)
+# WHY: Completed torrents go to standard Downloads folder; easy to find
+# STATUS: Active - DownloadLocationConstant true = always use same location
+# COMPAT: All macOS versions with Transmission installed
 defaults write org.m0k.transmission DownloadLocationConstant -bool true
 
-# Don’t prompt for confirmation before downloading
+# WHAT: Disables confirmation prompts before starting downloads
+# WHY: Faster torrent workflow; no "Are you sure?" dialogs
+# STATUS: Active - DownloadAsk = torrent files, MagnetOpenAsk = magnet links
+# COMPAT: All macOS versions with Transmission installed
 defaults write org.m0k.transmission DownloadAsk -bool false
 defaults write org.m0k.transmission MagnetOpenAsk -bool false
 
-# Don’t prompt for confirmation before removing non-downloading active transfers
+# WHAT: Disables confirmation prompt when removing active (non-downloading) transfers
+# WHY: Faster transfer management; no confirmation for seeding/paused torrents
+# STATUS: Active - Still prompts for actively downloading torrents
+# COMPAT: All macOS versions with Transmission installed
 defaults write org.m0k.transmission CheckRemoveDownloading -bool true
 
-# Trash original torrent files
+# WHAT: Automatically moves original .torrent files to Trash after adding
+# WHY: Reduces clutter; torrent files no longer needed after adding to Transmission
+# STATUS: Active - Original .torrent files deleted automatically
+# COMPAT: All macOS versions with Transmission installed
 defaults write org.m0k.transmission DeleteOriginalTorrent -bool true
 
-# Hide the donate message
+# WHAT: Hides donation and legal disclaimer messages in Transmission
+# WHY: Cleaner interface; removes repetitive nag screens
+# STATUS: Active - No donation requests or legal warnings
+# COMPAT: All macOS versions with Transmission installed
 defaults write org.m0k.transmission WarningDonate -bool false
-# Hide the legal disclaimer
 defaults write org.m0k.transmission WarningLegal -bool false
 
-# IP block list.
-# Source: https://giuliomac.wordpress.com/2014/02/19/best-blocklist-for-transmission/
+# WHAT: Enables IP blocklist to prevent connections to known bad peers
+# WHY: Security and privacy; blocks anti-piracy organizations, malicious peers
+# STATUS: Active - Downloads and uses blocklist from john.bitsurge.net
+# COMPAT: All macOS versions with Transmission installed
+# NOTE: Blocklist blocks connections to copyright trolls, fake peers, and malicious IPs
+# SOURCE: https://giuliomac.wordpress.com/2014/02/19/best-blocklist-for-transmission/
 defaults write org.m0k.transmission BlocklistNew -bool true
 defaults write org.m0k.transmission BlocklistURL -string "http://john.bitsurge.net/public/biglist.p2p.gz"
 defaults write org.m0k.transmission BlocklistAutoUpdate -bool true
 
-# Randomize port on launch
+# WHAT: Randomizes BitTorrent port on each Transmission launch
+# WHY: Improves connectivity; avoids ISP throttling of specific ports
+# STATUS: Active - Uses different port each time (range 49152-65535)
+# COMPAT: All macOS versions with Transmission installed
+# NOTE: May require port forwarding reconfiguration if using router port forwarding
 defaults write org.m0k.transmission RandomPort -bool true
 
 ###############################################################################
 # Twitter.app                                                                 #
 ###############################################################################
 
-# Disable smart quotes as it’s annoying for code tweets
-defaults write com.twitter.twitter-mac AutomaticQuoteSubstitutionEnabled -bool false
+# WHAT: Disables smart quotes in Twitter for Mac app
+# WHY: Prevents curly quotes that break code snippets in tweets
+# STATUS: Active - Keeps straight quotes for programming/technical tweets
+# COMPAT: All macOS versions with Twitter for Mac installed
+# NOTE: Twitter for Mac was discontinued in 2018; settings kept for legacy users
+# defaults write com.twitter.twitter-mac AutomaticQuoteSubstitutionEnabled -bool false
 
-# Show the app window when clicking the menu bar icon
-defaults write com.twitter.twitter-mac MenuItemBehavior -int 1
+# WHAT: Shows Twitter app window when clicking menu bar icon
+# WHY: Convenient access to main window; MenuItemBehavior 1 = show window
+# STATUS: Active - Click menu bar icon to show/hide window
+# COMPAT: All macOS versions with Twitter for Mac installed
+# defaults write com.twitter.twitter-mac MenuItemBehavior -int 1
 
-# Enable the hidden ‘Develop’ menu
-defaults write com.twitter.twitter-mac ShowDevelopMenu -bool true
+# WHAT: Enables hidden Develop menu in Twitter for Mac
+# WHY: Access to debugging tools and advanced features
+# STATUS: Active - Shows "Develop" menu in menu bar
+# COMPAT: All macOS versions with Twitter for Mac installed
+# defaults write com.twitter.twitter-mac ShowDevelopMenu -bool true
 
-# Open links in the background
-defaults write com.twitter.twitter-mac openLinksInBackground -bool true
+# WHAT: Opens links in background tabs instead of foreground
+# WHY: Keeps Twitter timeline visible; links open without switching focus
+# STATUS: Active - Links open in background
+# COMPAT: All macOS versions with Twitter for Mac installed
+# defaults write com.twitter.twitter-mac openLinksInBackground -bool true
 
-# Allow closing the ‘new tweet’ window by pressing `Esc`
-defaults write com.twitter.twitter-mac ESCClosesComposeWindow -bool true
+# WHAT: Allows closing new tweet window with Escape key
+# WHY: Faster workflow; no need to click Cancel button
+# STATUS: Active - Press Esc to close compose window
+# COMPAT: All macOS versions with Twitter for Mac installed
+# defaults write com.twitter.twitter-mac ESCClosesComposeWindow -bool true
 
-# Show full names rather than Twitter handles
-defaults write com.twitter.twitter-mac ShowFullNames -bool true
+# WHAT: Shows full names instead of Twitter handles (@username)
+# WHY: More readable; easier to identify people by real names
+# STATUS: Active - Displays "John Doe" instead of "@johndoe"
+# COMPAT: All macOS versions with Twitter for Mac installed
+# defaults write com.twitter.twitter-mac ShowFullNames -bool true
 
-# Hide the app in the background if it’s not the front-most window
-defaults write com.twitter.twitter-mac HideInBackground -bool true
+# WHAT: Hides Twitter app when it's not the active window
+# WHY: Reduces clutter; app disappears from Dock when not in use
+# STATUS: Active - App hidden when switching to other apps
+# COMPAT: All macOS versions with Twitter for Mac installed
+# defaults write com.twitter.twitter-mac HideInBackground -bool true
 
 ###############################################################################
 # Tweetbot.app                                                                #
 ###############################################################################
 
-# Bypass the annoyingly slow t.co URL shortener
+# WHAT: Bypasses Twitter's t.co URL shortener in Tweetbot
+# WHY: Opens original URLs directly; faster, avoids tracking
+# STATUS: Commented out - Only useful if Tweetbot is installed
+# COMPAT: All macOS versions with Tweetbot installed; Tweetbot is paid Twitter client
+# NOTE: t.co shortener adds latency and tracking; direct URLs are faster
 #defaults write com.tapbots.TweetbotMac OpenURLsDirectly -bool true
 
 ###############################################################################
 # Kill affected applications                                                  #
 ###############################################################################
 
+# WHAT: Restarts applications to apply new settings immediately
+# WHY: Many settings require app restart to take effect; forces reload of preferences
+# STATUS: Active - Kills listed apps; macOS automatically relaunches them
+# COMPAT: All macOS versions; killall sends SIGTERM (graceful termination)
+# NOTE: Apps will relaunch automatically; unsaved work may be lost
+# WARNING: cfprefsd is system daemon that caches preferences; killing it forces reload
 for app in "Activity Monitor" \
 	"Address Book" \
 	"Calendar" \
@@ -923,4 +1573,10 @@ for app in "Activity Monitor" \
 	"iCal"; do
 	killall "${app}" &> /dev/null
 done
+
+# WHAT: Displays completion message with restart reminder
+# WHY: Informs user that some settings require logout/restart to fully apply
+# STATUS: Active - Final message after all settings applied
+# COMPAT: All macOS versions
+# NOTE: Settings like energy, login items, and some system preferences need restart
 echo "Done. Note that some of these changes require a logout/restart to take effect."
