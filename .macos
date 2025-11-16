@@ -713,20 +713,6 @@ defaults write com.apple.dock expose-animation-duration -float 0.1
 defaults write com.apple.dock expose-group-apps -bool false
 defaults write com.apple.dock expose-group-by-app -bool false
 
-# WHAT: Disables Dashboard (widget layer)
-# WHY: Dashboard is deprecated and removed; reclaims system resources
-# STATUS: Commented out - Dashboard removed in macOS Catalina 10.15+
-# COMPAT: macOS Yosemite 10.10 - Mojave 10.14; no effect on Catalina+
-# NOTE: Dashboard was replaced by Notification Center widgets
-# defaults write com.apple.dashboard mcx-disabled -bool true
-# TODO: is that even needed anymore?
-
-# WHAT: Prevents Dashboard from appearing as a separate Space
-# WHY: Keeps Dashboard as overlay instead of full-screen Space
-# STATUS: Commented out - Dashboard removed in macOS Catalina 10.15+
-# COMPAT: macOS Yosemite 10.10 - Mojave 10.14; no effect on Catalina+
-# defaults write com.apple.dock dashboard-in-overlay -bool true
-
 # WHAT: Disables automatic rearrangement of Spaces based on recent use
 # WHY: Keeps Spaces in fixed order; prevents confusing reordering
 # STATUS: Active - Spaces stay in the order you arrange them
@@ -1482,64 +1468,6 @@ defaults write org.m0k.transmission BlocklistAutoUpdate -bool true
 # COMPAT: All macOS versions with Transmission installed
 # NOTE: May require port forwarding reconfiguration if using router port forwarding
 defaults write org.m0k.transmission RandomPort -bool true
-
-###############################################################################
-# Twitter.app                                                                 #
-###############################################################################
-
-# WHAT: Disables smart quotes in Twitter for Mac app
-# WHY: Prevents curly quotes that break code snippets in tweets
-# STATUS: Active - Keeps straight quotes for programming/technical tweets
-# COMPAT: All macOS versions with Twitter for Mac installed
-# NOTE: Twitter for Mac was discontinued in 2018; settings kept for legacy users
-# defaults write com.twitter.twitter-mac AutomaticQuoteSubstitutionEnabled -bool false
-
-# WHAT: Shows Twitter app window when clicking menu bar icon
-# WHY: Convenient access to main window; MenuItemBehavior 1 = show window
-# STATUS: Active - Click menu bar icon to show/hide window
-# COMPAT: All macOS versions with Twitter for Mac installed
-# defaults write com.twitter.twitter-mac MenuItemBehavior -int 1
-
-# WHAT: Enables hidden Develop menu in Twitter for Mac
-# WHY: Access to debugging tools and advanced features
-# STATUS: Active - Shows "Develop" menu in menu bar
-# COMPAT: All macOS versions with Twitter for Mac installed
-# defaults write com.twitter.twitter-mac ShowDevelopMenu -bool true
-
-# WHAT: Opens links in background tabs instead of foreground
-# WHY: Keeps Twitter timeline visible; links open without switching focus
-# STATUS: Active - Links open in background
-# COMPAT: All macOS versions with Twitter for Mac installed
-# defaults write com.twitter.twitter-mac openLinksInBackground -bool true
-
-# WHAT: Allows closing new tweet window with Escape key
-# WHY: Faster workflow; no need to click Cancel button
-# STATUS: Active - Press Esc to close compose window
-# COMPAT: All macOS versions with Twitter for Mac installed
-# defaults write com.twitter.twitter-mac ESCClosesComposeWindow -bool true
-
-# WHAT: Shows full names instead of Twitter handles (@username)
-# WHY: More readable; easier to identify people by real names
-# STATUS: Active - Displays "John Doe" instead of "@johndoe"
-# COMPAT: All macOS versions with Twitter for Mac installed
-# defaults write com.twitter.twitter-mac ShowFullNames -bool true
-
-# WHAT: Hides Twitter app when it's not the active window
-# WHY: Reduces clutter; app disappears from Dock when not in use
-# STATUS: Active - App hidden when switching to other apps
-# COMPAT: All macOS versions with Twitter for Mac installed
-# defaults write com.twitter.twitter-mac HideInBackground -bool true
-
-###############################################################################
-# Tweetbot.app                                                                #
-###############################################################################
-
-# WHAT: Bypasses Twitter's t.co URL shortener in Tweetbot
-# WHY: Opens original URLs directly; faster, avoids tracking
-# STATUS: Commented out - Only useful if Tweetbot is installed
-# COMPAT: All macOS versions with Tweetbot installed; Tweetbot is paid Twitter client
-# NOTE: t.co shortener adds latency and tracking; direct URLs are faster
-#defaults write com.tapbots.TweetbotMac OpenURLsDirectly -bool true
 
 ###############################################################################
 # Kill affected applications                                                  #
