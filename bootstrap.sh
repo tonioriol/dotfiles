@@ -48,11 +48,11 @@ function doIt() {
 	mkdir -p ~/.local/share/devbox/global/default
 	rsync -avh --no-perms devbox.json ~/.local/share/devbox/global/default/
 	
-	# Refresh devbox global environment if devbox is available
+	# Install devbox global packages if devbox is available
 	if command -v devbox &> /dev/null; then
-		echo "Refreshing devbox global environment..."
-		devbox global refresh
-		echo "✓ Devbox environment refreshed"
+		echo "Installing devbox global packages..."
+		devbox global install
+		echo "✓ Devbox packages installed"
 	fi
 	
 	echo "✓ Dotfiles synced successfully"
