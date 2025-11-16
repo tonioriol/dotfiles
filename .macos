@@ -5,9 +5,8 @@
 # WHAT: Closes System Settings/Preferences application before applying changes
 # WHY: Prevents GUI from overriding or conflicting with command-line changes being applied
 # STATUS: Active
-# COMPAT: Handles both "System Settings" (macOS Ventura 13.0+) and "System Preferences" (older versions)
-osascript -e 'tell application "System Settings" to quit' 2>/dev/null || \
-osascript -e 'tell application "System Preferences" to quit' 2>/dev/null
+# COMPAT: macOS Ventura 13.0+ and later (System Settings); use "System Preferences" for earlier versions
+osascript -e 'tell application "System Settings" to quit' 2>/dev/null
 
 # WHAT: Requests administrator password at script start
 # WHY: Many system settings require elevated privileges; getting password upfront prevents interruptions
@@ -247,10 +246,11 @@ sudo defaults write /Library/Preferences/com.apple.loginwindow AdminHostInfo Hos
 #defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
 
 # WHAT: Increases Bluetooth audio quality by setting minimum bitpool to 40
-# WHY: Improves audio quality for Bluetooth headphones; default range 4-64 is too low
-# STATUS: Active - Sets minimum to 40 (max is 80 for SBC codec)
-# COMPAT: All macOS versions; higher values = better quality but may cause stuttering on weak connections
-defaults write com.apple.BluetoothAudioAgent "Apple Bitpool Min (editable)" -int 40
+# WHY: Improves audio quality for Bluetooth headphones using SBC codec
+# STATUS: Commented out - macOS intelligent defaults provide better adaptive quality for AirPods Pro and modern devices
+# COMPAT: All macOS versions; default adaptive bitrate is optimized by Apple for AirPods Pro
+# NOTE: macOS automatically optimizes AAC codec (~128-256 kbps adaptive) for AirPods Pro without manual configuration
+#defaults write com.apple.BluetoothAudioAgent "Apple Bitpool Min (editable)" -int 40
 
 # WHAT: Enables full keyboard access for all UI controls (mode 3)
 # WHY: Allows Tab key to navigate all controls including buttons in dialogs, not just text fields
@@ -262,14 +262,14 @@ defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
 # WHY: Provides screen magnification for accessibility; useful for presentations or vision assistance
 # STATUS: Active - Ctrl (^) modifier + scroll wheel/gesture to zoom
 # COMPAT: All macOS versions; HIDScrollZoomModifierMask 262144 = Ctrl key
-defaults write com.apple.universalaccess closeViewScrollWheelToggle -bool true
-defaults write com.apple.universalaccess HIDScrollZoomModifierMask -int 262144
+# defaults write com.apple.universalaccess closeViewScrollWheelToggle -bool true
+# defaults write com.apple.universalaccess HIDScrollZoomModifierMask -int 262144
 
 # WHAT: Makes zoom follow keyboard focus (cursor position)
 # WHY: Automatically pans zoomed view to show where you're typing
 # STATUS: Active - Zoom follows text cursor and UI focus
 # COMPAT: All macOS versions; useful when zoom is enabled
-defaults write com.apple.universalaccess closeViewZoomFollowsFocus -bool true
+# defaults write com.apple.universalaccess closeViewZoomFollowsFocus -bool true
 
 # WHAT: Disables press-and-hold for accent characters, enables key repeat instead
 # WHY: Allows holding keys to repeat (like vim hjkl navigation); disables accent menu popup
@@ -298,7 +298,7 @@ defaults write NSGlobalDomain AppleMetricUnits -bool $MACOS_METRIC_UNITS
 # WHY: Allows selecting keyboard layout before logging in; useful for multilingual users
 # STATUS: Active
 # COMPAT: All macOS versions
-sudo defaults write /Library/Preferences/com.apple.loginwindow showInputMenu -bool true
+# sudo defaults write /Library/Preferences/com.apple.loginwindow showInputMenu -bool true
 
 # WHAT: Sets system timezone
 # WHY: Ensures correct time display and scheduling; uses MACOS_TIMEZONE variable from ~/.extra
@@ -311,9 +311,7 @@ sudo systemsetup -settimezone "$MACOS_TIMEZONE" > /dev/null
 # STATUS: Commented out - File no longer exists on macOS Catalina 10.15+
 # COMPAT: macOS Mojave 10.14 and earlier; deprecated on Catalina+ when iTunes became Music.app
 # NOTE: On modern macOS, media keys are controlled by the active media app automatically
-if [ -f /System/Library/LaunchAgents/com.apple.rcd.plist ]; then
-    launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2>/dev/null || true
-fi
+# launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2>/dev/null || true
 
 ###############################################################################
 # Energy saving                                                               #
@@ -327,46 +325,47 @@ sudo pmset -a lidwake 1
 
 # WHAT: Automatically restarts Mac after power loss (AC power restored)
 # WHY: Ensures servers/always-on Macs resume operation after power outages
-# STATUS: Active - Applies to all power sources
+# STATUS: Commented out - Not needed for laptops with battery backup
 # COMPAT: All macOS versions; useful for home servers, media centers, or critical systems
-sudo pmset -a autorestart 1
+# sudo pmset -a autorestart 1
 
 # WHAT: Automatically restarts Mac if system freezes/hangs
 # WHY: Provides automatic recovery from system hangs; reduces downtime
-# STATUS: Active
+# STATUS: Commented out - Uses macOS default (On by default on modern Macs)
 # COMPAT: All macOS versions; uses systemsetup command (not pmset)
-sudo systemsetup -setrestartfreeze on
+# sudo systemsetup -setrestartfreeze on
 
-# WHAT: Sets display sleep timeout to 15 minutes
-# WHY: Saves energy and prevents screen burn-in while keeping system responsive
+# WHAT: Sets display sleep timeout to 1 minute (instant)
+# WHY: Saves energy and prevents screen burn-in; instant sleep for maximum security
 # STATUS: Active - Applies to all power sources
-# COMPAT: All macOS versions; value in minutes
-sudo pmset -a displaysleep 15
+# COMPAT: All macOS versions; 1 = 1 minute (minimum practical value)
+# sudo pmset -a displaysleep 1
 
-# WHAT: Disables system sleep when connected to AC power (charging)
-# WHY: Keeps Mac always available when plugged in; useful for servers or development machines
-# STATUS: Active - Only applies to AC power (-c flag)
-# COMPAT: All macOS versions; 0 = never sleep
-sudo pmset -c sleep 0
+# WHAT: System sleep timeout when connected to AC power
+# WHY: Use system default behavior (0 = never sleep on AC)
+# STATUS: Commented out - Uses macOS default (sleep=0, never sleep on AC power)
+# COMPAT: All macOS versions; default is 0 = never sleep when plugged in
+# sudo pmset -c sleep 0
 
-# WHAT: Sets system sleep timeout to 5 minutes when on battery power
-# WHY: Conserves battery life when unplugged; balances power saving with convenience
-# STATUS: Active - Only applies to battery power (-b flag)
-# COMPAT: All macOS versions; value in minutes
-sudo pmset -b sleep 5
+# WHAT: System sleep timeout when on battery power
+# WHY: Use system default behavior (5 minutes)
+# STATUS: Commented out - Uses macOS default (sleep=5 minutes on battery)
+# COMPAT: All macOS versions; default is 5 minutes on battery power
+# sudo pmset -b sleep 5
 
-# WHAT: Sets standby delay to 24 hours (86400 seconds)
-# WHY: Delays deep sleep/hibernation; keeps Mac in regular sleep for faster wake
-# STATUS: Active - Default is 1 hour (3600 seconds)
-# COMPAT: All macOS versions; standby writes RAM to disk and powers off RAM to save battery
-sudo pmset -a standbydelay 86400
+# WHAT: Standby delay configuration (time before entering deep sleep)
+# WHY: Use system default behavior
+# STATUS: Commented out - Uses macOS default (standbydelay not set by default on modern Macs)
+# COMPAT: All macOS versions; default behavior is unset (system manages automatically)
+# NOTE: Modern Apple Silicon Macs handle standby efficiently without manual configuration
+# sudo pmset -a standbydelay 86400
 
-# WHAT: Disables automatic system sleep entirely
-# WHY: Keeps Mac always on (display may still sleep); overrides other sleep settings
-# STATUS: Active - Conflicts with per-power-source sleep settings above
+# WHAT: Global system sleep configuration
+# WHY: Use per-power-source settings instead of global override
+# STATUS: Commented out - Conflicts with per-power-source sleep settings; use defaults
 # COMPAT: All macOS versions; "Off" = never sleep, or specify minutes
-# NOTE: This overrides the battery sleep setting above; consider removing one or the other
-sudo systemsetup -setcomputersleep Off > /dev/null
+# NOTE: Commenting this out allows per-power-source defaults to work (AC: never, Battery: 5 min)
+# sudo systemsetup -setcomputersleep Off > /dev/null
 
 # WHAT: Sets hibernation mode (how Mac saves state during sleep)
 # WHY: Mode 0 = no hibernation (faster sleep/wake), Mode 3 = save RAM to disk (safe sleep)
@@ -1160,14 +1159,13 @@ defaults write com.apple.terminal StringEncodings -array 4
 defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
 
 # WHAT: Disables local Time Machine snapshots (APFS snapshots on system drive)
-# WHY: Saves disk space; local snapshots can consume significant storage
-# STATUS: Active - Only keeps backups on external Time Machine drive
-# COMPAT: macOS High Sierra 10.13+ (APFS); 'disablelocal' deprecated, use 'disable'
-# NOTE: Without local snapshots, you can't restore files if backup drive is unavailable
-# WARNING: Apple Silicon Macs benefit from local snapshots for fast recovery
-if hash tmutil &> /dev/null; then
-    sudo tmutil disable 2>/dev/null || true
-fi
+# WHY: Originally intended to save disk space on Intel Macs
+# STATUS: DISABLED - Snapshots are beneficial for Apple Silicon (fast, efficient, minimal space via APFS copy-on-write)
+# COMPAT: macOS High Sierra 10.13+ (APFS)
+# NOTE: Keeping snapshots enabled (default) provides instant recovery without external drive
+# if hash tmutil &> /dev/null; then
+#     sudo tmutil disable 2>/dev/null || true
+# fi
 
 ###############################################################################
 # Activity Monitor                                                            #
