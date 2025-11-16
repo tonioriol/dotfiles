@@ -370,16 +370,20 @@ sudo pmset -a lidwake 1
 # WHAT: Sets hibernation mode (how Mac saves state during sleep)
 # WHY: Mode 0 = no hibernation (faster sleep/wake), Mode 3 = save RAM to disk (safe sleep)
 # STATUS: Commented out - Uses system default (mode 3)
-# COMPAT: All macOS versions; mode 0 saves disk space, mode 3 protects against power loss
-# NOTE: Mode 3 recommended for Apple Silicon (efficient), mode 0 was preferred on Intel (saves space)
-#sudo pmset -a hibernatemode 0
+# COMPAT: All macOS versions; mode 0 saves disk space, mode 3 protects against power loss.
+# INTEL (enable mode 0 - saves disk space, hibernation slow on Intel)
+# sudo pmset -a hibernatemode 0
+# ARM (keep default mode 3 - fast hibernation, minimal space, protects data) (Default mode, no need to set)
+# sudo pmset -a hibernatemode 3
 
 # WHAT: Removes sleep image file and prevents recreation to save disk space
 # WHY: Sleep image can be several GB (size of RAM); reclaims disk space
 # STATUS: Commented out - RISK: Data loss if power fails during sleep
 # COMPAT: All macOS versions; sleepimage stores RAM contents for hibernation
 # WARNING: Without sleepimage, losing power during sleep = losing unsaved work
-# NOTE: More important on Intel Macs (large files); Apple Silicon hibernation is more efficient
+# INTEL (enable removal - reclaims 8-32GB, hibernation slow)
+# if [ -f /private/var/vm/sleepimage ]; then sudo rm -f /private/var/vm/sleepimage; sudo touch /private/var/vm/sleepimage; sudo chflags uchg /private/var/vm/sleepimage; fi
+# ARM (keep disabled - sleep image small/efficient, hibernation fast)
 # if [ -f /private/var/vm/sleepimage ]; then
 #     sudo rm -f /private/var/vm/sleepimage
 #     # Create a zero-byte file instead…
