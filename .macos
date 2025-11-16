@@ -1149,13 +1149,14 @@ defaults write com.apple.terminal StringEncodings -array 4
 defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
 
 # WHAT: Disables local Time Machine snapshots (APFS snapshots on system drive)
-# WHY: Originally intended to save disk space on Intel Macs
-# STATUS: DISABLED - Snapshots are beneficial for Apple Silicon (fast, efficient, minimal space via APFS copy-on-write)
-# COMPAT: macOS High Sierra 10.13+ (APFS)
-# NOTE: Keeping snapshots enabled (default) provides instant recovery without external drive
-# if hash tmutil &> /dev/null; then
-#     sudo tmutil disable 2>/dev/null || true
-# fi
+# WHY: Saves disk space; local snapshots can consume significant storage
+# STATUS: Active - Only keeps backups on external Time Machine drive
+# COMPAT: macOS High Sierra 10.13+ (APFS); 'disablelocal' deprecated, use 'disable'
+# NOTE: Without local snapshots, you can't restore files if backup drive is unavailable
+# WARNING: Apple Silicon Macs benefit from local snapshots for fast recovery
+if hash tmutil &> /dev/null; then
+    sudo tmutil disable 2>/dev/null || true
+fi
 
 ###############################################################################
 # Activity Monitor                                                            #
