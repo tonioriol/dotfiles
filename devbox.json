@@ -56,6 +56,7 @@
     "ngrok@latest",
     "nmap@latest",
     "nodejs@latest",
+    "openjdk@latest",
     "openssh@latest",
     "openssl_3@latest",
     "p7zip@latest",
