@@ -382,8 +382,6 @@ sudo pmset -a lidwake 1
 # COMPAT: All macOS versions; sleepimage stores RAM contents for hibernation
 # WARNING: Without sleepimage, losing power during sleep = losing unsaved work
 # INTEL (enable removal - reclaims 8-32GB, hibernation slow)
-# if [ -f /private/var/vm/sleepimage ]; then sudo rm -f /private/var/vm/sleepimage; sudo touch /private/var/vm/sleepimage; sudo chflags uchg /private/var/vm/sleepimage; fi
-# ARM (keep disabled - sleep image small/efficient, hibernation fast)
 # if [ -f /private/var/vm/sleepimage ]; then
 #     sudo rm -f /private/var/vm/sleepimage
 #     # Create a zero-byte file instead…
@@ -391,6 +389,7 @@ sudo pmset -a lidwake 1
 #     # …and make sure it can't be rewritten
 #     sudo chflags uchg /private/var/vm/sleepimage
 # fi
+# ARM (keep disabled - sleep image small/efficient, hibernation fast)
 
 ###############################################################################
 # Screen                                                                      #
@@ -500,7 +499,7 @@ defaults write com.apple.finder _FXShowPosixPathInTitle -bool true
 # WHY: Folders always appear before files; matches Windows behavior; easier navigation
 # STATUS: Active - Applies to all Finder view modes
 # COMPAT: macOS Sierra 10.12+
-# defaults write com.apple.finder _FXSortFoldersFirst -bool true
+defaults write com.apple.finder _FXSortFoldersFirst -bool true
 
 # WHAT: Sets default search scope to current folder (SCcf)
 # WHY: Searches only current folder instead of entire Mac; faster, more relevant results
@@ -548,7 +547,7 @@ defaults write com.apple.frameworks.diskimages skip-verify-remote -bool true
 defaults write com.apple.frameworks.diskimages auto-open-ro-root -bool true
 defaults write com.apple.frameworks.diskimages auto-open-rw-root -bool true
 defaults write com.apple.finder OpenWindowForNewRemovableDisk -bool true
-# YO!
+
 # WHAT: Shows file information (size, kind, date) below icon names in icon view
 # WHY: Provides quick file details without opening Get Info; useful for file management
 # STATUS: Active - Applies to Desktop, standard folders (FK_), and all icon views
@@ -660,14 +659,13 @@ defaults write com.apple.dock mouse-over-hilite-stack -bool true
 # WHY: Faster than "genie" effect; less distracting; better performance
 # STATUS: Active - Other options: "genie" (classic), "suck" (deprecated)
 # COMPAT: All macOS versions; "scale" is faster and more modern
-# defaults write com.apple.dock mineffect -string "scale"
-# TODO: the defalt in sequoia is: "genie"? research
+defaults write com.apple.dock mineffect -string "scale"
 
 # WHAT: Minimizes windows into their application's Dock icon instead of separate window tile
 # WHY: Reduces Dock clutter; keeps related windows grouped with their app
 # STATUS: Active - Windows minimize into app icon, not separate tile in Dock
 # COMPAT: All macOS versions
-defaults write com.apple.dock minimize-to-application -bool true
+# defaults write com.apple.dock minimize-to-application -bool true
 
 # WHAT: Enables spring-loading for all Dock items (drag file over app to open it)
 # WHY: Allows opening apps by hovering with dragged file; useful for "Open With" workflow
@@ -675,12 +673,11 @@ defaults write com.apple.dock minimize-to-application -bool true
 # COMPAT: All macOS versions; similar to Finder spring-loaded folders
 defaults write com.apple.dock enable-spring-load-actions-on-all-items -bool true
 
-# WHAT: Shows indicator lights (dots) under running applications in Dock
-# WHY: Visual indication of which apps are currently running
-# STATUS: Active - Small dot appears under active app icons
-# COMPAT: All macOS versions; standard macOS behavior
-defaults write com.apple.dock show-process-indicators -bool true
-# TODO: if this is the standard behavior, why is it being set?
+# WHAT: Shows indicator lights (dots) under running applications in the Dock
+# WHY: Visual indication of which apps are currently running; helps users identify active applications at a glance
+# STATUS: Always active in modern macOS versions (since macOS Ventura, 2022)
+# COMPAT: Was toggleable in older macOS versions (prior to Ventura); no longer toggleable since Ventura and beyond (including Sequoia)
+# defaults write com.apple.dock show-process-indicators -bool true
 
 # WHAT: Removes all default application icons from Dock
 # WHY: Clean slate for customizing Dock; useful for new Mac setup or minimal Dock users
