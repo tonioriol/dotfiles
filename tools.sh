@@ -18,6 +18,9 @@ brew update && brew upgrade
 brew bundle install
 brew cleanup
 
+# Set BREW_PREFIX for current architecture
+BREW_PREFIX=$(brew --prefix)
+
 if [ -x "${BREW_PREFIX}/bin/bash" ] && ! grep -q "${BREW_PREFIX}/bin/bash" /etc/shells; then
     echo "${BREW_PREFIX}/bin/bash" | sudo tee -a /etc/shells > /dev/null
 fi
