@@ -20,7 +20,7 @@ git config --global user.email "$GIT_AUTHOR_EMAIL"
 # IMPORTANT: If you're setting up a new Mac and restoring secrets:
 #   1. Create this .extra file FIRST (before running bootstrap.sh)
 #   2. Run bootstrap.sh
-#   3. Run scripts/secrets.sh restore (this restores GPG private keys)
+#   3. Run secrets.sh restore (this restores GPG private keys)
 #   4. The restore script will display your available GPG keys
 #   5. Come back here, uncomment the lines below, and add your key ID
 #   6. Run: source ~/.extra

@@ -59,7 +59,7 @@ devbox search <package-name>
 
 ### On your old Mac:
 ```shell
-./scripts/secrets.sh backup
+./secrets.sh backup
 ```
 This saves SSH keys, AWS credentials, GPG keys, etc. to `./.secrets/` (gitignored).
 
@@ -78,7 +78,7 @@ vim ~/.extra
 ./bootstrap.sh
 
 # 5. Restore secrets
-./scripts/secrets.sh restore
+./secrets.sh restore
 # The restore script will display your GPG keys if found.
 # Edit ~/.extra to add your GPG key ID, then: source ~/.extra
 

@@ -36,8 +36,7 @@ function doIt() {
 		--exclude "README.md" \
 		--exclude "LICENSE-MIT.txt" \
 		--exclude "AGENTS.md" \
-		--exclude "BOOTSTRAP_REFACTOR_DESIGN.md" \
-		--exclude "scripts/" \
+		--exclude "secrets.sh" \
 		--exclude "Brewfile" \
 		--exclude "devbox.json" \
 		--exclude ".extra.template" \
@@ -80,17 +79,17 @@ function doIt() {
 	echo "=============================================================================="
 	./tools.sh
 	
-	# ============================================================================
-	# Phase 5: Secrets & Configuration
-	# ============================================================================
-	# Restore secrets if .secrets directory exists
-	if [ -d ".secrets" ]; then
-		echo ""
-		echo "=============================================================================="
-		echo "Restoring secrets..."
-		echo "=============================================================================="
-		./scripts/secrets.sh restore
-	fi
+	# # ============================================================================
+	# # Phase 5: Secrets & Configuration
+	# # ============================================================================
+	# # Restore secrets if .secrets directory exists
+	# if [ -d ".secrets" ]; then
+	# 	echo ""
+	# 	echo "=============================================================================="
+	# 	echo "Restoring secrets..."
+	# 	echo "=============================================================================="
+	# 	./secrets.sh restore
+	# fi
 	
 	# Run .macos to configure macOS settings
 	echo ""
