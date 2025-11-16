@@ -18,13 +18,16 @@ function doIt() {
 	
 	rsync --exclude ".git/" \
 		--exclude ".DS_Store" \
-		--exclude ".osx" \
+		--exclude ".macos" \
 		--exclude "bootstrap.sh" \
 		--exclude "tools.sh" \
 		--exclude "README.md" \
 		--exclude "LICENSE-MIT.txt" \
 		--exclude "AGENTS.md" \
 		--exclude "scripts/" \
+		--exclude "Brewfile" \
+		--exclude "devbox.json" \
+		--exclude ".extra.template" \
 		-avh --no-perms . ~;
 	source ~/.zshrc;
 	
@@ -52,6 +55,15 @@ function doIt() {
 	echo "=============================================================================="
 	./tools.sh
 	
+	# Restore secrets if .secrets directory exists
+	if [ -d ".secrets" ]; then
+		echo ""
+		echo "=============================================================================="
+		echo "Restoring secrets..."
+		echo "=============================================================================="
+		./scripts/secrets.sh restore
+	fi
+	
 	# Run .macos to configure macOS settings
 	# echo ""
 	# echo "=============================================================================="
@@ -67,8 +79,7 @@ function doIt() {
 	echo ""
 	echo "Next steps:"
 	echo "  1. Restart your computer for all macOS settings to take effect"
-	echo "  2. Restore secrets if needed: ./scripts/secrets.sh restore"
-	echo "  3. If you restored GPG keys, add the key ID to ~/.extra and source it"
+	echo "  2. If GPG keys were restored, add the key ID to ~/.extra and source it"
 	echo "=============================================================================="
 }
 
