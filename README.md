@@ -131,3 +131,6 @@ Suggestions/improvements [welcome](https://github.com/tonioriol/dotfiles/issues)
 
 Forked from [mathiasbynens/dotfiles](https://github.com/mathiasbynens/dotfiles)
 
+## TODO
+* install/update bash?
+* handle GPG?

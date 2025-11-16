@@ -64,12 +64,12 @@ function doIt() {
 		./scripts/secrets.sh restore
 	fi
 	
-	# Run .macos to configure macOS settings
-	# echo ""
-	# echo "=============================================================================="
-	# echo "Running .macos to configure macOS settings..."
-	# echo "=============================================================================="
-	# ./.macos  # Disabled: currently broken
+	Run .macos to configure macOS settings
+	echo ""
+	echo "=============================================================================="
+	echo "Running .macos to configure macOS settings..."
+	echo "=============================================================================="
+	./.macos
 	
 	echo ""
 	echo "=============================================================================="

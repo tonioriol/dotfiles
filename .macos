@@ -304,7 +304,9 @@ defaults write NSGlobalDomain AppleMetricUnits -bool $MACOS_METRIC_UNITS
 # WHY: Ensures correct time display and scheduling; uses MACOS_TIMEZONE variable from ~/.extra
 # STATUS: Active - Run `sudo systemsetup -listtimezones` to see available values
 # COMPAT: All macOS versions; example values: "Europe/Madrid", "America/New_York", "Asia/Tokyo"
-sudo systemsetup -settimezone "$MACOS_TIMEZONE" > /dev/null
+# NOTE: macOS Sequoia 15.0+ logs "Error:-99" from InternetServices.m - this is benign and can be ignored
+#       The timezone is set successfully despite the error message. Error suppressed with 2>/dev/null
+sudo systemsetup -settimezone "$MACOS_TIMEZONE" 2>/dev/null || true
 
 # WHAT: Prevents Music/iTunes from responding to keyboard media keys (play/pause, next, previous)
 # WHY: Stops Music app from hijacking media keys; allows other apps to use them
@@ -1045,9 +1047,8 @@ defaults write com.apple.mail SpellCheckingBehavior -string "NoSpellCheckingEnab
 # WHAT: Prevents Spotlight from indexing newly mounted volumes automatically
 # WHY: Saves CPU/battery on external drives; prevents indexing network shares
 # STATUS: Active - New volumes in /Volumes won't be indexed unless manually enabled
-# COMPAT: All macOS versions; use `sudo mdutil -i off "/Volumes/foo"` to disable specific volume
-# NOTE: Main system drive (/) is still indexed; only affects external/network volumes
-sudo defaults write /.Spotlight-V100/VolumeConfiguration Exclusions -array "/Volumes"
+# COMPAT: macOS Sequoia 15.0+ uses /System/Volumes/Data/.Spotlight-V100/, older versions used /.Spotlight-V100/
+sudo defaults write /System/Volumes/Data/.Spotlight-V100/VolumeConfiguration Exclusions -array "/Volumes"
 
 # WHAT: Configures which categories appear in Spotlight search results
 # WHY: Faster searches by excluding irrelevant categories; improves privacy
@@ -1191,8 +1192,9 @@ defaults write com.apple.ActivityMonitor SortDirection -int 0
 # WHAT: Enables debug menu in Contacts app (formerly Address Book)
 # WHY: Access to advanced features and troubleshooting tools for contact management
 # STATUS: Active - Shows "Debug" menu in Contacts menu bar
-# COMPAT: All macOS versions; useful for developers and power users
-defaults write com.apple.addressbook ABShowDebugMenu -bool true
+# COMPAT: All macOS versions; requires sudo on macOS Sequoia 15.0+ due to system protection
+# NOTE: Domain name is case-sensitive: com.apple.AddressBook (capital A and B)
+sudo defaults write com.apple.AddressBook ABShowDebugMenu -bool true
 
 # WHAT: Enables Dashboard developer mode (allows adding widgets as files)
 # WHY: Allows installing custom Dashboard widgets without restrictions
@@ -1475,12 +1477,12 @@ defaults write org.m0k.transmission RandomPort -bool true
 # Kill affected applications                                                  #
 ###############################################################################
 
-# WHAT: Restarts applications to apply new settings immediately
-# WHY: Many settings require app restart to take effect; forces reload of preferences
-# STATUS: Active - Kills listed apps; macOS automatically relaunches them
-# COMPAT: All macOS versions; killall sends SIGTERM (graceful termination)
-# NOTE: Apps will relaunch automatically; unsaved work may be lost
-# WARNING: cfprefsd is system daemon that caches preferences; killing it forces reload
+# Restart apps to apply settings (unsaved work will be lost)
+echo ""
+echo "⚠️  About to restart apps: Dock, Finder, Safari, Mail, and others."
+read -n 1 -s -r -p "Press any key to continue..."
+echo ""
+
 for app in "Activity Monitor" \
 	"Address Book" \
 	"Calendar" \
@@ -1497,10 +1499,10 @@ for app in "Activity Monitor" \
 	"Safari" \
 	"SystemUIServer" \
 	"Terminal" \
-	"Transmission" \
-	"iCal"; do
+	"Transmission"; do
 	killall "${app}" &> /dev/null
 done
+echo "Apps restarted."
 
 # WHAT: Displays completion message with restart reminder
 # WHY: Informs user that some settings require logout/restart to fully apply
