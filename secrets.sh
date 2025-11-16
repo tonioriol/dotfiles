@@ -16,8 +16,11 @@ declare -A BACKUP_ITEMS=(
   ["ssh-private-keys"]="${HOME}/.ssh/id_*::600"
   ["ssh-public-keys"]="${HOME}/.ssh/id_*.pub::644"
   
-  # GPG Keys (private keys only, no config files)
+  # GPG Keys (both private keys and public keyring needed)
   ["gpg-private-keys"]="${HOME}/.gnupg/private-keys*:700:600"
+  ["gpg-public-keyring"]="${HOME}/.gnupg/pubring.kbx::600"
+  ["gpg-public-keyring-legacy"]="${HOME}/.gnupg/pubring.gpg::600"
+  ["gpg-trustdb"]="${HOME}/.gnupg/trustdb.gpg::600"
   
   # AWS Credentials
   ["aws-credentials"]="${HOME}/.aws/credentials::600"

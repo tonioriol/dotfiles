@@ -337,23 +337,29 @@ sudo pmset -a lidwake 1
 # COMPAT: All macOS versions; uses systemsetup command (not pmset)
 # sudo systemsetup -setrestartfreeze on
 
-# WHAT: Sets display sleep timeout to 1 minute (instant)
-# WHY: Saves energy and prevents screen burn-in; instant sleep for maximum security
-# STATUS: Active - Applies to all power sources
-# COMPAT: All macOS versions; 1 = 1 minute (minimum practical value)
-# sudo pmset -a displaysleep 1
+# WHAT: Sets display sleep timeout on battery power
+# WHY: Saves energy and prevents screen burn-in; display sleeps before system
+# STATUS: Active - Applies to battery power only; must be less than system sleep
+# COMPAT: All macOS versions; 2 = 2 minutes (ensures display < system sleep on battery)
+sudo pmset -b displaysleep 2
+
+# WHAT: Sets display sleep timeout on AC power
+# WHY: Longer display timeout when plugged in for convenience
+# STATUS: Active - Applies to AC power only
+# COMPAT: All macOS versions; 10 = 10 minutes when on AC power
+sudo pmset -c displaysleep 10
 
 # WHAT: System sleep timeout when connected to AC power
-# WHY: Use system default behavior (0 = never sleep on AC)
-# STATUS: Commented out - Uses macOS default (sleep=0, never sleep on AC power)
+# WHY: Never sleep when plugged in for convenience
+# STATUS: Active - 0 = never sleep on AC power
 # COMPAT: All macOS versions; default is 0 = never sleep when plugged in
-# sudo pmset -c sleep 0
+sudo pmset -c sleep 0
 
 # WHAT: System sleep timeout when on battery power
-# WHY: Use system default behavior (5 minutes)
-# STATUS: Commented out - Uses macOS default (sleep=5 minutes on battery)
-# COMPAT: All macOS versions; default is 5 minutes on battery power
-# sudo pmset -b sleep 5
+# WHY: Conserve battery by sleeping after 10 minutes of inactivity
+# STATUS: Active - Must be greater than display sleep (2 min) to avoid warning
+# COMPAT: All macOS versions; 10 minutes on battery power
+sudo pmset -b sleep 10
 
 # WHAT: Standby delay configuration (time before entering deep sleep)
 # WHY: Use system default behavior
@@ -763,7 +769,7 @@ defaults write com.apple.dock showhidden -bool true
 # STATUS: Active - Deletes Launchpad database files (*.db) in Dock support folder
 # COMPAT: All macOS versions; Launchpad will rebuild layout on next launch
 # NOTE: Does not affect desktop wallpaper or other Dock settings
-find "${HOME}/Library/Application Support/Dock" -name "*-*.db" -maxdepth 1 -delete
+find "${HOME}/Library/Application Support/Dock" -maxdepth 1 -name "*-*.db" -delete 2>/dev/null || true
 
 # WHAT: Adds iOS and Watch Simulator apps to Launchpad
 # WHY: Quick access to Xcode simulators from Launchpad
@@ -822,10 +828,15 @@ find "${HOME}/Library/Application Support/Dock" -name "*-*.db" -maxdepth 1 -dele
 # Safari & WebKit                                                             #
 ###############################################################################
 
+# Note: On macOS Sequoia 15.0+, Safari preferences are App Sandboxed and many
+# settings will show "Could not write domain" errors. This is EXPECTED behavior.
+# These settings work on pre-Sequoia macOS. On Sequoia, configure manually in
+# Safari > Settings or grant Terminal "Full Disk Access" in System Settings.
+
 # WHAT: Disables Siri suggestions in Safari's address bar (formerly "Universal Search")
 # WHY: Privacy - prevents Apple from seeing your search queries; keeps searches local
-# STATUS: Active - Modern replacement for legacy UniversalSearchEnabled/SuppressSearchSuggestions
-# COMPAT: doesn't work anymore in macOS Sequoia 15.0+
+# STATUS: Commented out - doesn't work in macOS Sequoia 15.0+
+# COMPAT: macOS Monterey 12.0 - Sonoma 14.x only
 # defaults write com.apple.Safari UniversalSearchEnabled -bool false
 # defaults write com.apple.Safari SuppressSearchSuggestions -bool true
 
@@ -833,33 +844,34 @@ find "${HOME}/Library/Application Support/Dock" -name "*-*.db" -maxdepth 1 -dele
 # WHY: Accessibility and keyboard navigation; allows tabbing through links, buttons, form fields
 # STATUS: Active - Both WebKit and WebKit2 settings for compatibility
 # COMPAT: All macOS versions; essential for keyboard-only navigation
-defaults write com.apple.Safari WebKitTabToLinksPreferenceKey -bool true
-defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2TabsToLinks -bool true
+# NOTE: macOS Sequoia 15.0+ uses App Sandbox for Safari; some settings may require Full Disk Access
+# defaults write com.apple.Safari WebKitTabToLinksPreferenceKey -bool true 2>/dev/null || true
+# defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2TabsToLinks -bool true 2>/dev/null || true
 
 # WHAT: Shows full URL in address bar (domain + path)
 # WHY: Security - see complete URL to identify phishing sites; useful for developers
 # STATUS: Active - Still hides protocol (http://, https://)
 # COMPAT: All macOS versions; note that scheme (protocol) is still hidden for security
-defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool true
+# defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool true 2>/dev/null || true
 
 # WHAT: Sets Safari home page to blank page (about:blank)
 # WHY: Faster Safari startup; no network requests on launch; privacy (no default page tracking)
 # STATUS: Active - Opens to empty page instead of Apple's default or custom page
 # COMPAT: All macOS versions
-defaults write com.apple.Safari HomePage -string "about:blank"
+# defaults write com.apple.Safari HomePage -string "about:blank" 2>/dev/null || true
 
 # WHAT: Prevents Safari from automatically opening "safe" downloaded files
 # WHY: Security - prevents auto-execution of potentially malicious files disguised as safe
 # STATUS: Active - Files stay in Downloads folder until manually opened
 # COMPAT: All macOS versions; "safe" files include images, movies, PDFs, text files
 # NOTE: Important security setting - prevents drive-by downloads from auto-opening
-defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
+# defaults write com.apple.Safari AutoOpenSafeDownloads -bool false 2>/dev/null || true
 
 # WHAT: Enables Backspace key to navigate to previous page in history
 # WHY: Convenient keyboard navigation; matches browser behavior from other platforms
 # STATUS: Active - Backspace = back, Shift+Backspace = forward
 # COMPAT: All macOS versions; WebKit2 setting for modern Safari
-defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2BackspaceKeyNavigationEnabled -bool true
+# defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2BackspaceKeyNavigationEnabled -bool true 2>/dev/null || true
 
 # WHAT: Hides Safari's Favorites/Bookmarks bar below address bar
 # WHY: Maximizes vertical space for web content; cleaner interface
@@ -871,13 +883,13 @@ defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebK
 # WHY: Cleaner Top Sites view; more space for site thumbnails
 # STATUS: Active - No sidebar when viewing Top Sites
 # COMPAT: All macOS versions
-defaults write com.apple.Safari ShowSidebarInTopSites -bool false
+# defaults write com.apple.Safari ShowSidebarInTopSites -bool false 2>/dev/null || true
 
 # WHAT: Disables thumbnail cache for History and Top Sites
 # WHY: Saves disk space; improves privacy (no cached page previews)
 # STATUS: Active - DebugSnapshotsUpdatePolicy 2 = never update thumbnails
 # COMPAT: All macOS versions; 0 = always update, 1 = update when needed, 2 = never update
-defaults write com.apple.Safari DebugSnapshotsUpdatePolicy -int 2
+# defaults write com.apple.Safari DebugSnapshotsUpdatePolicy -int 2 2>/dev/null || true
 
 # WHAT: (Deprecated) Previously enabled Safari's internal debug menu
 # WHY: Historically used to access experimental debug features; replaced/renamed on modern macOS
@@ -889,22 +901,22 @@ defaults write com.apple.Safari DebugSnapshotsUpdatePolicy -int 2
 # WHY: More flexible search; finds text anywhere in words, not just at beginning
 # STATUS: Active - false = Contains (search anywhere), true = Starts With
 # COMPAT: All macOS versions
-defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
+# defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false 2>/dev/null || true
 
 # WHAT: Removes proxy icons from Safari's bookmarks bar
 # WHY: Cleaner bookmarks bar; removes unnecessary visual clutter
 # STATUS: Active - ProxiesInBookmarksBar set to empty array
 # COMPAT: All macOS versions; proxy icons are small favicons for bookmarks
-defaults write com.apple.Safari ProxiesInBookmarksBar "()"
+# defaults write com.apple.Safari ProxiesInBookmarksBar "()" 2>/dev/null || true
 
 # WHAT: Enables Safari's Develop menu and Web Inspector (developer tools)
 # WHY: Essential for web development; inspect HTML/CSS/JavaScript, debug, test
 # STATUS: Active - Shows "Develop" menu in menu bar; enables right-click "Inspect Element"
 # COMPAT: All macOS versions; three settings ensure compatibility across WebKit versions
 # NOTE: IncludeDevelopMenu = menu bar, WebKitDeveloperExtras = inspector, WebKit2 = modern engine
-defaults write com.apple.Safari IncludeDevelopMenu -bool true
-defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
-defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
+# defaults write com.apple.Safari IncludeDevelopMenu -bool true 2>/dev/null || true
+# defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true 2>/dev/null || true
+# defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true 2>/dev/null || true
 
 # WHAT: Adds "Inspect Element" to context menu in all WebKit-based apps
 # WHY: Enables Web Inspector in any app using WebKit (Mail, App Store, etc.)
@@ -916,7 +928,7 @@ defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
 # WHY: Catches typos in forms, comments, emails; improves writing quality
 # STATUS: Active - Red underlines appear under misspelled words
 # COMPAT: All macOS versions
-defaults write com.apple.Safari WebContinuousSpellCheckingEnabled -bool true
+# defaults write com.apple.Safari WebContinuousSpellCheckingEnabled -bool true 2>/dev/null || true
 
 # WHAT: Disables automatic spelling correction in Safari
 # WHY: Prevents unwanted word changes; useful for technical writing, code, non-English
@@ -939,32 +951,32 @@ defaults write com.apple.Safari WebContinuousSpellCheckingEnabled -bool true
 # WHY: Security - protects against phishing attacks and malicious sites
 # STATUS: Active - Shows warning before loading suspicious sites
 # COMPAT: All macOS versions; uses Google Safe Browsing database
-defaults write com.apple.Safari WarnAboutFraudulentWebsites -bool true
+# defaults write com.apple.Safari WarnAboutFraudulentWebsites -bool true 2>/dev/null || true
 
 # WHAT: Disables browser plug-ins (Flash, Silverlight, Java applets, etc.)
 # WHY: Security and performance - plug-ins are deprecated, security risks, slow
 # STATUS: Active - Both WebKit and WebKit2 settings for complete coverage
 # COMPAT: All macOS versions; most modern sites use HTML5 instead of plug-ins
 # NOTE: Flash and most plug-ins are deprecated and removed from modern browsers
-defaults write com.apple.Safari WebKitPluginsEnabled -bool false
-defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2PluginsEnabled -bool false
+# defaults write com.apple.Safari WebKitPluginsEnabled -bool false 2>/dev/null || true
+# defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2PluginsEnabled -bool false 2>/dev/null || true
 
 # WHAT: Disables Java applets in Safari
 # WHY: Security - Java applets are major security risk, rarely used, deprecated
 # STATUS: Active - Disables Java for all pages including local files
 # COMPAT: All macOS versions; Java applets deprecated since 2017
 # NOTE: This only affects Java applets in browser, not Java applications
-defaults write com.apple.Safari WebKitJavaEnabled -bool false
-defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaEnabled -bool false
-defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaEnabledForLocalFiles -bool false
+# defaults write com.apple.Safari WebKitJavaEnabled -bool false 2>/dev/null || true
+# defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaEnabled -bool false 2>/dev/null || true
+# defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaEnabledForLocalFiles -bool false 2>/dev/null || true
 
 # WHAT: Blocks JavaScript from automatically opening pop-up windows
 # WHY: Blocks annoying pop-ups and pop-unders; improves browsing experience
 # STATUS: Active - JavaScript cannot open windows without user interaction
 # COMPAT: All macOS versions; both WebKit and WebKit2 settings
 # NOTE: Legitimate pop-ups (like OAuth login) may require manual allowing
-defaults write com.apple.Safari WebKitJavaScriptCanOpenWindowsAutomatically -bool false
-defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptCanOpenWindowsAutomatically -bool false
+# defaults write com.apple.Safari WebKitJavaScriptCanOpenWindowsAutomatically -bool false 2>/dev/null || true
+# defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptCanOpenWindowsAutomatically -bool false 2>/dev/null || true
 
 # WHAT: Disables auto-playing video in Safari
 # WHY: Saves bandwidth; prevents annoying auto-play ads; improves battery life
@@ -980,13 +992,13 @@ defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebK
 # WHY: Privacy - requests websites not to track your browsing behavior
 # STATUS: Active - Sends DNT: 1 header with all HTTP requests
 # COMPAT: All macOS versions; note that websites are not required to honor this request
-defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true
+# defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true 2>/dev/null || true
 
 # WHAT: Enables automatic updates for Safari extensions
 # WHY: Security and features - keeps extensions up-to-date with latest fixes
 # STATUS: Active - Extensions update automatically in background
 # COMPAT: All macOS versions with Safari extensions support
-defaults write com.apple.Safari InstallExtensionUpdatesAutomatically -bool true
+# defaults write com.apple.Safari InstallExtensionUpdatesAutomatically -bool true 2>/dev/null || true
 
 ###############################################################################
 # Mail                                                                        #
@@ -1048,7 +1060,7 @@ defaults write com.apple.mail SpellCheckingBehavior -string "NoSpellCheckingEnab
 # WHY: Saves CPU/battery on external drives; prevents indexing network shares
 # STATUS: Active - New volumes in /Volumes won't be indexed unless manually enabled
 # COMPAT: macOS Sequoia 15.0+ uses /System/Volumes/Data/.Spotlight-V100/, older versions used /.Spotlight-V100/
-sudo defaults write /System/Volumes/Data/.Spotlight-V100/VolumeConfiguration Exclusions -array "/Volumes"
+sudo defaults write /System/Volumes/Data/.Spotlight-V100/VolumeConfiguration Exclusions -array "/Volumes" 2>/dev/null || true
 
 # WHAT: Configures which categories appear in Spotlight search results
 # WHY: Faster searches by excluding irrelevant categories; improves privacy
