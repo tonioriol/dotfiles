@@ -29,6 +29,9 @@ declare -A BACKUP_ITEMS=(
   ["firebase"]="${HOME}/.config/firebase:700:600"
   ["doctl"]="${HOME}/Library/Application Support/doctl:700:"
   
+  # GPG (entire directory - includes all keys, config, trust)
+  ["gnupg"]="${HOME}/.gnupg:700:"
+  
   # Fonts (Operator Mono - paid font not in Homebrew)
   ["operator-mono-fonts"]="${HOME}/Library/Fonts/OperatorMono*.otf::644"
 )
@@ -65,51 +68,18 @@ if [[ "$1" == "backup" ]]; then
       backup_path="$DEST/$rel_path"
       mkdir -p "$(dirname "$backup_path")"
       
-      if cp -a "$file" "$backup_path"; then
-        chmod -R go-rwx "$(dirname "$backup_path")"
+      # Copy files (may produce errors for sockets which we can ignore)
+      cp -a "$file" "$backup_path" 2>/dev/null || true
+      chmod -R go-rwx "$(dirname "$backup_path")" 2>/dev/null || true
+      
+      # Verify backup succeeded by checking if destination exists
+      if [[ -e "$backup_path" ]]; then
         echo "✓ $file"
       else
         echo "✗ $file (failed)"
       fi
     done
   done
-  
-  # Special handling for GPG keys - use proper export commands
-  if command -v gpg &> /dev/null && gpg --list-secret-keys &> /dev/null; then
-    echo ""
-    echo "Exporting GPG keys..."
-    mkdir -p "$DEST/gpg"
-    chmod 700 "$DEST/gpg"
-    
-    # Export all public keys
-    if gpg --export --armor > "$DEST/gpg/public-keys.asc" 2>/dev/null; then
-      chmod 600 "$DEST/gpg/public-keys.asc"
-      echo "✓ GPG public keys exported"
-    else
-      echo "⊘ No GPG public keys found"
-      rm -f "$DEST/gpg/public-keys.asc"
-    fi
-    
-    # Export all private keys
-    if gpg --export-secret-keys --armor > "$DEST/gpg/private-keys.asc" 2>/dev/null; then
-      chmod 600 "$DEST/gpg/private-keys.asc"
-      echo "✓ GPG private keys exported"
-    else
-      echo "⊘ No GPG private keys found"
-      rm -f "$DEST/gpg/private-keys.asc"
-    fi
-    
-    # Export owner trust
-    if gpg --export-ownertrust > "$DEST/gpg/ownertrust.txt" 2>/dev/null; then
-      chmod 600 "$DEST/gpg/ownertrust.txt"
-      echo "✓ GPG owner trust exported"
-    else
-      echo "⊘ No GPG owner trust found"
-      rm -f "$DEST/gpg/ownertrust.txt"
-    fi
-  else
-    echo "⊘ GPG not available or no keys found"
-  fi
   
   echo "Done!"
 
@@ -123,11 +93,6 @@ elif [[ "$1" == "restore" ]]; then
   # Restore regular files
   shopt -s dotglob globstar
   for backup_file in "$DEST"/**/*; do
-    # Skip GPG directory (handled separately below)
-    if [[ "$backup_file" == "$DEST/gpg" ]] || [[ "$backup_file" == "$DEST/gpg/"* ]]; then
-      continue
-    fi
-    
     if [[ ! -f "$backup_file" ]]; then
       continue
     fi
@@ -169,39 +134,6 @@ elif [[ "$1" == "restore" ]]; then
     fi
   done
   shopt -u dotglob globstar
-  
-  # Special handling for GPG keys - use proper import commands
-  if [[ -d "$DEST/gpg" ]] && command -v gpg &> /dev/null; then
-    echo ""
-    echo "Importing GPG keys..."
-    
-    # Import public keys
-    if [[ -f "$DEST/gpg/public-keys.asc" ]]; then
-      if gpg --import "$DEST/gpg/public-keys.asc" 2>&1 | grep -q "imported\|unchanged"; then
-        echo "✓ GPG public keys imported"
-      else
-        echo "⊘ Failed to import GPG public keys"
-      fi
-    fi
-    
-    # Import private keys
-    if [[ -f "$DEST/gpg/private-keys.asc" ]]; then
-      if gpg --import "$DEST/gpg/private-keys.asc" 2>&1 | grep -q "imported\|unchanged\|secret key"; then
-        echo "✓ GPG private keys imported"
-      else
-        echo "⊘ Failed to import GPG private keys"
-      fi
-    fi
-    
-    # Import owner trust
-    if [[ -f "$DEST/gpg/ownertrust.txt" ]]; then
-      if gpg --import-ownertrust "$DEST/gpg/ownertrust.txt" 2>&1 | grep -q "inserted\|processed"; then
-        echo "✓ GPG owner trust imported"
-      else
-        echo "⊘ Failed to import GPG owner trust"
-      fi
-    fi
-  fi
   
   echo "Done!"
   
