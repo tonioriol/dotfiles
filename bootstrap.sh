@@ -48,10 +48,14 @@ function doIt() {
 	mkdir -p ~/.local/share/devbox/global/default
 	rsync -avh --no-perms devbox.json ~/.local/share/devbox/global/default/
 	
-	echo "✓ Dotfiles synced successfully"
+	# Refresh devbox global environment if devbox is available
+	if command -v devbox &> /dev/null; then
+		echo "Refreshing devbox global environment..."
+		devbox global refresh || true
+		echo "✓ Devbox environment refreshed"
+	fi
 	
-	# Source shell configuration
-	source ~/.zshrc;
+	echo "✓ Dotfiles synced successfully"
 	
 	# ============================================================================
 	# Phase 3: Environment Setup
@@ -108,8 +112,9 @@ function doIt() {
 	echo "Your dotfiles have been installed and configured."
 	echo ""
 	echo "Next steps:"
-	echo "  1. Restart your computer for all macOS settings to take effect"
-	echo "  2. If GPG keys were restored, add the key ID to ~/.extra and source it"
+	echo "  1. Open a new terminal (or restart this one) to load the new shell config"
+	echo "  2. Restart your computer for all macOS settings to take effect"
+	echo "  3. If GPG keys were restored, add the key ID to ~/.extra and source it"
 	echo "=============================================================================="
 }
 
