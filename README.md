@@ -7,7 +7,7 @@ Sensible macOS defaults and shell configuration for developers.
 ## What's Inside
 
 - **Shell configuration**: Zsh with custom prompt, aliases, and functions
-- **Package management**: Declarative setup using `Brewfile` (GUI apps) and `devbox.json` (CLI tools)
+- **Package management**: Declarative setup using `Brewfile` (CLI tools and GUI apps)
 - **macOS defaults**: Sensible system settings via `.macos`
 - **Migration tools**: Scripts to backup/restore secrets when setting up a new Mac
 
@@ -30,28 +30,22 @@ vim ~/.extra  # Add your git credentials, etc.
 This will:
 1. Copy dotfiles to your home directory
 2. Install Homebrew and GUI apps from `Brewfile`
-3. Install CLI tools via devbox
+3. Install CLI tools via Homebrew
 4. Configure macOS settings
 
 Restart your shell: `exec $SHELL -l`
 
 ## Package Management
 
-This setup uses a **hybrid approach** for better reproducibility:
-
-### GUI Apps & Fonts → Brewfile (Homebrew Bundle)
-Browsers, IDEs, productivity apps
-
-### CLI Tools → devbox.json (Nix)
-Tools, languages, utilities
+Everything is declared in the `Brewfile` (Homebrew Bundle): CLI tools, GUI apps, browsers, IDEs and productivity apps. Language runtimes are managed by mise.
 
 ```shell
-# Edit devbox.json, then sync
-./bootstrap.sh -f
+# Edit Brewfile, then sync
+brew bundle install
 exec $SHELL -l
 
 # Search for packages
-devbox search <package-name>
+brew search <package-name>
 ```
 
 
@@ -117,8 +111,7 @@ Use `\command` to access originals if needed.
 
 - `bootstrap.sh` - Main installation script
 - `tools.sh` - Installs Homebrew and runs `brew bundle`
-- `Brewfile` - Declarative list of GUI apps and fonts
-- `devbox.json` - Declarative list of CLI tools
+- `Brewfile` - Declarative list of CLI tools, GUI apps and fonts
 - `.macos` - macOS system settings
 - `.zshrc` - Zsh configuration
 - `.extra.template` - Template for personal settings

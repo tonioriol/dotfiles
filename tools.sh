@@ -25,14 +25,6 @@ if [ -x "${BREW_PREFIX}/bin/bash" ] && ! grep -q "${BREW_PREFIX}/bin/bash" /etc/
     echo "${BREW_PREFIX}/bin/bash" | sudo tee -a /etc/shells > /dev/null
 fi
 
-# Devbox
-if ! command -v devbox &> /dev/null; then
-    curl -fsSL https://get.jetify.com/devbox | bash
-    export PATH="$HOME/.local/bin:$PATH"
-fi
-
-eval "$(devbox global shellenv)"
-
 # Direnv
 if command -v direnv &> /dev/null; then
     direnv allow ~/.envrc

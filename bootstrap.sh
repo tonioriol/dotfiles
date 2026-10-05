@@ -38,22 +38,12 @@ function doIt() {
 		--exclude "AGENTS.md" \
 		--exclude "secrets.sh" \
 		--exclude "Brewfile" \
-		--exclude "devbox.json" \
 		--exclude ".extra.template" \
 		--exclude ".gitignore_global" \
 		-avh --no-perms . ~;
 	
 	# Sync special files with destination mapping
 	rsync -avh --no-perms .gitignore_global ~/.gitignore;
-	mkdir -p ~/.local/share/devbox/global/default
-	rsync -avh --no-perms devbox.json ~/.local/share/devbox/global/default/
-	
-	# Install devbox global packages if devbox is available
-	if command -v devbox &> /dev/null; then
-		echo "Installing devbox global packages..."
-		devbox global install
-		echo "✓ Devbox packages installed"
-	fi
 	
 	echo "✓ Dotfiles synced successfully"
 	
