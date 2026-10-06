@@ -55,13 +55,6 @@ function doIt() {
 	echo "Setting up development environment..."
 	echo "=============================================================================="
 	
-	# Allow direnv for the dotfiles directory if direnv is available
-	if command -v direnv &> /dev/null; then
-		echo "Approving direnv configuration..."
-		direnv allow .
-		echo "✓ direnv configuration approved"
-	fi
-	
 	echo "✓ Development environment configured"
 	
 	# ============================================================================

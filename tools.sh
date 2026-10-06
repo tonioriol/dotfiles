@@ -25,9 +25,4 @@ if [ -x "${BREW_PREFIX}/bin/bash" ] && ! grep -q "${BREW_PREFIX}/bin/bash" /etc/
     echo "${BREW_PREFIX}/bin/bash" | sudo tee -a /etc/shells > /dev/null
 fi
 
-# Direnv
-if command -v direnv &> /dev/null; then
-    direnv allow ~/.envrc
-fi
-
 echo "✓ All tools installed!"
